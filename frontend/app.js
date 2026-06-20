@@ -1,5 +1,5 @@
 // Configuration
-const API_URL = 'http://localhost:8000/api/scan';
+const API_URL = 'https://igiari-backend.onrender.com/api/scan';
 const MAX_CHARS = 4000;
 
 // Example text from eval_002 (Straw Man fallacy) per spec
