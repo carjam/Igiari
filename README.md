@@ -4,7 +4,14 @@
 
 Paste an argument, email, article, or transcript and see logical fallacies highlighted inline with explanations. Think "Grammarly, but for bad reasoning instead of bad grammar."
 
-🚧 **Status:** Phases 0-3 complete. Ready for local testing before deployment.
+## 🚀 Live Deployment
+
+**Try it now:** https://igiari.pages.dev/
+
+- **Frontend:** https://igiari.pages.dev/ (Cloudflare Pages)
+- **Backend API:** https://igiari-backend.onrender.com (Render)
+
+✅ **Status:** Phases 0-4 complete. Deployed and live!
 
 ## Quick Start
 
@@ -58,12 +65,8 @@ This is a deliberately small, demand-testing version of a larger idea (a browser
 | **Phase 1** | ✅ Complete | Backend: FastAPI + Anthropic API + rate limiting |
 | **Phase 2** | ✅ Complete | Quality validation script (`backend/run_eval.py`) |
 | **Phase 3** | ✅ Complete | Frontend: Vanilla HTML/CSS/JS, copyeditor aesthetic |
-| **Phase 4** | ⏳ Next | Deployment: Backend + frontend to production |
-| **Phase 5** | ⏳ Pending | Soft launch + analytics + signal collection |
-
-**Current blockers:**
-- Need to test Phase 2 eval (requires ANTHROPIC_API_KEY in `backend/.env`)
-- Need to choose hosting providers for Phase 4
+| **Phase 4** | ✅ Complete | Deployment: Backend (Render) + Frontend (Cloudflare Pages) |
+| **Phase 5** | ⏳ Next | Soft launch + analytics + signal collection |
 
 ## Document index
 
