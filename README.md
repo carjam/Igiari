@@ -13,7 +13,7 @@ Paste an argument, email, article, or transcript and see logical fallacies highl
 
 ✅ **Status:** Phases 0-4 complete. Deployed and live!
 
-📖 **Managing the deployment?** See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for dashboard URLs, how to update, logs, troubleshooting, and more.
+📖 **Managing the deployment?** See [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for dashboard URLs, how to update, logs, troubleshooting, and more.
 
 ## Quick Start
 

@@ -8,7 +8,7 @@
 
 ## Why This Is Required
 
-Response caching was upgraded from SHOULD to MUST (see `DECISIONS.md`). Cost control is critical for a free public tool. If a text goes viral or gets shared, we need to avoid redundant API calls for identical inputs.
+Response caching was upgraded from SHOULD to MUST (see `../docs/DECISIONS.md`). Cost control is critical for a free public tool. If a text goes viral or gets shared, we need to avoid redundant API calls for identical inputs.
 
 ---
 
