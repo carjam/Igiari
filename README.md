@@ -1,6 +1,46 @@
-# Fallacy Scanner — MVP Build Spec
+# Igiari! (異議あり!)
 
-This folder contains a complete build specification for an AI agent (or team of agents) to build a minimal web tool: paste text, see logical fallacies highlighted inline.
+**Objection!** — A logical fallacy scanner for text.
+
+Paste an argument, email, article, or transcript and see logical fallacies highlighted inline with explanations. Think "Grammarly, but for bad reasoning instead of bad grammar."
+
+🚧 **Status:** Phases 0-3 complete. Ready for local testing before deployment.
+
+## Quick Start
+
+### Backend
+
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Create .env from .env.example and add your ANTHROPIC_API_KEY
+cp .env.example .env
+# Edit .env and add your API key
+
+python server.py
+```
+
+Backend runs on `http://localhost:8000`
+
+### Frontend
+
+```bash
+cd frontend
+python -m http.server 8080
+```
+
+Open `http://localhost:8080` in your browser.
+
+Click "Try an Example" to see it in action.
+
+---
+
+## Build Specification
+
+This project was built following a complete specification designed for AI agents to execute autonomously.
 
 **Start here:** [`specs/00_master_spec.md`](specs/00_master_spec.md)
 
@@ -9,6 +49,21 @@ Then work through `specs/04_build_phases.md` as the main task list, referring ba
 ## Why this spec exists
 
 This is a deliberately small, demand-testing version of a larger idea (a browser extension / consumer product for fallacy detection). The goal of this specific build is to answer "will anyone actually use this" as cheaply as possible — see `specs/00_master_spec.md` and `specs/07_monetization_notes.md` for the full reasoning. Resist the urge to build beyond what's in `specs/01_product_requirements.md`'s MUST list; see `specs/08_future_ideas.md` for where to park good ideas that come up mid-build instead of implementing them early.
+
+## Build Progress
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| **Phase 0** | ✅ Complete | Setup: repo structure, taxonomy files, .env.example |
+| **Phase 1** | ✅ Complete | Backend: FastAPI + Anthropic API + rate limiting |
+| **Phase 2** | ✅ Complete | Quality validation script (`backend/run_eval.py`) |
+| **Phase 3** | ✅ Complete | Frontend: Vanilla HTML/CSS/JS, copyeditor aesthetic |
+| **Phase 4** | ⏳ Next | Deployment: Backend + frontend to production |
+| **Phase 5** | ⏳ Pending | Soft launch + analytics + signal collection |
+
+**Current blockers:**
+- Need to test Phase 2 eval (requires ANTHROPIC_API_KEY in `backend/.env`)
+- Need to choose hosting providers for Phase 4
 
 ## Document index
 
