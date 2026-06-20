@@ -16,7 +16,7 @@ uvicorn server:app --host 0.0.0.0 --port $PORT
 ## Environment Variables
 Add these in Render dashboard:
 - `ANTHROPIC_API_KEY` = (your actual API key)
-- `PYTHON_VERSION` = 3.13.0
+- `PYTHON_VERSION` = 3.11.9
 
 ## Root Directory
 `backend`
