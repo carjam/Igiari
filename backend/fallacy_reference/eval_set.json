@@ -1,0 +1,255 @@
+[
+  {
+    "id": "eval_001",
+    "source_type": "podcast_interview",
+    "transcript": "HOST: So critics say the supplement industry isn't well regulated.\nGUEST: Look, I've been taking this stuff for three years and I feel incredible. My energy's up, my focus is up. That's all the proof I need.",
+    "ground_truth": [
+      {"fallacy": "Argument from Anecdote", "span": "I've been taking this stuff for three years and I feel incredible... That's all the proof I need.", "category": "Informal", "subcategory": "Faulty Generalization"}
+    ],
+    "notes": "Single personal anecdote presented as sufficient evidence for a general claim about the product's efficacy."
+  },
+  {
+    "id": "eval_002",
+    "source_type": "city_council_meeting",
+    "transcript": "COUNCILMEMBER A: I think we should pilot a four-day work week for city staff, just for six months, to see the data.\nCOUNCILMEMBER B: So you want to dismantle the entire structure of public service and let government grind to a halt?",
+    "ground_truth": [
+      {"fallacy": "Straw Man", "span": "So you want to dismantle the entire structure of public service and let government grind to a halt?", "category": "Informal", "subcategory": "Other Informal Fallacy"}
+    ],
+    "notes": "A modest six-month pilot is recast as dismantling government entirely."
+  },
+  {
+    "id": "eval_003",
+    "source_type": "debate",
+    "transcript": "MODERATOR: Senator, your opponent says your infrastructure plan is underfunded.\nSENATOR: Well, my opponent voted against the bridge repair bill in 2019, so nothing he says about funding can be trusted.",
+    "ground_truth": [
+      {"fallacy": "Ad Hominem", "span": "my opponent voted against the bridge repair bill in 2019, so nothing he says about funding can be trusted", "category": "Informal", "subcategory": "Relevance Fallacy"}
+    ],
+    "notes": "Attacks the opponent's past voting record instead of addressing the funding claim itself."
+  },
+  {
+    "id": "eval_004",
+    "source_type": "sales_call",
+    "transcript": "REP: Look, ninety percent of companies in your industry have already switched to a platform like ours. You really don't want to be the one team still doing this manually, right?",
+    "ground_truth": [
+      {"fallacy": "Argumentum ad Populum", "span": "ninety percent of companies in your industry have already switched to a platform like ours. You really don't want to be the one team still doing this manually", "category": "Informal", "subcategory": "Appeal to Tradition/Authority Bias"}
+    ],
+    "notes": "Popularity of the product is used as the reason to adopt it, with mild appeal-to-emotion framing layered on ('don't want to be the one team')."
+  },
+  {
+    "id": "eval_005",
+    "source_type": "team_standup",
+    "transcript": "MANAGER: Why did the deploy fail last night?\nENGINEER: Honestly, every time we deploy on a Thursday something goes wrong. Last month's outage was a Thursday too. I really think we should just stop deploying on Thursdays.",
+    "ground_truth": [
+      {"fallacy": "Post Hoc Ergo Propter Hoc", "span": "every time we deploy on a Thursday something goes wrong... I really think we should just stop deploying on Thursdays", "category": "Informal", "subcategory": "Questionable Cause"}
+    ],
+    "notes": "Temporal correlation with day-of-week is treated as causal, without investigating actual deploy content/load differences."
+  },
+  {
+    "id": "eval_006",
+    "source_type": "panel_discussion",
+    "transcript": "PANELIST: I know the data shows mixed results on this policy, but think about the families who will lose their homes if we don't act now. How can anyone look at that and still say no?",
+    "ground_truth": [
+      {"fallacy": "Appeal to Pity", "span": "think about the families who will lose their homes if we don't act now. How can anyone look at that and still say no?", "category": "Informal", "subcategory": "Appeal to Emotion"}
+    ],
+    "notes": "Substitutes emotional appeal for engagement with the cited mixed empirical evidence."
+  },
+  {
+    "id": "eval_007",
+    "source_type": "youtube_commentary",
+    "transcript": "CREATOR: People keep telling me this diet has no scientific backing. But honestly, nobody's been able to prove to me that it doesn't work, so until someone does, I'm sticking with it.",
+    "ground_truth": [
+      {"fallacy": "Argument from Ignorance", "span": "nobody's been able to prove to me that it doesn't work, so until someone does, I'm sticking with it", "category": "Informal", "subcategory": "Argument from Ignorance / Silence"}
+    ],
+    "notes": "Treats absence of disproof as a reason to maintain belief, rather than asking whether there's positive evidence."
+  },
+  {
+    "id": "eval_008",
+    "source_type": "corporate_earnings_call",
+    "transcript": "ANALYST: Why did customer churn increase this quarter?\nCEO: Listen, every company in our space is seeing the same softness — Acme, Globex, all of them. It's an industry-wide thing, not specific to us.\nANALYST: Right, but your churn rate doubled while theirs stayed flat.\nCEO: Sure, but it's still part of the broader trend.",
+    "ground_truth": [
+      {"fallacy": "Special Pleading", "span": "Sure, but it's still part of the broader trend.", "category": "Informal", "subcategory": "Improper Presumption"}
+    ],
+    "notes": "After the 'industry-wide' framing is directly contradicted by the data (doubled vs. flat), CEO claims an unjustified exemption from the counter-evidence rather than addressing it."
+  },
+  {
+    "id": "eval_009",
+    "source_type": "true_negative_news_interview",
+    "transcript": "REPORTER: How confident are you in the revised growth forecast?\nECONOMIST: Reasonably confident, but I'd flag two risks: the forecast assumes consumer spending stays flat, and assumes no further rate hikes. If either of those breaks, the number moves quite a bit.",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE. Careful, hedged reasoning that explicitly states its assumptions and their sensitivity. No fallacy present."
+  },
+  {
+    "id": "eval_010",
+    "source_type": "true_negative_meeting",
+    "transcript": "PM: I think we should delay the launch by two weeks.\nDESIGNER: What's driving that?\nPM: QA found three high-severity bugs yesterday, and we already used most of our buffer time fixing the payment flow last sprint. Shipping now risks a broken checkout for a meaningful share of users.",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE. A specific, relevant causal claim supported by concrete evidence (bug severity, prior buffer usage). Not a hasty generalization or single-cause fallacy — it's a single well-supported reason for a narrow, proportionate conclusion."
+  },
+  {
+    "id": "eval_011",
+    "source_type": "true_negative_legitimate_authority",
+    "transcript": "PATIENT: Should I be worried about this mole?\nDERMATOLOGIST: Based on the asymmetry and the color variation I'm seeing, I'd like to biopsy it. In my experience treating thousands of cases like this, those two features together warrant a closer look.",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE / borderline-but-legitimate appeal to authority. The dermatologist is a relevant expert speaking within their domain and grounding the claim in specific observable features, not bare credential-waving — this is the non-fallacious form of appeal to authority."
+  },
+  {
+    "id": "eval_012",
+    "source_type": "political_speech",
+    "transcript": "SPEAKER: My opponent wants you to believe his tax plan is moderate. But let's be clear about where this leads: first it's a small increase, then it's a bigger one, and within a decade we'll be taxed into the ground, just like every other place that's tried this.",
+    "ground_truth": [
+      {"fallacy": "Slippery Slope", "span": "first it's a small increase, then it's a bigger one, and within a decade we'll be taxed into the ground", "category": "Informal", "subcategory": "Improper Presumption"}
+    ],
+    "notes": "Asserts an inevitable chain from a modest first step to an extreme outcome without justifying each link."
+  },
+  {
+    "id": "eval_013",
+    "source_type": "reddit_style_comment_transcribed",
+    "transcript": "COMMENTER (read aloud): Honestly I don't even need to argue this. Anyone with basic common sense can see I'm right, so I'm not going to waste time debating people who clearly don't get it.",
+    "ground_truth": [
+      {"fallacy": "Ipse Dixit", "span": "Anyone with basic common sense can see I'm right, so I'm not going to waste time debating", "category": "Informal", "subcategory": "Other Informal Fallacy"},
+      {"fallacy": "Pooh-Pooh", "span": "I'm not going to waste time debating people who clearly don't get it", "category": "Informal", "subcategory": "Appeal to Emotion"}
+    ],
+    "notes": "Two fallacies stacked: a bare, dogmatic assertion of correctness, plus dismissing opposing views as unworthy of engagement rather than rebutting them."
+  },
+  {
+    "id": "eval_014",
+    "source_type": "courtroom_transcript",
+    "transcript": "DEFENSE ATTORNEY: My client failed the polygraph, yes. But polygraphs are well known to produce false positives under stress, and my client had just learned his mother was hospitalized that morning.\nPROSECUTOR: The test result speaks for itself. Innocent people don't fail lie detector tests.",
+    "ground_truth": [
+      {"fallacy": "Circular Reasoning", "span": "The test result speaks for itself. Innocent people don't fail lie detector tests.", "category": "Informal", "subcategory": "Improper Presumption"}
+    ],
+    "notes": "Assumes the test's reliability (innocent people don't fail it) as the basis for concluding guilt, when that reliability is precisely what's being challenged."
+  },
+  {
+    "id": "eval_015",
+    "source_type": "true_negative_debate",
+    "transcript": "DEBATER A: I think the merger will reduce competition in this market.\nDEBATER B: That's possible, but the two companies barely overlap in product lines — one does enterprise software, the other does consumer hardware. Can you point to where the overlap actually creates a competition problem?",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE. This is a legitimate, relevant rebuttal asking for the warrant behind a claim — not an appeal to ridicule or dismissal, since it engages directly with the substance."
+  },
+  {
+    "id": "eval_016",
+    "source_type": "parenting_podcast",
+    "transcript": "HOST: Some pediatricians recommend limiting screen time to one hour on weekdays.\nGUEST: I get why people say that, but my grandparents didn't have screens at all and they turned out fine, so I don't think an hour a day is going to hurt anyone.",
+    "ground_truth": [
+      {"fallacy": "Appeal to Tradition", "span": "my grandparents didn't have screens at all and they turned out fine, so I don't think an hour a day is going to hurt anyone", "category": "Informal", "subcategory": "Appeal to Tradition/Authority Bias"}
+    ],
+    "notes": "Could also be read as a hasty generalization from one family's anecdote; tagged primarily as appeal to tradition since the reasoning leans on 'how things used to be done' rather than just sample size. Annotators should accept either label as correct if justified."
+  },
+  {
+    "id": "eval_017",
+    "source_type": "hr_meeting",
+    "transcript": "HR REP: We're proposing a new flexible PTO policy.\nMANAGER: If we let people take unlimited time off, nobody's going to show up to work at all, and the whole department falls apart within a year.",
+    "ground_truth": [
+      {"fallacy": "Slippery Slope", "span": "If we let people take unlimited time off, nobody's going to show up to work at all, and the whole department falls apart within a year", "category": "Informal", "subcategory": "Improper Presumption"}
+    ],
+    "notes": "Could also be flagged as Nirvana Fallacy depending on framing; slippery slope is the better fit since the objection is about an escalating chain of consequences, not the policy's imperfection."
+  },
+  {
+    "id": "eval_018",
+    "source_type": "academic_lecture",
+    "transcript": "LECTURER: A student once asked me why we should trust peer review at all, since reviewers sometimes get things wrong. But just because the process isn't perfect doesn't mean we should throw it out — the alternative, no review at all, would let through far more errors, not fewer.",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE. This sentence actually rebuts a nirvana fallacy rather than committing one — it explicitly argues against rejecting an imperfect system in favor of a worse alternative."
+  },
+  {
+    "id": "eval_019",
+    "source_type": "talk_radio",
+    "transcript": "HOST: My guest today says raising the minimum wage kills jobs. He runs three restaurants, so listen up — he's lived it.\nGUEST: That's right. I've cut staff every time my labor costs went up.",
+    "ground_truth": [
+      {"fallacy": "Hasty Generalization", "span": "I've cut staff every time my labor costs went up", "category": "Informal", "subcategory": "Faulty Generalization"}
+    ],
+    "notes": "Generalizing a broad economic claim from one business owner's personal experience across his three restaurants; the host's framing ('he's lived it') primes the anecdote as proof but the fallacy itself sits in the guest's generalization."
+  },
+  {
+    "id": "eval_020",
+    "source_type": "instagram_live_transcribed",
+    "transcript": "INFLUENCER: I know some of you are going to say 'where's your medical degree' — but you don't need a degree to know how your own body feels, okay? I feel amazing on this, that's the only data point that matters to me.",
+    "ground_truth": [
+      {"fallacy": "Argument from Anecdote", "span": "I feel amazing on this, that's the only data point that matters to me", "category": "Informal", "subcategory": "Faulty Generalization"}
+    ],
+    "notes": "Personal subjective experience explicitly elevated to sole/sufficient evidence, dismissing the relevance of expertise pre-emptively (note: the pre-emptive dismissal itself borders on poisoning the well against future medical criticism, but the core fallacy in this span is the anecdote-as-proof move)."
+  },
+  {
+    "id": "eval_021",
+    "source_type": "true_negative_interview",
+    "transcript": "INTERVIEWER: Are you concerned the new regulation will hurt small businesses?\nOWNER: A little, honestly. Compliance costs about $4,000 a year for a shop my size, which is real money, but it's smaller than I expected going in, and the tax credit offsets about half of it.",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE. Specific, hedged, quantified claim with no overgeneralization or causal leap."
+  },
+  {
+    "id": "eval_022",
+    "source_type": "sports_commentary",
+    "transcript": "COMMENTATOR: They lost the last three games wearing the away kit, so the manager should really think about switching the kit before tomorrow's match.",
+    "ground_truth": [
+      {"fallacy": "Gambler's Fallacy", "span": "They lost the last three games wearing the away kit, so the manager should really think about switching the kit", "category": "Informal", "subcategory": "Questionable Cause"}
+    ],
+    "notes": "Borderline: could also be read as post hoc / superstition (Magical Thinking). Accept either Post Hoc Ergo Propter Hoc or Magical Thinking as a correct alternate label, since the kit has no causal mechanism and the reasoning leans on a string of independent outcomes implying a pattern."
+  },
+  {
+    "id": "eval_023",
+    "source_type": "marriage_counseling_transcript",
+    "transcript": "PARTNER A: I just feel like you don't make time for me anymore.\nPARTNER B: Oh, so now I'M the bad guy? What about the time YOU forgot our anniversary? You don't get to lecture me about effort.",
+    "ground_truth": [
+      {"fallacy": "Tu Quoque", "span": "What about the time YOU forgot our anniversary? You don't get to lecture me about effort.", "category": "Informal", "subcategory": "Other Informal Fallacy"}
+    ],
+    "notes": "Deflects the original complaint by pointing to the other person's past inconsistency rather than addressing the complaint."
+  },
+  {
+    "id": "eval_024",
+    "source_type": "product_review_video",
+    "transcript": "REVIEWER: A few people in the comments said this laptop overheats. I've used it for two weeks and mine's been totally fine, so I think those reports are overblown.",
+    "ground_truth": [
+      {"fallacy": "Hasty Generalization", "span": "I've used it for two weeks and mine's been totally fine, so I think those reports are overblown", "category": "Informal", "subcategory": "Faulty Generalization"}
+    ],
+    "notes": "One unit's two-week experience used to dismiss a broader pattern of complaints, without addressing sample size or variance."
+  },
+  {
+    "id": "eval_025",
+    "source_type": "true_negative_science_podcast",
+    "transcript": "HOST: Does the new study settle the debate on saturated fat?\nGUEST: Not really — it's one cohort study, fairly large, but observational, so it shows an association, not causation. We'd want a few replications and ideally an RCT before treating this as settled.",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE. The guest explicitly avoids the correlation-causation leap and names the epistemic limitation directly — this is a model of fallacy-avoidance, not commission."
+  },
+  {
+    "id": "eval_026",
+    "source_type": "job_interview",
+    "transcript": "INTERVIEWER: Tell me about a time you disagreed with a manager.\nCANDIDATE: Honestly, I'm not the kind of person who disagrees with people, so I don't really have an example, but that's a good thing because it means I'm a team player.",
+    "ground_truth": [
+      {"fallacy": "Begging the Question", "span": "I don't really have an example, but that's a good thing because it means I'm a team player", "category": "Informal", "subcategory": "Improper Presumption"}
+    ],
+    "notes": "Assumes the conclusion (never disagreeing = being a good team player) as a premise without establishing it; could also be read loosely as a non-answer, but the specific phrasing asserts the value judgment as already settled."
+  },
+  {
+    "id": "eval_027",
+    "source_type": "true_negative_op_ed_read_aloud",
+    "transcript": "NARRATOR (reading op-ed): Three independent audits over the last two years found the agency's reported numbers overstated actual outcomes by 15 to 20 percent. Based on that pattern, it's reasonable to treat next quarter's projected figures with some skepticism until a fourth audit is complete.",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE. A pattern across three independent audits supports a proportionate, hedged conclusion ('some skepticism,' not certainty) — this is legitimate inductive reasoning, not hasty generalization."
+  },
+  {
+    "id": "eval_028",
+    "source_type": "twitch_stream_transcribed",
+    "transcript": "STREAMER: Chat's saying the new patch nerfed this weapon too hard. But like, three pro players I follow on Twitter posted that it's fine, so it's fine. Trust me.",
+    "ground_truth": [
+      {"fallacy": "Appeal to Authority", "span": "three pro players I follow on Twitter posted that it's fine, so it's fine", "category": "Informal", "subcategory": "Relevance Fallacy"}
+    ],
+    "notes": "Pro players' skill at the game doesn't make their opinion on balance design authoritative in the relevant sense, and three opinions are treated as settling the question."
+  },
+  {
+    "id": "eval_029",
+    "source_type": "policy_debate",
+    "transcript": "SPEAKER A: We should ban the chemical because three studies linked it to health issues in mice.\nSPEAKER B: Mice aren't people, and none of those studies used doses anywhere near what a human would realistically be exposed to — can we look at the actual exposure levels before deciding?",
+    "ground_truth": [],
+    "notes": "TRUE NEGATIVE for Speaker B. Speaker B's response is a legitimate methodological challenge (dose, species relevance), not a dismissal — it directly engages the evidence rather than committing a fallacy. (Speaker A's claim might itself be a hasty generalization depending on framing, but is left unlabeled here since dose-response context is unstated; use as a discussion case for annotator calibration.)"
+  },
+  {
+    "id": "eval_030",
+    "source_type": "family_dinner_conversation",
+    "transcript": "UNCLE: I'm just saying, every single self-made millionaire I've read about woke up at 5am. If you actually wanted to be successful, you'd be doing that too.",
+    "ground_truth": [
+      {"fallacy": "Survivorship Bias", "span": "every single self-made millionaire I've read about woke up at 5am. If you actually wanted to be successful, you'd be doing that too", "category": "Informal", "subcategory": "Faulty Generalization"}
+    ],
+    "notes": "Draws a behavioral rule from a visible set of successes without considering the unseen base rate of early risers who never became millionaires."
+  }
+]
