@@ -11,7 +11,7 @@ Paste an argument, email, article, or transcript and see logical fallacies highl
 - **Frontend:** https://igiari.pages.dev/ (Cloudflare Pages)
 - **Backend API:** https://igiari-backend.onrender.com (Render)
 
-✅ **Status:** Phases 0-4 complete. Deployed and live!
+✅ **Status:** Phases 0–4 complete and deployed. **Phase 5 + monetization rollout in progress** — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md).
 
 📖 **Managing the deployment?** See [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for dashboard URLs, how to update, logs, troubleshooting, and more.
 
@@ -36,8 +36,9 @@ Backend runs on `http://localhost:8000`
 
 ### Frontend
 
+Static files live at the **repository root** (`index.html`, `app.js`, `styles.css`):
+
 ```bash
-cd frontend
 python -m http.server 8080
 ```
 
@@ -51,13 +52,13 @@ Click "Try an Example" to see it in action.
 
 This project was built following a complete specification designed for AI agents to execute autonomously.
 
-**Start here:** [`specs/00_master_spec.md`](specs/00_master_spec.md)
+**Start here for current work:** [`specs/11_monetization_rollout_plan.md`](specs/11_monetization_rollout_plan.md)
 
-Then work through `specs/04_build_phases.md` as the main task list, referring back to the other numbered documents as each phase requires.
+For the original MVP build (complete), see [`specs/04_build_phases.md`](specs/04_build_phases.md).
 
 ## Why this spec exists
 
-This is a deliberately small, demand-testing version of a larger idea (a browser extension / consumer product for fallacy detection). The goal of this specific build is to answer "will anyone actually use this" as cheaply as possible — see `specs/00_master_spec.md` and `specs/07_monetization_notes.md` for the full reasoning. Resist the urge to build beyond what's in `specs/01_product_requirements.md`'s MUST list; see `specs/08_future_ideas.md` for where to park good ideas that come up mid-build instead of implementing them early.
+Built as a demand-testing MVP first; now moving to a paid launch experiment. See [`docs/MONETIZATION_ROLLOUT.md`](docs/MONETIZATION_ROLLOUT.md) for the phased plan. Resist building beyond the current step's scope; park ideas in `specs/08_future_ideas.md`.
 
 ## Build Progress
 
@@ -68,7 +69,8 @@ This is a deliberately small, demand-testing version of a larger idea (a browser
 | **Phase 2** | ✅ Complete | Quality validation script (`backend/run_eval.py`) |
 | **Phase 3** | ✅ Complete | Frontend: Vanilla HTML/CSS/JS, copyeditor aesthetic |
 | **Phase 4** | ✅ Complete | Deployment: Backend (Render) + Frontend (Cloudflare Pages) |
-| **Phase 5** | ⏳ Next | Soft launch + analytics + signal collection |
+| **Phase 5** | ⏳ In progress | Soft launch + analytics + signal collection — [Step 0 checklist](docs/STEP0_LAUNCH_READINESS.md) |
+| **Monetization** | ⏳ Step 0 → 1 | Phased rollout — [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md) |
 
 ## Document index
 
@@ -81,8 +83,13 @@ This is a deliberately small, demand-testing version of a larger idea (a browser
 | `specs/04_build_phases.md` | **The task list** — sequenced phases with acceptance criteria |
 | `specs/05_api_contract.md` | Exact frontend/backend request-response schema |
 | `specs/06_testing_and_launch_checklist.md` | Pre-launch verification |
-| `specs/07_monetization_notes.md` | Why monetization (incl. ads) is deferred/rejected for this phase |
+| `specs/07_monetization_notes.md` | MVP deferral rationale; ads rejected |
 | `specs/08_future_ideas.md` | Parking lot — explicitly not in scope yet |
+| `specs/09_legal_positioning_and_pricing..md` | Legal beachhead positioning and pricing |
+| `specs/10_monetization.md` | Full monetization architecture and Stripe/pricing design |
+| `specs/11_monetization_rollout_plan.md` | **Phased execution plan — current work** |
+| `docs/MONETIZATION_ROLLOUT.md` | Human-readable rollout tracker |
+| `docs/STEP0_LAUNCH_READINESS.md` | Step 0 checklist (analytics, live tests, spend cap) |
 
 ## Prerequisite materials
 

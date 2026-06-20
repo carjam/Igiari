@@ -126,8 +126,13 @@ No environment variables needed - API URL is hardcoded in `app.js`
 4. Click any deployment to see detailed logs
 
 **Analytics:**
-- Cloudflare dashboard → Your project → "Analytics" tab
-- Shows page views, bandwidth, requests
+
+Two options (see `docs/STEP0_LAUNCH_READINESS.md`):
+
+1. **Cloudflare Web Analytics (recommended)** — privacy-preserving beacon. Token goes in `site-config.js`; loaded by `analytics.js`. Enable the site at dash.cloudflare.com → Web Analytics → Add site → `igiari.pages.dev`.
+2. **Pages dashboard only** — Cloudflare → Workers & Pages → **igiari** → **Analytics** tab (page views, no code change).
+
+After enabling the beacon, update `legal/privacy.html` § Cookies and Analytics.
 
 ## 🐛 Common Issues & Fixes
 
@@ -203,6 +208,7 @@ No environment variables needed - API URL is hardcoded in `app.js`
 **Anthropic:**
 - Dashboard: https://console.anthropic.com/settings/usage
 - Set budget alerts in Anthropic dashboard
+- **Required for Step 0:** Set a monthly spend limit or alert at https://console.anthropic.com/settings/limits — backstop below app rate limiting (see `docs/STEP0_LAUNCH_READINESS.md`)
 
 **Render:**
 - Dashboard shows usage hours

@@ -1,6 +1,8 @@
 # 07 — Monetization Notes
 
-## Why this phase has zero monetization built in
+> **Update (June 2026):** Monetization is now in active rollout. The deferral rationale below applied to the original demand-test MVP (Phases 0–4). Execution order and scoped increments are in `11_monetization_rollout_plan.md`; full target design in `10_monetization.md`. **The ads rejection below still stands.**
+
+## Why the original MVP phase had zero monetization built in
 
 This MVP exists to answer one question cheaply: **do people actually use this?** Adding payment, accounts, or even ads at this stage adds engineering surface area (billing integration, legal terms, ad-network setup) that only pays off if the answer to that question is yes. Building monetization before demand is confirmed is solving a problem you don't know you have yet.
 

@@ -102,4 +102,21 @@ Execute these phases in order. Each phase lists its dependencies, tasks, and acc
 - Share the URL in a small, low-stakes way first (a few friends, a niche forum/community relevant to critical thinking or media literacy) before any broad/viral push — this is a deliberate choice to catch bugs and cost issues at small scale before they happen at large scale.
 - Watch API spend daily for the first week. If costs are tracking higher than expected, revisit the rate limit and the model choice in `03_architecture.md` before any wider promotion.
 
-**Acceptance criteria**: this phase doesn't have a hard "done" — it's the start of the demand-testing process itself, which is the actual goal of this entire project per `00_master_spec.md`. Treat Phase 5 as ongoing rather than a task to complete and check off.
+**Acceptance criteria**: this phase doesn't have a hard "done" — it's the start of the demand-testing process itself. Treat Phase 5 as ongoing rather than a task to complete and check off.
+
+**Concrete checklist:** `docs/STEP0_LAUNCH_READINESS.md` (analytics, live smoke test, Anthropic spend cap). Complete Step 0 before starting monetization Step 1 in `11_monetization_rollout_plan.md`.
+
+---
+
+## Monetization rollout (post–Phase 4)
+
+**Not numbered as Phase 6** to avoid confusion with the original MVP scope — instead, follow `11_monetization_rollout_plan.md`:
+
+| Step | Scope | Depends on |
+|---|---|---|
+| Step 0 | Launch readiness (analytics, live checklist, spend cap) | Phase 4 |
+| Step 1 | Consumer billing MVP (auth, credits, Stripe test mode) | Step 0 |
+| Step 2 | `/legal` landing + first outreach | Step 1 |
+| Step 3 | Full tiers, developer API, Stripe live | Step 2 + first paying users |
+
+Full architecture: `10_monetization.md`. Human tracker: `docs/MONETIZATION_ROLLOUT.md`.

@@ -1,6 +1,7 @@
 # Igiari Launch Checklist Tracker
 **Based on:** `specs/06_testing_and_launch_checklist.md`  
-**Last Updated:** 2026-06-19 18:06 PST
+**Step 0 rollout:** [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md)  
+**Last Updated:** 2026-06-20
 
 ---
 
