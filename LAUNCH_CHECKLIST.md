@@ -78,14 +78,26 @@
    - Check: Precision/recall/F1
    - Gate: True-negative accuracy > 60%
 
-3. **Phase 4 Deployment**
+3. **Phase 3.5 Response Caching (NEW - REQUIRED)**
+   - **Status:** Upgraded from SHOULD to MUST
+   - **When:** After Phase 2 passes, before Phase 4 deployment
+   - **Why:** Cost control for viral/repeated requests
+   - **Implementation:**
+     - SHA-256 hash of trimmed input as cache key
+     - In-memory dict storing API responses
+     - Optional: LRU eviction (max 1000 entries)
+     - Optional: TTL (24 hours)
+   - **Test:** Verify cache hit on identical text (no API call)
+   - **Documented in:** `DECISIONS.md`
+
+4. **Phase 4 Deployment**
    - Choose backend hosting (Render/Fly.io/VM)
    - Choose frontend hosting (Cloudflare Pages/Netlify/Vercel)
    - Deploy both
    - Configure production API_URL
    - Test end-to-end on LIVE URLs
 
-4. **Phase 5 Analytics Setup**
+5. **Phase 5 Analytics Setup**
    - Add analytics script (Plausible/Simple Analytics)
    - Test events are recording
    - Set up dashboard
