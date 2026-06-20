@@ -67,9 +67,23 @@ This will:
 - 10 requests per IP per hour
 - Enforced server-side for cost control
 
+## Prompt Engineering
+
+The system prompt is now **extracted to a separate file** for easy tweaking:
+
+**📝 Edit the prompt**: `prompt_template.txt`
+
+No need to touch Python code - just edit the template file and restart the server.
+
+**See [PROMPT_GUIDE.md](PROMPT_GUIDE.md)** for:
+- How to test prompt changes
+- Tips for improving precision/recall
+- Deployment workflow
+
 ## Architecture Notes
 
 - **Model**: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
 - **Input limit**: 4,000 characters
 - **Rate limiting**: In-memory token bucket (resets on server restart)
 - **Taxonomy**: 136 fallacies loaded at startup from `fallacy_reference/fallacies.json`
+- **Prompt**: Loaded from `prompt_template.txt` at runtime

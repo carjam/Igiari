@@ -105,6 +105,16 @@ def hash_text(text: str) -> str:
     return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
 
 
+def load_prompt_template() -> str:
+    """
+    Load the prompt template from file.
+    Template can be edited without touching server code.
+    """
+    template_path = Path(__file__).parent / "prompt_template.txt"
+    with open(template_path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
 def build_system_prompt() -> str:
     """
     Construct system prompt with taxonomy and calibration guidance.
@@ -116,35 +126,9 @@ def build_system_prompt() -> str:
         for f in fallacy_taxonomy
     ])
     
-    prompt = f"""You are a logical fallacy detection system. Your task is to analyze text and identify logical fallacies.
-
-TAXONOMY OF 136 FALLACIES:
-{taxonomy_text}
-
-OUTPUT FORMAT:
-Return ONLY valid JSON matching this schema (no other text):
-{{
-  "findings": [
-    {{
-      "span": "exact substring from input",
-      "fallacy": "canonical name from taxonomy",
-      "category": "Formal or Informal",
-      "subcategory": "from taxonomy",
-      "confidence": "high, medium, or low",
-      "explanation": "1-2 sentences explaining why this span matches the pattern"
-    }}
-  ]
-}}
-
-CRITICAL CALIBRATION RULES:
-1. **Confidence matters more than coverage.** A text may contain ZERO fallacies. Do not manufacture findings.
-2. **Distinguish real fallacies from merely weak arguments.** Not every bad argument is a named fallacy.
-3. **Quote exact substrings.** The span MUST be an exact substring from the input, not a paraphrase.
-4. **True negatives are valid.** Returning an empty findings array is a correct, expected outcome for clean text.
-5. **No dark patterns.** Do not over-flag or fabricate results to seem more useful. Trustworthiness is paramount.
-6. **Ambiguous cases**: If borderline, mark confidence as "low" rather than forcing a binary call.
-
-Return valid JSON only. If no fallacies found, return {{"findings": []}}"""
+    # Load template and inject taxonomy
+    template = load_prompt_template()
+    prompt = template.replace("{TAXONOMY}", taxonomy_text)
     
     return prompt
 
@@ -205,10 +189,11 @@ async def call_anthropic_api(user_text: str) -> Dict:
             print(f"Response text: {response_text[:500]}")
             
             # Second attempt with explicit instruction
+            retry_prompt = system_prompt + "\n\nIMPORTANT: Return ONLY valid JSON, no markdown code fences or other text."
             message = client.messages.create(
                 model=MODEL_NAME,
                 max_tokens=4096,
-                system=system_prompt + "\n\nIMPORTANT: Return ONLY valid JSON, no markdown code fences or other text.",
+                system=retry_prompt,
                 messages=[
                     {"role": "user", "content": user_text}
                 ]
