@@ -4,7 +4,7 @@
 
 This is a spec for building a **minimal web tool**, not the full product. The goal is narrow: find out, as cheaply as possible, whether real people will use and pay for a tool that detects logical fallacies in text. Everything in this spec is scoped to that goal. Resist scope creep — if a task isn't in this document, don't build it yet, even if it seems obviously good. Flag it instead (see `08_future_ideas.md`) and move on.
 
-If you are an agent picking this up cold: read the files in this folder in order (00 through 08). Each one is self-contained but assumes you've read the ones before it. `04_build_phases.md` is the actual task list with sequencing and acceptance criteria — start there once you understand the context from 00–03.
+If you are an agent picking this up cold: read 00–03 for context, then check **`11_monetization_rollout_plan.md`** for the current execution plan. Phases 0–4 in `04_build_phases.md` are complete; Phase 5 (soft launch) and monetization Steps 0–3 in spec 11 are active work.
 
 ## What this product is
 
@@ -13,7 +13,7 @@ A web page where someone pastes in text (an email, an article, an ad, a transcri
 ## What this product explicitly is NOT (yet)
 
 - Not a browser extension (no DOM injection into arbitrary websites)
-- Not a service with user accounts, billing, or subscriptions (defer monetization entirely for this phase — see `07_monetization_notes.md` for why and what to do later)
+- Not yet a service with user accounts, billing, or subscriptions in the **original MVP scope** — monetization is now planned in `10_monetization.md` and rolled out incrementally per `11_monetization_rollout_plan.md`
 - Not a mobile app
 - Not a tool that fetches/scrapes arbitrary URLs server-side (legal/scraping complexity — out of scope; users paste text directly)
 - Not multi-language (English only for v1)
@@ -58,9 +58,14 @@ If these files are missing from your working directory for any reason, stop and 
 5. `04_build_phases.md` — the actual sequenced task list with dependencies and acceptance criteria — **the main thing to execute against**
 6. `05_api_contract.md` — exact request/response schema between frontend and backend
 7. `06_testing_and_launch_checklist.md` — what "done enough to launch" means
-8. `07_monetization_notes.md` — why this phase has no monetization, and what signal to watch for
+8. `07_monetization_notes.md` — why the MVP deferred monetization; ads still rejected
 9. `08_future_ideas.md` — explicitly out of scope, parking lot for later
+10. `09_legal_positioning_and_pricing..md` — legal beachhead copy and pricing
+11. `10_monetization.md` — full monetization architecture and pricing
+12. `11_monetization_rollout_plan.md` — **phased execution plan (start here for current work)**
 
-## Definition of done for this whole project
+## Definition of done
 
-A working public URL where a stranger can paste text, click a button, and within ~10 seconds see fallacies highlighted with explanations — with no login, no payment, and a cost structure that won't bankrupt the builder if it gets shared on social media (rate limiting in place from day one). See `06_testing_and_launch_checklist.md` for the full launch checklist.
+**MVP (Phases 0–4) — complete:** A working public URL where a stranger can paste text, click a button, and within ~10 seconds see fallacies highlighted — with rate limiting in place. See `06_testing_and_launch_checklist.md`.
+
+**Monetization experiment — in progress:** Step 0 launch readiness, then consumer billing (Step 1), then first revenue channel via legal landing (Step 2). See `11_monetization_rollout_plan.md`.
