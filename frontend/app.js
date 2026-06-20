@@ -96,7 +96,7 @@ async function handleScan() {
         
         if (!response.ok) {
             // Handle error responses from backend
-            const errorDetail = data.error || {};
+            const errorDetail = data.detail || data.error || {};
             throw new Error(errorDetail.message || 'An error occurred while scanning.');
         }
         
