@@ -1,0 +1,66 @@
+# Build Spec: Fallacy Scanner — Demand-Test MVP
+
+## Read this first
+
+This is a spec for building a **minimal web tool**, not the full product. The goal is narrow: find out, as cheaply as possible, whether real people will use and pay for a tool that detects logical fallacies in text. Everything in this spec is scoped to that goal. Resist scope creep — if a task isn't in this document, don't build it yet, even if it seems obviously good. Flag it instead (see `08_future_ideas.md`) and move on.
+
+If you are an agent picking this up cold: read the files in this folder in order (00 through 08). Each one is self-contained but assumes you've read the ones before it. `04_build_phases.md` is the actual task list with sequencing and acceptance criteria — start there once you understand the context from 00–03.
+
+## What this product is
+
+A web page where someone pastes in text (an email, an article, an ad, a transcript) and gets back the same text with logical fallacies highlighted inline, each with a short explanation and the fallacy's name. Think "Grammarly, but for bad reasoning instead of bad grammar."
+
+## What this product explicitly is NOT (yet)
+
+- Not a browser extension (no DOM injection into arbitrary websites)
+- Not a service with user accounts, billing, or subscriptions (defer monetization entirely for this phase — see `07_monetization_notes.md` for why and what to do later)
+- Not a mobile app
+- Not a tool that fetches/scrapes arbitrary URLs server-side (legal/scraping complexity — out of scope; users paste text directly)
+- Not multi-language (English only for v1)
+- Not a fine-tuned or custom model — this calls the Anthropic API with the fallacy-detection skill's taxonomy as context, nothing more exotic
+
+## Repo / file structure this spec assumes
+
+```
+fallacy-scanner/
+├── frontend/              # static site, paste box + results UI
+│   ├── index.html
+│   ├── styles.css
+│   ├── app.js
+│   └── assets/
+├── backend/                # thin API server, the ONLY thing holding the API key
+│   ├── server.py  (or server.js — see 03_architecture.md for the decision)
+│   ├── fallacy_reference/  # copy of the taxonomy from the existing skill
+│   │   ├── fallacies.json
+│   │   └── fallacy_taxonomy.md
+│   ├── requirements.txt   (or package.json)
+│   └── .env.example
+└── README.md
+```
+
+## Source materials you already have
+
+A prior project produced a fallacy-detection skill with a full taxonomy and an eval set. **Reuse these, don't recreate them.** They are bundled in `../source-materials/` alongside this specs folder:
+- `source-materials/references/fallacies.json` — 136 fallacies, structured
+- `source-materials/references/fallacy_taxonomy.md` — same data as readable markdown
+- `source-materials/eval/eval_set.json` — 30 labeled test cases, used in Phase 2 to validate the backend's detection quality
+- `source-materials/eval/grade_eval.py` — the original grading script; adapt its matching logic for Phase 2 rather than rewriting it
+- `source-materials/SKILL.md` — contains the prompting logic (output schema, calibration notes) that should inform the backend's prompt to the model
+
+If these files are missing from your working directory for any reason, stop and ask the human rather than recreating the taxonomy from scratch — recreating it risks drifting from the eval set's ground truth.
+
+## Files in this spec folder
+
+1. `00_master_spec.md` — this file
+2. `01_product_requirements.md` — what the tool must do, from a user's perspective, with explicit in/out scope
+3. `02_design_direction.md` — visual identity guidance (not generic AI-template look)
+4. `03_architecture.md` — concrete technical decisions: stack, hosting, API key handling, why
+5. `04_build_phases.md` — the actual sequenced task list with dependencies and acceptance criteria — **the main thing to execute against**
+6. `05_api_contract.md` — exact request/response schema between frontend and backend
+7. `06_testing_and_launch_checklist.md` — what "done enough to launch" means
+8. `07_monetization_notes.md` — why this phase has no monetization, and what signal to watch for
+9. `08_future_ideas.md` — explicitly out of scope, parking lot for later
+
+## Definition of done for this whole project
+
+A working public URL where a stranger can paste text, click a button, and within ~10 seconds see fallacies highlighted with explanations — with no login, no payment, and a cost structure that won't bankrupt the builder if it gets shared on social media (rate limiting in place from day one). See `06_testing_and_launch_checklist.md` for the full launch checklist.
