@@ -84,17 +84,17 @@ def run_eval():
                     ]
                 })
                 
-                print(f"✓ ({len(findings)} findings)")
+                print(f"OK ({len(findings)} findings)")
             else:
                 error_msg = f"HTTP {response.status_code}: {response.text[:100]}"
                 errors.append({"id": case_id, "error": error_msg})
-                print(f"✗ {error_msg}")
+                print(f"ERROR: {error_msg}")
                 predictions.append({"id": case_id, "predictions": []})
         
         except requests.exceptions.RequestException as e:
             error_msg = f"Request failed: {str(e)[:100]}"
             errors.append({"id": case_id, "error": error_msg})
-            print(f"✗ {error_msg}")
+            print(f"ERROR: {error_msg}")
             predictions.append({"id": case_id, "predictions": []})
         
         # Small delay to avoid overwhelming the backend
@@ -183,7 +183,7 @@ def print_results(summary, results, errors):
     print("=== EVALUATION SUMMARY ===")
     print("=" * 60)
     
-    print("\n📊 POSITIVE CASES (fallacies present):")
+    print("\n[POSITIVE CASES] (fallacies present):")
     pos = summary["positive_cases"]
     print(f"  True Positives:  {pos['true_positives']}")
     print(f"  False Positives: {pos['false_positives']}")
@@ -192,7 +192,7 @@ def print_results(summary, results, errors):
     print(f"  Recall:    {pos['recall']}")
     print(f"  F1 Score:  {pos['f1']}")
     
-    print("\n✅ TRUE NEGATIVE CASES (clean text):")
+    print("\n[TRUE NEGATIVE CASES] (clean text):")
     tn = summary["true_negative_cases"]
     print(f"  Total: {tn['total']}")
     print(f"  Correctly identified as clean: {tn['correctly_flagged_clean']}")
@@ -206,27 +206,27 @@ def print_results(summary, results, errors):
     issues = []
     
     if pos['recall'] is not None and pos['recall'] < 0.3:
-        issues.append(f"⚠️  LOW RECALL ({pos['recall']}) - Missing most fallacies")
+        issues.append(f"WARNING: LOW RECALL ({pos['recall']}) - Missing most fallacies")
     
     if pos['precision'] is not None and pos['precision'] < 0.3:
-        issues.append(f"⚠️  LOW PRECISION ({pos['precision']}) - Too many false positives")
+        issues.append(f"WARNING: LOW PRECISION ({pos['precision']}) - Too many false positives")
     
     if tn['accuracy'] is not None and tn['accuracy'] < 0.6:
-        issues.append(f"🚫 FAILING TRUE NEGATIVES ({tn['accuracy']}) - Hallucinating fallacies in clean text")
+        issues.append(f"CRITICAL: FAILING TRUE NEGATIVES ({tn['accuracy']}) - Hallucinating fallacies in clean text")
         issues.append("   This violates the 'no dark patterns' requirement (spec 01)")
     
     if errors:
-        issues.append(f"⚠️  {len(errors)} API ERRORS occurred during evaluation")
+        issues.append(f"WARNING: {len(errors)} API ERRORS occurred during evaluation")
     
     if issues:
-        print("\n❌ QUALITY ISSUES DETECTED:\n")
+        print("\n[QUALITY ISSUES DETECTED]\n")
         for issue in issues:
             print(issue)
-        print("\n⛔ RECOMMENDATION: Fix prompt/calibration before proceeding to Phase 3")
+        print("\n[RECOMMENDATION] STOP: Fix prompt/calibration before proceeding to Phase 3")
         print("   (Per spec 04: 'Building a frontend on top of a backend that doesn't")
         print("    work is wasted effort')")
     else:
-        print("\n✅ QUALITY GATE PASSED")
+        print("\n[QUALITY GATE PASSED]")
         print("   Backend quality is acceptable for MVP demand-test")
         print("   Ready to proceed to Phase 3 (Frontend build)")
     
@@ -238,9 +238,9 @@ def print_results(summary, results, errors):
     for r in results:
         flag = ""
         if r["type"] == "true_negative" and not r["correct"]:
-            flag = "  🔴 FALSE ALARM on clean text"
+            flag = "  [FALSE ALARM] on clean text"
         if r["type"] == "positive" and (r.get("missed") or r.get("extra_unjustified")):
-            flag = "  ⚠️  mismatch"
+            flag = "  [MISMATCH]"
         
         print(f"\n{r['id']} [{r['type']}]{flag}")
         if r["type"] == "positive":
@@ -271,9 +271,9 @@ def main():
     print("\nChecking if backend is running...")
     try:
         response = requests.get("http://localhost:8000/", timeout=5)
-        print("✓ Backend is running")
+        print("OK - Backend is running")
     except requests.exceptions.RequestException:
-        print("✗ Backend is not running!")
+        print("ERROR - Backend is not running!")
         print("\nPlease start the backend first:")
         print("  cd backend")
         print("  python server.py")
@@ -301,7 +301,7 @@ def main():
     with open(output_path, "w") as f:
         json.dump(output, f, indent=2)
     
-    print(f"\n💾 Full results saved to: {output_path}")
+    print(f"\n[SAVED] Full results saved to: {output_path}")
 
 
 if __name__ == "__main__":

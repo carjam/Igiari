@@ -1,0 +1,445 @@
+{
+  "summary": {
+    "positive_cases": {
+      "true_positives": 14,
+      "false_positives": 17,
+      "false_negatives": 8,
+      "precision": 0.452,
+      "recall": 0.636,
+      "f1": 0.528
+    },
+    "true_negative_cases": {
+      "total": 9,
+      "correctly_flagged_clean": 8,
+      "accuracy": 0.889
+    }
+  },
+  "results": [
+    {
+      "id": "eval_001",
+      "type": "positive",
+      "ground_truth": [
+        "Argument from Anecdote"
+      ],
+      "predicted": [
+        "Argument from Anecdote",
+        "Begging the Question"
+      ],
+      "matched": [
+        "Argument from Anecdote"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "Begging the Question"
+      ]
+    },
+    {
+      "id": "eval_002",
+      "type": "positive",
+      "ground_truth": [
+        "Straw Man"
+      ],
+      "predicted": [
+        "Straw Man"
+      ],
+      "matched": [
+        "Straw Man"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_003",
+      "type": "positive",
+      "ground_truth": [
+        "Ad Hominem"
+      ],
+      "predicted": [
+        "Ad Hominem",
+        "Tu Quoque"
+      ],
+      "matched": [
+        "Ad Hominem"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "Tu Quoque"
+      ]
+    },
+    {
+      "id": "eval_004",
+      "type": "positive",
+      "ground_truth": [
+        "Argumentum ad Populum"
+      ],
+      "predicted": [
+        "Appeal to Fear",
+        "Argumentum ad Populum"
+      ],
+      "matched": [
+        "Argumentum ad Populum"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "Appeal to Fear"
+      ]
+    },
+    {
+      "id": "eval_005",
+      "type": "positive",
+      "ground_truth": [
+        "Post Hoc Ergo Propter Hoc"
+      ],
+      "predicted": [
+        "Cum Hoc Ergo Propter Hoc",
+        "Post Hoc Ergo Propter Hoc"
+      ],
+      "matched": [
+        "Post Hoc Ergo Propter Hoc"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "Cum Hoc Ergo Propter Hoc"
+      ]
+    },
+    {
+      "id": "eval_006",
+      "type": "positive",
+      "ground_truth": [
+        "Appeal to Pity"
+      ],
+      "predicted": [
+        "Appeal to Pity"
+      ],
+      "matched": [
+        "Appeal to Pity"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_007",
+      "type": "positive",
+      "ground_truth": [
+        "Argument from Ignorance"
+      ],
+      "predicted": [
+        "Argument from Ignorance",
+        "Red Herring"
+      ],
+      "matched": [
+        "Argument from Ignorance"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "Red Herring"
+      ]
+    },
+    {
+      "id": "eval_008",
+      "type": "positive",
+      "ground_truth": [
+        "Special Pleading"
+      ],
+      "predicted": [
+        "Moving the Goalposts"
+      ],
+      "matched": [],
+      "missed": [
+        "Special Pleading"
+      ],
+      "extra_unjustified": [
+        "Moving the Goalposts"
+      ]
+    },
+    {
+      "id": "eval_009",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_010",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_011",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_012",
+      "type": "positive",
+      "ground_truth": [
+        "Slippery Slope"
+      ],
+      "predicted": [
+        "Slippery Slope"
+      ],
+      "matched": [
+        "Slippery Slope"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_013",
+      "type": "positive",
+      "ground_truth": [
+        "Ipse Dixit",
+        "Pooh-Pooh"
+      ],
+      "predicted": [
+        "Appeal to the Stone"
+      ],
+      "matched": [],
+      "missed": [
+        "Ipse Dixit",
+        "Pooh-Pooh"
+      ],
+      "extra_unjustified": [
+        "Appeal to the Stone"
+      ]
+    },
+    {
+      "id": "eval_014",
+      "type": "positive",
+      "ground_truth": [
+        "Circular Reasoning"
+      ],
+      "predicted": [
+        "Affirming the Consequent",
+        "Appeal to the Stone"
+      ],
+      "matched": [],
+      "missed": [
+        "Circular Reasoning"
+      ],
+      "extra_unjustified": [
+        "Affirming the Consequent",
+        "Appeal to the Stone"
+      ]
+    },
+    {
+      "id": "eval_015",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_016",
+      "type": "positive",
+      "ground_truth": [
+        "Appeal to Tradition"
+      ],
+      "predicted": [
+        "Argument from Anecdote",
+        "Hasty Generalization"
+      ],
+      "matched": [],
+      "missed": [
+        "Appeal to Tradition"
+      ],
+      "extra_unjustified": [
+        "Argument from Anecdote",
+        "Hasty Generalization"
+      ]
+    },
+    {
+      "id": "eval_017",
+      "type": "positive",
+      "ground_truth": [
+        "Slippery Slope"
+      ],
+      "predicted": [
+        "Slippery Slope"
+      ],
+      "matched": [
+        "Slippery Slope"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_018",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_019",
+      "type": "positive",
+      "ground_truth": [
+        "Hasty Generalization"
+      ],
+      "predicted": [
+        "Post Hoc Ergo Propter Hoc"
+      ],
+      "matched": [],
+      "missed": [
+        "Hasty Generalization"
+      ],
+      "extra_unjustified": [
+        "Post Hoc Ergo Propter Hoc"
+      ]
+    },
+    {
+      "id": "eval_020",
+      "type": "positive",
+      "ground_truth": [
+        "Argument from Anecdote"
+      ],
+      "predicted": [
+        "Appeal to Anecdote"
+      ],
+      "matched": [],
+      "missed": [
+        "Argument from Anecdote"
+      ],
+      "extra_unjustified": [
+        "Appeal to Anecdote"
+      ]
+    },
+    {
+      "id": "eval_021",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_022",
+      "type": "positive",
+      "ground_truth": [
+        "Gambler's Fallacy"
+      ],
+      "predicted": [
+        "Post Hoc Ergo Propter Hoc"
+      ],
+      "matched": [],
+      "missed": [
+        "Gambler's Fallacy"
+      ],
+      "extra_unjustified": [
+        "Post Hoc Ergo Propter Hoc"
+      ]
+    },
+    {
+      "id": "eval_023",
+      "type": "positive",
+      "ground_truth": [
+        "Tu Quoque"
+      ],
+      "predicted": [
+        "Tu Quoque"
+      ],
+      "matched": [
+        "Tu Quoque"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_024",
+      "type": "positive",
+      "ground_truth": [
+        "Hasty Generalization"
+      ],
+      "predicted": [
+        "Hasty Generalization"
+      ],
+      "matched": [
+        "Hasty Generalization"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_025",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_026",
+      "type": "positive",
+      "ground_truth": [
+        "Begging the Question"
+      ],
+      "predicted": [
+        "Begging the Question",
+        "False Equivalence"
+      ],
+      "matched": [
+        "Begging the Question"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "False Equivalence"
+      ]
+    },
+    {
+      "id": "eval_027",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_028",
+      "type": "positive",
+      "ground_truth": [
+        "Appeal to Authority"
+      ],
+      "predicted": [
+        "Appeal to Authority",
+        "False Dilemma"
+      ],
+      "matched": [
+        "Appeal to Authority"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "False Dilemma"
+      ]
+    },
+    {
+      "id": "eval_029",
+      "type": "true_negative",
+      "correct": false,
+      "ground_truth": [],
+      "predicted": [
+        "False Analogy"
+      ]
+    },
+    {
+      "id": "eval_030",
+      "type": "positive",
+      "ground_truth": [
+        "Survivorship Bias"
+      ],
+      "predicted": [
+        "Fallacy of the Single Cause",
+        "Survivorship Bias"
+      ],
+      "matched": [
+        "Survivorship Bias"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "Fallacy of the Single Cause"
+      ]
+    }
+  ],
+  "errors": [],
+  "timestamp": "2026-06-19 19:34:32"
+}
