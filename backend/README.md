@@ -35,11 +35,32 @@ API endpoint: `POST /api/scan`
 
 ## Testing
 
+### Quick Manual Test
+
 ```bash
 curl -X POST http://localhost:8000/api/scan \
   -H "Content-Type: application/json" \
   -d '{"text": "Everyone I know loves this product, so it must be the best on the market."}'
 ```
+
+### Phase 2: Quality Validation (Eval Set)
+
+Run the backend against all 30 eval cases and compute quality metrics:
+
+```bash
+python run_eval.py
+```
+
+This will:
+- Send each eval case to the running backend
+- Compare predictions against ground truth
+- Compute precision/recall/F1 and true-negative accuracy
+- Check if quality meets the Phase 2 gate criteria
+
+**Acceptance criteria:**
+- ✅ Precision and recall computed (no fixed threshold for MVP)
+- ✅ True-negative accuracy > 60% (don't hallucinate fallacies in clean text)
+- ✅ Results reviewed by human before proceeding to Phase 3
 
 ## Rate Limiting
 
