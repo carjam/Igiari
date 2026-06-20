@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Igiari!</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <main class="container legal-page">
+        <header class="header">
+            <h1 class="title"><a href="../index.html" class="title-link">Igiari!</a></h1>
+            <p class="subtitle">Privacy Policy</p>
+        </header>
+
+        <article class="legal-content">
+            <p class="legal-meta">Last updated: June 20, 2026</p>
+
+            <p>This Privacy Policy describes how Igiari! ("Igiari," "we," "us," or "our") collects, uses, and shares information when you use our fallacy-scanning website and related services (the "Service"). The Service is currently offered free of charge and does not require an account.</p>
+
+            <p>By using the Service, you agree to the collection and use of information as described in this policy. If you do not agree, please do not use the Service.</p>
+
+            <h2>1. Information We Collect</h2>
+
+            <h3>Text you submit</h3>
+            <p>When you paste or type text into the scanner, that text is transmitted to our backend so it can be analyzed. We do not ask you to create an account or provide your name or email to use the Service.</p>
+
+            <h3>Technical and usage information</h3>
+            <p>When you use the Service, we automatically receive certain technical information, including:</p>
+            <ul>
+                <li><strong>IP address</strong> — used to enforce rate limits and help prevent abuse.</li>
+                <li><strong>Request metadata</strong> — such as timestamps, request size, and basic HTTP headers needed to operate the API.</li>
+                <li><strong>Server logs</strong> — our hosting providers may log standard web server data (for example, IP address, user agent, and request path) for security, debugging, and operations.</li>
+            </ul>
+
+            <h3>Information we do not intentionally collect</h3>
+            <p>We do not require registration and do not intentionally collect payment information, government identifiers, or contact details through the scanner itself. Please do not submit information you are not comfortable sharing with us and with our subprocessors described below.</p>
+
+            <h2>2. How We Use Information</h2>
+            <p>We use the information described above to:</p>
+            <ul>
+                <li>Provide fallacy analysis by sending submitted text to an AI model operated by a third party.</li>
+                <li>Enforce usage limits (currently 10 scans per hour per IP address).</li>
+                <li>Maintain an in-memory cache of prior analysis results so identical submissions can be answered without repeating an API call.</li>
+                <li>Operate, secure, troubleshoot, and improve the Service.</li>
+                <li>Comply with applicable law and respond to lawful requests.</li>
+            </ul>
+
+            <h2>3. How Long We Keep Information</h2>
+            <ul>
+                <li><strong>Submitted text:</strong> We do not maintain a persistent database of user-submitted text. Text is processed for the scan request and transmitted to our AI provider as described below.</li>
+                <li><strong>Rate-limit records:</strong> IP addresses and associated request timestamps are kept in server memory for up to one hour for rate-limiting purposes, then discarded automatically.</li>
+                <li><strong>Response cache:</strong> Analysis results for previously seen text may be stored in server memory keyed by a cryptographic hash of the normalized text (not the raw text itself). Cached entries are limited in number and are cleared when the server restarts or entries are evicted.</li>
+                <li><strong>Hosting logs:</strong> Log retention is controlled by our hosting providers and may persist for a limited period according to their policies.</li>
+            </ul>
+
+            <h2>4. Third-Party Services</h2>
+            <p>We rely on third parties to operate the Service. Your use of the Service may involve sharing information with:</p>
+            <ul>
+                <li><strong>Anthropic, PBC</strong> — submitted text is sent to Anthropic's API for AI analysis. Anthropic processes that text according to its own terms and privacy policies. Do not submit content you are prohibited from sharing with third-party AI providers.</li>
+                <li><strong>Render</strong> — hosts our backend API.</li>
+                <li><strong>Cloudflare</strong> — hosts our frontend and may process standard web traffic data as part of content delivery and security.</li>
+            </ul>
+            <p>We do not sell your personal information. We do not share submitted text with third parties for their independent marketing purposes.</p>
+
+            <h2>5. Cookies and Analytics</h2>
+            <p>The Service does not currently set first-party cookies or use third-party advertising trackers. Our hosting providers may process technical data automatically as part of delivering the site. If we add privacy-preserving analytics in the future, we will update this policy to describe what is collected.</p>
+
+            <h2>6. Your Choices and Responsibilities</h2>
+            <p>You control what text you submit. Because the Service is anonymous and does not use accounts, we generally cannot verify your identity from a submission alone. If you do not want text processed by us or our AI provider, do not submit it.</p>
+            <p><strong>Sensitive information:</strong> Do not paste confidential, proprietary, medical, financial, or other sensitive personal information unless you accept the risk that it will be transmitted to third-party infrastructure for processing.</p>
+
+            <h2>7. Legal Bases (EEA/UK Users)</h2>
+            <p>If you are in the European Economic Area or the United Kingdom, we process information on the following bases:</p>
+            <ul>
+                <li><strong>Performance of a contract / steps at your request</strong> — to provide the scan you request.</li>
+                <li><strong>Legitimate interests</strong> — to secure the Service, prevent abuse, and operate infrastructure efficiently (including caching and rate limiting).</li>
+                <li><strong>Legal obligation</strong> — where required by applicable law.</li>
+            </ul>
+
+            <h2>8. Your Privacy Rights</h2>
+            <p>Depending on where you live, you may have rights to access, correct, delete, or restrict certain processing of personal information, or to object to processing and to data portability. Because we do not operate user accounts and do not persistently store submitted text, we may be unable to identify or delete specific past submissions unless you provide information sufficient for us to locate associated records (for example, approximate time of use and IP address).</p>
+            <p>California residents may have additional rights under the CCPA/CPRA, including the right to know what categories of information are collected and the right to opt out of sale or sharing. We do not sell or share personal information for cross-context behavioral advertising.</p>
+            <p>To exercise privacy rights or ask questions about this policy, contact us using the information in Section 11.</p>
+
+            <h2>9. Children</h2>
+            <p>The Service is not directed to children under 13, and we do not knowingly collect personal information from children under 13. If you believe a child has provided personal information through the Service, contact us and we will take reasonable steps to delete it.</p>
+
+            <h2>10. International Transfers</h2>
+            <p>The Service is operated from the United States. If you access the Service from outside the United States, your information may be transferred to, stored in, and processed in the United States and other countries where our service providers operate, which may have different data-protection laws than your jurisdiction.</p>
+
+            <h2>11. Changes and Contact</h2>
+            <p>We may update this Privacy Policy from time to time. The "Last updated" date at the top will reflect the latest version. Material changes will be posted on this page. Continued use of the Service after changes become effective constitutes acceptance of the revised policy.</p>
+            <p>For privacy-related questions or requests, contact us at <a href="mailto:jamescarson3rd@gmail.com?subject=Privacy%20Request">jamescarson3rd@gmail.com</a> (subject line: <strong>Privacy Request</strong>).</p>
+            <p>California residents may also submit requests under the CCPA/CPRA to the same address. We will verify and respond as required by applicable law.</p>
+        </article>
+
+        <footer class="footer">
+            <p class="footer-links">
+                <a href="../index.html">Home</a>
+                <span class="footer-sep">·</span>
+                <a href="terms.html">Terms of Service</a>
+                <span class="footer-sep">·</span>
+                <a href="copyright.html">Copyright</a>
+            </p>
+        </footer>
+    </main>
+</body>
+</html>
