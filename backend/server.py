@@ -5,6 +5,7 @@ Minimal FastAPI server for detecting logical fallacies via Anthropic API.
 import json
 import os
 import time
+import hashlib
 from pathlib import Path
 from typing import Dict, List, Optional
 from collections import defaultdict
@@ -36,10 +37,12 @@ MAX_INPUT_LENGTH = 4000
 RATE_LIMIT_REQUESTS = 10
 RATE_LIMIT_WINDOW = 3600  # 1 hour in seconds
 MODEL_NAME = "claude-haiku-4-5-20251001"
+CACHE_MAX_SIZE = 1000  # Max entries before LRU eviction
 
 # Global state
 fallacy_taxonomy: List[Dict] = []
 rate_limit_store: Dict[str, List[float]] = defaultdict(list)
+response_cache: Dict[str, Dict] = {}  # SHA-256 hash -> API response
 
 # Pydantic models
 class ScanRequest(BaseModel):
@@ -92,6 +95,14 @@ def check_rate_limit(client_ip: str) -> bool:
     # Record this request
     rate_limit_store[client_ip].append(now)
     return True
+
+
+def hash_text(text: str) -> str:
+    """
+    Create SHA-256 hash of trimmed/normalized text for cache key.
+    """
+    normalized = text.strip().lower()
+    return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
 
 
 def build_system_prompt() -> str:
@@ -272,6 +283,16 @@ async def scan_text(request: Request, body: ScanRequest):
             }
         )
     
+    # Check cache first (Phase 3.5)
+    cache_key = hash_text(text)
+    if cache_key in response_cache:
+        print(f"Cache hit for hash: {cache_key[:16]}...")
+        cached_response = response_cache[cache_key]
+        return ScanResponse(**cached_response)
+    
+    # Cache miss - proceed with API call
+    print(f"Cache miss for hash: {cache_key[:16]}...")
+    
     # Call Anthropic API
     try:
         raw_result = await call_anthropic_api(text)
@@ -318,6 +339,19 @@ async def scan_text(request: Request, body: ScanRequest):
             confidence=finding.get("confidence", "medium"),
             explanation=finding.get("explanation", "")
         ))
+    
+    # Store in cache (Phase 3.5)
+    response_data = {
+        "input_length": len(text),
+        "findings": [f.dict() for f in findings]
+    }
+    response_cache[cache_key] = response_data
+    
+    # LRU eviction: remove oldest entry if over max size
+    if len(response_cache) > CACHE_MAX_SIZE:
+        oldest_key = next(iter(response_cache))
+        del response_cache[oldest_key]
+        print(f"Cache evicted oldest entry (size was {CACHE_MAX_SIZE + 1})")
     
     return ScanResponse(
         input_length=len(text),
