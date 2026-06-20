@@ -174,6 +174,16 @@ async def call_anthropic_api(user_text: str) -> Dict:
         # Extract text content
         response_text = message.content[0].text
         
+        # Strip markdown code fences if present
+        response_text = response_text.strip()
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]  # Remove ```json
+        elif response_text.startswith("```"):
+            response_text = response_text[3:]  # Remove ```
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]  # Remove closing ```
+        response_text = response_text.strip()
+        
         # Parse JSON
         try:
             result = json.loads(response_text)
@@ -183,16 +193,26 @@ async def call_anthropic_api(user_text: str) -> Dict:
             print(f"JSON parse error on first attempt: {e}")
             print(f"Response text: {response_text[:500]}")
             
-            # Second attempt
+            # Second attempt with explicit instruction
             message = client.messages.create(
                 model=MODEL_NAME,
                 max_tokens=4096,
-                system=system_prompt + "\n\nIMPORTANT: Return ONLY valid JSON, no markdown or other text.",
+                system=system_prompt + "\n\nIMPORTANT: Return ONLY valid JSON, no markdown code fences or other text.",
                 messages=[
                     {"role": "user", "content": user_text}
                 ]
             )
-            response_text = message.content[0].text
+            response_text = message.content[0].text.strip()
+            
+            # Strip markdown again on retry
+            if response_text.startswith("```json"):
+                response_text = response_text[7:]
+            elif response_text.startswith("```"):
+                response_text = response_text[3:]
+            if response_text.endswith("```"):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+            
             result = json.loads(response_text)
             return result
             
