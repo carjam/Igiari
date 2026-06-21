@@ -122,9 +122,9 @@ async function handleScan() {
     } catch (error) {
         console.error('Scan error:', error);
         showError(error.message || 'Unable to connect to the server. Please try again.');
-        scanButton.disabled = false;
     } finally {
         hideLoading();
+        updateScanButton();
     }
 }
 

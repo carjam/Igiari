@@ -4,6 +4,7 @@ Supabase-backed accounts and credit ledger for authenticated scans.
 import os
 from typing import Any, Dict, Optional
 
+import requests
 from fastapi import HTTPException
 
 TRIAL_CREDITS = 20
@@ -31,21 +32,30 @@ def verify_access_token(token: str) -> Dict[str, Any]:
             },
         )
 
+    url = os.environ["SUPABASE_URL"].rstrip("/")
+    service_key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+
     try:
-        client = get_supabase()
-        response = client.auth.get_user(token)
-        user = response.user
-    except Exception as exc:
-        print(f"Auth verification failed: {exc}")
+        response = requests.get(
+            f"{url}/auth/v1/user",
+            headers={
+                "apikey": service_key,
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
+    except requests.RequestException as exc:
+        print(f"Auth verification request failed: {exc}")
         raise HTTPException(
-            status_code=401,
+            status_code=503,
             detail={
-                "code": "INVALID_SESSION",
-                "message": "Your sign-in session is invalid or expired. Please sign in again.",
+                "code": "AUTH_UNAVAILABLE",
+                "message": "Could not verify sign-in. Please try again.",
             },
         ) from exc
 
-    if not user or not user.id:
+    if response.status_code != 200:
+        print(f"Auth verification failed: {response.status_code} {response.text}")
         raise HTTPException(
             status_code=401,
             detail={
@@ -54,20 +64,25 @@ def verify_access_token(token: str) -> Dict[str, Any]:
             },
         )
 
-    email = user.email or ""
-    return {"id": user.id, "email": email}
+    user = response.json()
+    user_id = user.get("id")
+    if not user_id:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "INVALID_SESSION",
+                "message": "Your sign-in session is invalid or expired. Please sign in again.",
+            },
+        )
+
+    return {"id": user_id, "email": user.get("email") or ""}
 
 
 def get_account(user_id: str) -> Optional[Dict[str, Any]]:
     client = get_supabase()
-    result = (
-        client.table("accounts")
-        .select("*")
-        .eq("id", user_id)
-        .maybe_single()
-        .execute()
-    )
-    return result.data
+    result = client.table("accounts").select("*").eq("id", user_id).limit(1).execute()
+    rows = result.data or []
+    return rows[0] if rows else None
 
 
 def grant_trial_credits(user_id: str) -> None:

@@ -12,40 +12,70 @@ function getAccessToken() {
     return currentSession?.access_token || null;
 }
 
-async function initAuth() {
-    const section = document.getElementById('authSection');
-    if (!authConfigured()) {
-        if (section) {
-            section.classList.add('hidden');
+async function restoreSessionFromUrl() {
+    const queryParams = new URLSearchParams(window.location.search);
+    const code = queryParams.get('code');
+
+    if (code) {
+        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        if (error) {
+            throw error;
         }
+        window.history.replaceState({}, document.title, window.location.pathname);
         return;
     }
 
-    if (section) {
-        section.classList.remove('hidden');
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, '?'));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+
+    if (accessToken && refreshToken) {
+        const { error } = await supabaseClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        });
+        if (error) {
+            throw error;
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
+}
+
+async function initAuth() {
+    const section = document.getElementById('authSection');
+    const statusEl = document.getElementById('authStatus');
+
+    if (!authConfigured()) {
+        section?.classList.add('hidden');
+        return;
+    }
+
+    section?.classList.remove('hidden');
 
     supabaseClient = window.supabase.createClient(
         window.IGIARI_SUPABASE_URL,
-        window.IGIARI_SUPABASE_ANON_KEY
+        window.IGIARI_SUPABASE_ANON_KEY,
+        {
+            auth: {
+                detectSessionInUrl: true,
+                persistSession: true,
+                flowType: 'pkce',
+            },
+        }
     );
 
-    const params = new URLSearchParams(window.location.hash.replace(/^#/, '?'));
-    if (params.get('access_token')) {
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-        if (accessToken && refreshToken) {
-            await supabaseClient.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-            });
-            window.history.replaceState({}, document.title, window.location.pathname);
+    try {
+        await restoreSessionFromUrl();
+    } catch (error) {
+        console.error('Sign-in redirect failed:', error);
+        if (statusEl) {
+            statusEl.textContent = error.message || 'Sign-in link expired. Request a new one.';
         }
     }
 
     const { data } = await supabaseClient.auth.getSession();
     currentSession = data.session;
-    updateAuthUI();
+    await updateAuthUI();
 
     supabaseClient.auth.onAuthStateChange((_event, session) => {
         currentSession = session;
@@ -92,7 +122,7 @@ async function handleSignOut() {
 async function fetchAccount() {
     const token = getAccessToken();
     if (!token) {
-        return null;
+        return { error: 'Not signed in.' };
     }
 
     const response = await fetch(`${API_BASE}/api/account/me`, {
@@ -101,11 +131,22 @@ async function fetchAccount() {
         },
     });
 
-    if (!response.ok) {
-        return null;
+    let data = {};
+    try {
+        data = await response.json();
+    } catch (_error) {
+        return { error: 'Could not read account response from server.' };
     }
 
-    return response.json();
+    if (!response.ok) {
+        const detail = data.detail || {};
+        const message = typeof detail === 'string'
+            ? detail
+            : (detail.message || 'Could not load your account.');
+        return { error: message };
+    }
+
+    return { account: data };
 }
 
 async function updateAuthUI() {
@@ -120,18 +161,30 @@ async function updateAuthUI() {
         if (balanceEl) {
             balanceEl.textContent = '';
         }
-        if (statusEl) {
-            statusEl.textContent = '';
-        }
         return;
     }
 
     signedOut?.classList.add('hidden');
     signedIn?.classList.remove('hidden');
 
-    const account = await fetchAccount();
-    if (account && balanceEl) {
-        balanceEl.textContent = `${account.credit_balance} scans left`;
+    if (balanceEl) {
+        balanceEl.textContent = 'Loading scans…';
+    }
+
+    const result = await fetchAccount();
+    if (result.account && balanceEl) {
+        balanceEl.textContent = `${result.account.credit_balance} scans left`;
+        if (statusEl) {
+            statusEl.textContent = '';
+        }
+        return;
+    }
+
+    if (balanceEl) {
+        balanceEl.textContent = 'Balance unavailable';
+    }
+    if (statusEl && result.error) {
+        statusEl.textContent = result.error;
     }
 }
 
