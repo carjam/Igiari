@@ -15,7 +15,8 @@
 
         <section class="auth-section hidden" id="authSection">
             <div id="authSignedOut" class="auth-panel">
-                <p class="auth-label">Sign in to scan — 20 free scans included</p>
+                <p class="auth-label">Sign in with your email</p>
+                <p class="auth-help">New or returning — same address. After your first sign-in, this browser keeps you signed in.</p>
                 <div class="auth-row">
                     <input
                         type="email"
@@ -24,7 +25,7 @@
                         placeholder="you@example.com"
                         autocomplete="email"
                     />
-                    <button type="button" id="signInButton" class="btn btn-secondary">Email me a link</button>
+                    <button type="button" id="signInButton" class="btn btn-secondary">Send sign-in link</button>
                 </div>
                 <p class="auth-status" id="authStatus"></p>
             </div>
@@ -101,7 +102,7 @@
         </footer>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
     <script src="site-config.js"></script>
     <script src="analytics.js"></script>
     <script src="auth.js"></script>

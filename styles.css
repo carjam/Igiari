@@ -561,6 +561,15 @@ main.legal-page {
     font-family: var(--font-mono);
     font-size: 13px;
     color: var(--color-secondary);
+    margin-bottom: 8px;
+}
+
+.auth-help {
+    width: 100%;
+    font-family: var(--font-serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-secondary);
     margin-bottom: 12px;
 }
 

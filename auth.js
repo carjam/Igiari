@@ -1,5 +1,6 @@
 // Magic-link sign-in via Supabase. Requires site-config.js values.
 const FETCH_TIMEOUT_MS = 15000;
+const LAST_EMAIL_KEY = 'igiari_last_email';
 
 function apiBase() {
     return window.API_BASE || 'https://igiari-backend.onrender.com';
@@ -26,10 +27,35 @@ function isSignedIn() {
     return Boolean(currentSession);
 }
 
+function rememberEmail(email) {
+    if (email) {
+        localStorage.setItem(LAST_EMAIL_KEY, email);
+    }
+}
+
+function prefillEmail() {
+    const input = document.getElementById('authEmail');
+    if (!input || input.value) {
+        return;
+    }
+    const saved = localStorage.getItem(LAST_EMAIL_KEY);
+    if (saved) {
+        input.value = saved;
+    }
+}
+
 function refreshScanControls() {
     if (window.updateScanButton) {
         window.updateScanButton();
     }
+}
+
+function formatAuthError(error) {
+    const message = error?.message || 'Sign-in failed. Please try again.';
+    if (/rate limit/i.test(message)) {
+        return 'Too many sign-in emails sent. Wait about an hour, or open a recent sign-in link from your inbox.';
+    }
+    return message;
 }
 
 function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
@@ -48,35 +74,20 @@ function bindAuthButtons() {
         event.preventDefault();
         void handleSignOut();
     });
+    document.getElementById('authEmail')?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            void handleSignIn();
+        }
+    });
 }
 
-async function restoreSessionFromUrl() {
-    const queryParams = new URLSearchParams(window.location.search);
-    const code = queryParams.get('code');
-
-    if (code) {
-        const { error } = await supabaseClient.auth.exchangeCodeForSession(code);
-        if (error) {
-            throw error;
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-        return;
+function applySession(session) {
+    currentSession = session;
+    if (session?.user?.email) {
+        rememberEmail(session.user.email);
     }
-
-    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, '?'));
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-
-    if (accessToken && refreshToken) {
-        const { error } = await supabaseClient.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-        });
-        if (error) {
-            throw error;
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-    }
+    void updateAuthUI();
 }
 
 async function initAuth() {
@@ -103,33 +114,33 @@ async function initAuth() {
         window.IGIARI_SUPABASE_ANON_KEY,
         {
             auth: {
+                autoRefreshToken: true,
                 detectSessionInUrl: true,
                 persistSession: true,
                 flowType: 'pkce',
+                storage: window.localStorage,
             },
         }
     );
 
-    try {
-        await restoreSessionFromUrl();
-    } catch (error) {
-        console.error('Sign-in redirect failed:', error);
-        if (statusEl) {
-            statusEl.textContent = error.message || 'Sign-in link expired. Request a new one.';
-        }
-    }
-
-    const { data } = await supabaseClient.auth.getSession();
-    currentSession = data.session;
-    void updateAuthUI();
-
-    supabaseClient.auth.onAuthStateChange((_event, session) => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
         if (ignoreAuthEvents) {
             return;
         }
-        currentSession = session;
-        void updateAuthUI();
+        applySession(session);
     });
+
+    const { data, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) {
+        console.error('Session restore failed:', sessionError);
+    }
+    if (data.session) {
+        applySession(data.session);
+    } else {
+        applySession(null);
+    }
+
+    prefillEmail();
 }
 
 async function handleSignIn() {
@@ -162,15 +173,17 @@ async function handleSignIn() {
         },
     });
 
+    rememberEmail(email);
+
     if (error) {
         if (statusEl) {
-            statusEl.textContent = error.message;
+            statusEl.textContent = formatAuthError(error);
         }
         return;
     }
 
     if (statusEl) {
-        statusEl.textContent = 'Check your email for a sign-in link.';
+        statusEl.textContent = 'Check your email for a sign-in link. Returning users: open the link on this device to stay signed in.';
     }
 }
 

@@ -41,6 +41,12 @@ Supabase dashboard → **Authentication** → **URL Configuration**:
 - **Site URL:** `https://igiari.pages.dev`
 - **Redirect URLs:** `https://igiari.pages.dev/**`
 
+## Returning users
+
+Sign-in uses the same magic link for new and returning accounts. After the first sign-in, the browser keeps the session in localStorage — a normal reload should not ask for email again.
+
+If Supabase shows **email rate limit exceeded**, wait about an hour or open a recent sign-in link already in your inbox (links expire after ~1 hour by default). For production traffic, configure custom SMTP in Supabase to raise email limits.
+
 ## Rollback
 
 Run `rollbacks/20250620200000_initial_billing_schema.down.sql` in SQL Editor (destroys billing data).
