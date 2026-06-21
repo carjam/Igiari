@@ -53,10 +53,10 @@ function refreshScanControls() {
 function formatAuthError(error) {
     const message = error?.message || 'Sign-in failed. Please try again.';
     if (/rate limit/i.test(message)) {
-        return 'Too many sign-in emails sent. Wait about an hour, or copy the link from your latest email into this same browser tab.';
+        return 'Too many sign-in emails sent. Use the 6-digit code from your latest email instead.';
     }
     if (/code verifier|pkce|invalid flow state|both auth code and code verifier/i.test(message)) {
-        return 'That link did not match this browser session. Copy the link from your email and paste it into the address bar on this tab (where you clicked Send sign-in link).';
+        return 'That link did not match this browser session. Enter the 6-digit code from your email below, or paste the link into this tab.';
     }
     return message;
 }
@@ -143,6 +143,16 @@ function bindAuthButtons() {
         if (event.key === 'Enter') {
             event.preventDefault();
             void handleSignIn();
+        }
+    });
+    document.getElementById('verifyOtpButton')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        void handleVerifyOtp();
+    });
+    document.getElementById('authOtp')?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            void handleVerifyOtp();
         }
     });
 }
@@ -256,8 +266,61 @@ async function handleSignIn() {
     }
 
     if (statusEl) {
-        statusEl.textContent = 'Check your email. Click the link, or copy it into this same browser tab if your mail app opens a different browser.';
+        statusEl.textContent = 'Check your email. Click the link, or enter the 6-digit code below.';
     }
+}
+
+async function handleVerifyOtp() {
+    const emailInput = document.getElementById('authEmail');
+    const otpInput = document.getElementById('authOtp');
+    const statusEl = document.getElementById('authStatus');
+    const email = emailInput?.value.trim();
+    const token = otpInput?.value.trim().replace(/\s/g, '');
+
+    if (!email) {
+        if (statusEl) {
+            statusEl.textContent = 'Enter your email address.';
+        }
+        return;
+    }
+
+    if (!token) {
+        if (statusEl) {
+            statusEl.textContent = 'Enter the 6-digit code from your email.';
+        }
+        return;
+    }
+
+    if (!supabaseClient) {
+        if (statusEl) {
+            statusEl.textContent = 'Sign-in is not ready yet. Refresh and try again.';
+        }
+        return;
+    }
+
+    rememberEmail(email);
+
+    if (statusEl) {
+        statusEl.textContent = 'Verifying code…';
+    }
+
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+    });
+
+    if (error) {
+        if (statusEl) {
+            statusEl.textContent = formatAuthError(error);
+        }
+        return;
+    }
+
+    if (otpInput) {
+        otpInput.value = '';
+    }
+    applySession(data.session);
 }
 
 async function handleSignOut() {

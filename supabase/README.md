@@ -43,7 +43,7 @@ Supabase dashboard → **Authentication** → **URL Configuration**:
 
 ## Returning users
 
-Sign-in uses Supabase’s default magic-link email (link only — no 6-digit code unless you add custom SMTP and edit the template).
+Sign-in uses a magic link and optional 6-digit code (add `{{ .Token }}` to the Magic Link template under Authentication → Email Templates).
 
 After the first sign-in, the browser keeps your session in localStorage — a normal reload should not ask for email again.
 
