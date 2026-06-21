@@ -4,10 +4,13 @@ Quick reference for managing your live Igiari deployment.
 
 ## 🌐 Live URLs
 
-- **Frontend (Public):** https://igiari.pages.dev/
+- **Frontend (primary):** https://igiari.us
+- **Frontend (Pages default):** https://igiari.pages.dev/
 - **Backend API (Public):** https://igiari-backend.onrender.com
 - **Backend Health Check:** https://igiari-backend.onrender.com/ (returns `{"status":"ok","service":"fallacy-scanner-api"}`)
 - **API Endpoint:** https://igiari-backend.onrender.com/api/scan
+
+Auth, email, and domain recovery: **[AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md)**
 
 ## 🎛️ Dashboard Access
 

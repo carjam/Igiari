@@ -6,6 +6,7 @@ This directory contains project documentation, testing reports, and deployment g
 
 ### Deployment & Operations
 - **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Comprehensive guide for managing live deployment (Render + Cloudflare)
+- **[AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md)** - Recreate Supabase auth, Resend SMTP, domain, and Magic Link email template
 - **[DEPLOY_CLOUDFLARE.md](DEPLOY_CLOUDFLARE.md)** - Quick reference for Cloudflare Pages deployment
 
 ### Testing & Quality

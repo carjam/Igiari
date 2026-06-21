@@ -25,9 +25,10 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 
 | Task | Status |
 |---|---|
-| Postgres + credit ledger | ⏳ Migration in `supabase/migrations/` — run `supabase db push` |
-| Auth (magic link) + 20 trial credits | ⬜ |
-| Credit-gated `/api/scan` | ⬜ |
+| Postgres + credit ledger | ✅ Migrations in `supabase/migrations/` |
+| Auth (magic link + OTP code) + 20 trial credits | ✅ See `docs/AUTH_AND_EMAIL_RECOVERY.md` |
+| Sign-in required to scan (no anonymous path in prod) | ✅ |
+| Custom domain + Resend SMTP | ✅ `igiari.us` |
 | Stripe Checkout + webhooks (test mode) | ⬜ |
 | Account UI (balance, buy, Billing Portal) | ⬜ |
 

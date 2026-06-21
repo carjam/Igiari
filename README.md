@@ -6,12 +6,12 @@ Paste an argument, email, article, or transcript and see logical fallacies highl
 
 ## 🚀 Live Deployment
 
-**Try it now:** https://igiari.pages.dev/
+**Try it now:** https://igiari.us
 
-- **Frontend:** https://igiari.pages.dev/ (Cloudflare Pages)
+- **Frontend:** https://igiari.us (Cloudflare Pages; also https://igiari.pages.dev/)
 - **Backend API:** https://igiari-backend.onrender.com (Render)
 
-✅ **Status:** Phases 0–4 complete and deployed. **Phase 5 + monetization rollout in progress** — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md).
+✅ **Status:** Phases 0–4 complete and deployed. **Step 1 auth + credits live** — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md). Auth/email rebuild guide: [AUTH_AND_EMAIL_RECOVERY.md](docs/AUTH_AND_EMAIL_RECOVERY.md).
 
 📖 **Managing the deployment?** See [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for dashboard URLs, how to update, logs, troubleshooting, and more.
 
