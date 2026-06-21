@@ -55,14 +55,31 @@ function formatAuthError(error) {
     if (/rate limit/i.test(message)) {
         return 'Too many sign-in emails sent. Use the 6-digit code from your latest email instead.';
     }
+    if (/invalid|expired|already been used/i.test(message)) {
+        return 'That code or link has expired or was already used. Request a new sign-in email and try again without clicking the link first — use the code only.';
+    }
     if (/code verifier|pkce|invalid flow state|both auth code and code verifier/i.test(message)) {
-        return 'That link did not match this browser session. Enter the 6-digit code from your email below, or paste the link into this tab.';
+        return 'That link did not match this browser session. Enter the 6-digit code from your email below instead.';
     }
     return message;
 }
 
 function clearAuthCallbackFromUrl() {
     window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+async function verifyOtpFromParams(params, statusEl) {
+    const tokenHash = params.get('token_hash');
+    if (tokenHash) {
+        const type = params.get('type') === 'magiclink' ? 'email' : (params.get('type') || 'email');
+        const { data, error } = await supabaseClient.auth.verifyOtp({
+            token_hash: tokenHash,
+            type,
+        });
+        return { data, error };
+    }
+
+    return { data: null, error: null };
 }
 
 async function completeAuthFromUrl(statusEl) {
@@ -77,17 +94,59 @@ async function completeAuthFromUrl(statusEl) {
         return false;
     }
 
+    if (url.searchParams.get('token_hash')) {
+        if (statusEl) {
+            statusEl.textContent = 'Completing sign-in…';
+        }
+        ignoreAuthEvents = true;
+        const { data, error } = await verifyOtpFromParams(url.searchParams, statusEl);
+        ignoreAuthEvents = false;
+        clearAuthCallbackFromUrl();
+        if (error) {
+            if (statusEl) {
+                statusEl.textContent = formatAuthError(error);
+            }
+            return false;
+        }
+        if (data?.session) {
+            applySession(data.session);
+            return true;
+        }
+    }
+
     const hashParams = new URLSearchParams(url.hash.replace(/^#/, '?'));
+    if (hashParams.get('token_hash')) {
+        if (statusEl) {
+            statusEl.textContent = 'Completing sign-in…';
+        }
+        ignoreAuthEvents = true;
+        const { data, error } = await verifyOtpFromParams(hashParams, statusEl);
+        ignoreAuthEvents = false;
+        clearAuthCallbackFromUrl();
+        if (error) {
+            if (statusEl) {
+                statusEl.textContent = formatAuthError(error);
+            }
+            return false;
+        }
+        if (data?.session) {
+            applySession(data.session);
+            return true;
+        }
+    }
+
     const accessToken = hashParams.get('access_token');
     const refreshToken = hashParams.get('refresh_token');
     if (accessToken && refreshToken) {
         if (statusEl) {
             statusEl.textContent = 'Completing sign-in…';
         }
+        ignoreAuthEvents = true;
         const { data, error } = await supabaseClient.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
         });
+        ignoreAuthEvents = false;
         clearAuthCallbackFromUrl();
         if (error) {
             if (statusEl) {
@@ -106,7 +165,9 @@ async function completeAuthFromUrl(statusEl) {
         if (statusEl) {
             statusEl.textContent = 'Completing sign-in…';
         }
+        ignoreAuthEvents = true;
         const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        ignoreAuthEvents = false;
         clearAuthCallbackFromUrl();
         if (error) {
             if (statusEl) {
@@ -184,7 +245,6 @@ async function initAuth() {
         return;
     }
 
-    // Implicit flow: magic links return tokens in the URL hash (no PKCE verifier needed).
     supabaseClient = window.supabase.createClient(
         window.IGIARI_SUPABASE_URL,
         window.IGIARI_SUPABASE_ANON_KEY,
@@ -193,7 +253,7 @@ async function initAuth() {
                 autoRefreshToken: true,
                 detectSessionInUrl: false,
                 persistSession: true,
-                flowType: 'implicit',
+                flowType: 'pkce',
                 storage: window.localStorage,
             },
         }
@@ -319,6 +379,12 @@ async function handleVerifyOtp() {
 
     if (otpInput) {
         otpInput.value = '';
+    }
+    if (!data?.session) {
+        if (statusEl) {
+            statusEl.textContent = 'Sign-in succeeded but no session was returned. Try again.';
+        }
+        return;
     }
     applySession(data.session);
 }

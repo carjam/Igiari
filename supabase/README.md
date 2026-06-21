@@ -38,12 +38,25 @@ window.IGIARI_SUPABASE_ANON_KEY = 'your-publishable-key';
 
 Supabase dashboard → **Authentication** → **URL Configuration**:
 
-- **Site URL:** `https://igiari.pages.dev`
-- **Redirect URLs:** `https://igiari.pages.dev/**`
+- **Site URL:** `https://igiari.us`
+- **Redirect URLs:** `https://igiari.us/**`
+
+## Magic Link email template (required for static site)
+
+**Do not use `{{ .ConfirmationURL }}` alone** — it redirects through Supabase with PKCE and often breaks on a static site. Gmail/Outlook may also prefetch that link and burn the one-time token before you click.
+
+In **Authentication** → **Email Templates** → **Magic Link**, use:
+
+```html
+<h2>Sign in to Igiari</h2>
+<p><a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">Sign in to Igiari</a></p>
+<p>Or enter this code on the site: {{ .Token }}</p>
+<p>This link and code expire in 1 hour and work once only.</p>
+```
+
+The site handles `?token_hash=...` on load and the 6-digit code via **Verify code**.
 
 ## Returning users
-
-Sign-in uses a magic link and optional 6-digit code (add `{{ .Token }}` to the Magic Link template under Authentication → Email Templates).
 
 After the first sign-in, the browser keeps your session in localStorage — a normal reload should not ask for email again.
 
