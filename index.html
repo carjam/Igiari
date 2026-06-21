@@ -16,7 +16,7 @@
         <section class="auth-section hidden" id="authSection">
             <div id="authSignedOut" class="auth-panel">
                 <p class="auth-label">Sign in with your email</p>
-                <p class="auth-help">New or returning — same address. After your first sign-in, this browser keeps you signed in.</p>
+                <p class="auth-help">New or returning — same email address. Keep this tab open, then click the link in your email (or copy the link here if mail opens another browser).</p>
                 <div class="auth-row">
                     <input
                         type="email"
@@ -26,18 +26,6 @@
                         autocomplete="email"
                     />
                     <button type="button" id="signInButton" class="btn btn-secondary">Send sign-in link</button>
-                </div>
-                <div class="auth-row auth-otp-row">
-                    <input
-                        type="text"
-                        id="authOtp"
-                        class="auth-input auth-otp-input"
-                        placeholder="6-digit code from email"
-                        inputmode="numeric"
-                        autocomplete="one-time-code"
-                        maxlength="8"
-                    />
-                    <button type="button" id="verifyOtpButton" class="btn btn-secondary">Verify code</button>
                 </div>
                 <p class="auth-status" id="authStatus"></p>
             </div>

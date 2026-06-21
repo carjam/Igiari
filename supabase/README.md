@@ -43,13 +43,13 @@ Supabase dashboard → **Authentication** → **URL Configuration**:
 
 ## Returning users
 
-Sign-in uses the same magic link for new and returning accounts. After the first sign-in, the browser keeps the session in localStorage — a normal reload should not ask for email again.
+Sign-in uses Supabase’s default magic-link email (link only — no 6-digit code unless you add custom SMTP and edit the template).
 
-If Supabase shows **email rate limit exceeded**, use the **6-digit code** from your latest sign-in email (shown on the site below the email field). That works even when you cannot request another link.
+After the first sign-in, the browser keeps your session in localStorage — a normal reload should not ask for email again.
 
-Magic links use PKCE: the link works most reliably when opened in the **same browser profile** where you clicked “Send sign-in link”. If the link fails, use the 6-digit code instead.
+If the email link does not sign you in, copy the link from the message and paste it into the **same browser tab** where you clicked “Send sign-in link” (some mail apps open a different browser).
 
-Redirect URLs must include `https://igiari.pages.dev` and `https://igiari.pages.dev/**`.
+Supabase’s built-in email is rate-limited. For production, configure **custom SMTP** (e.g. Resend, SendGrid) under Authentication → SMTP Settings — this also unlocks editing email templates.
 
 ## Rollback
 

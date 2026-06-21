@@ -53,10 +53,10 @@ function refreshScanControls() {
 function formatAuthError(error) {
     const message = error?.message || 'Sign-in failed. Please try again.';
     if (/rate limit/i.test(message)) {
-        return 'Too many sign-in emails sent. Use the 6-digit code from your latest email instead (below).';
+        return 'Too many sign-in emails sent. Wait about an hour, or copy the link from your latest email into this same browser tab.';
     }
     if (/code verifier|pkce|invalid flow state|both auth code and code verifier/i.test(message)) {
-        return 'That link could not be verified in this browser. Enter the 6-digit code from the same email below instead.';
+        return 'That link did not match this browser session. Copy the link from your email and paste it into the address bar on this tab (where you clicked Send sign-in link).';
     }
     return message;
 }
@@ -77,12 +77,17 @@ async function completeAuthFromUrl(statusEl) {
         return false;
     }
 
-    const code = url.searchParams.get('code');
-    if (code) {
+    const hashParams = new URLSearchParams(url.hash.replace(/^#/, '?'));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    if (accessToken && refreshToken) {
         if (statusEl) {
             statusEl.textContent = 'Completing sign-in…';
         }
-        const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        const { data, error } = await supabaseClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        });
         clearAuthCallbackFromUrl();
         if (error) {
             if (statusEl) {
@@ -96,14 +101,12 @@ async function completeAuthFromUrl(statusEl) {
         }
     }
 
-    const hashParams = new URLSearchParams(url.hash.replace(/^#/, '?'));
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-    if (accessToken && refreshToken) {
-        const { data, error } = await supabaseClient.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-        });
+    const code = url.searchParams.get('code');
+    if (code) {
+        if (statusEl) {
+            statusEl.textContent = 'Completing sign-in…';
+        }
+        const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
         clearAuthCallbackFromUrl();
         if (error) {
             if (statusEl) {
@@ -142,16 +145,6 @@ function bindAuthButtons() {
             void handleSignIn();
         }
     });
-    document.getElementById('verifyOtpButton')?.addEventListener('click', (event) => {
-        event.preventDefault();
-        void handleVerifyOtp();
-    });
-    document.getElementById('authOtp')?.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            void handleVerifyOtp();
-        }
-    });
 }
 
 function applySession(session) {
@@ -181,6 +174,7 @@ async function initAuth() {
         return;
     }
 
+    // Implicit flow: magic links return tokens in the URL hash (no PKCE verifier needed).
     supabaseClient = window.supabase.createClient(
         window.IGIARI_SUPABASE_URL,
         window.IGIARI_SUPABASE_ANON_KEY,
@@ -189,7 +183,7 @@ async function initAuth() {
                 autoRefreshToken: true,
                 detectSessionInUrl: false,
                 persistSession: true,
-                flowType: 'pkce',
+                flowType: 'implicit',
                 storage: window.localStorage,
             },
         }
@@ -262,61 +256,8 @@ async function handleSignIn() {
     }
 
     if (statusEl) {
-        statusEl.textContent = 'Check your email. Click the link or enter the 6-digit code below.';
+        statusEl.textContent = 'Check your email. Click the link, or copy it into this same browser tab if your mail app opens a different browser.';
     }
-}
-
-async function handleVerifyOtp() {
-    const emailInput = document.getElementById('authEmail');
-    const otpInput = document.getElementById('authOtp');
-    const statusEl = document.getElementById('authStatus');
-    const email = emailInput?.value.trim();
-    const token = otpInput?.value.trim().replace(/\s/g, '');
-
-    if (!email) {
-        if (statusEl) {
-            statusEl.textContent = 'Enter your email address.';
-        }
-        return;
-    }
-
-    if (!token) {
-        if (statusEl) {
-            statusEl.textContent = 'Enter the 6-digit code from your email.';
-        }
-        return;
-    }
-
-    if (!supabaseClient) {
-        if (statusEl) {
-            statusEl.textContent = 'Sign-in is not ready yet. Refresh and try again.';
-        }
-        return;
-    }
-
-    rememberEmail(email);
-
-    if (statusEl) {
-        statusEl.textContent = 'Verifying code…';
-    }
-
-    const { data, error } = await supabaseClient.auth.verifyOtp({
-        email,
-        token,
-        type: 'email',
-    });
-
-    if (error) {
-        if (statusEl) {
-            statusEl.textContent = formatAuthError(error);
-        }
-        return;
-    }
-
-    if (otpInput) {
-        otpInput.value = '';
-    }
-    applySession(data.session);
 }
 
 async function handleSignOut() {
