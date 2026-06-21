@@ -27,6 +27,8 @@
 | Item | Result | Notes |
 |------|--------|-------|
 | Sign in → Try Example → Scan → results ~10s | ✅ Owner verified (Stripe test session) | |
+| Sandbox Checkout → credits grant (+50 Starter) | ✅ | 19 → 69 |
+| Webhook replay idempotency | ✅ | Resend `checkout.session.completed` → still 69 |
 | True negative → "No fallacies found" | ⏳ | Run when convenient |
 | >4000 chars → warning | ✅ | Counter in UI |
 | Hover highlight → explanation | ⏳ | Requires scan with findings |
