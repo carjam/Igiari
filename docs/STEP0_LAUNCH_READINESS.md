@@ -9,27 +9,17 @@ Part of the monetization rollout — finish this before starting billing enginee
 
 ## 1. Analytics
 
-**Option A — Cloudflare Web Analytics beacon (recommended)**
+**Option B — Cloudflare Pages automatic analytics (current setup)**
 
-Privacy-preserving, no cookies, fits the product voice. Requires a one-time dashboard setup plus a token in the repo.
+If Web Analytics is enabled on the **igiari** Pages project, Cloudflare injects the beacon automatically at deploy time — no token in `site-config.js` required. Confirm data in Cloudflare → **Web Analytics** or Pages → **igiari** → **Analytics**.
 
-1. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Web Analytics** → **Add a site**.
-2. Enter `igiari.us` (primary) or `igiari.pages.dev`.
-3. Copy the **token** from the setup instructions.
-4. Paste it in `site-config.js`:
-   ```javascript
-   window.IGIARI_CF_ANALYTICS_TOKEN = 'your-token-here';
-   ```
-5. Deploy (push to GitHub; Cloudflare Pages redeploys automatically).
-6. Confirm events in Web Analytics within ~24 hours (can take a few minutes for first hit).
+**Option A — Manual beacon via `site-config.js`**
 
-**Option B — Cloudflare Pages dashboard analytics only**
+Only needed if you are not using Pages auto-inject (e.g. hosting elsewhere). Paste token in `site-config.js`; loaded by `analytics.js`.
 
-No code change. Go to Cloudflare → Workers & Pages → **igiari** → **Analytics**. Shows page views and bandwidth but not the same event detail as Web Analytics. Acceptable for Step 0 if you skip the beacon — check the box below and note "dashboard only" in the tracker.
-
-- [ ] Analytics method chosen: _______________
-- [ ] Token configured in `site-config.js` (if Option A)
-- [ ] First page view recorded
+- [x] Analytics method: Cloudflare Pages auto-inject + Web Analytics dashboard
+- [ ] Token in `site-config.js` (not required — Pages injects beacon)
+- [x] Page views recording in Cloudflare dashboard
 
 ---
 
@@ -90,7 +80,7 @@ Run from CI or local shell against production:
 | Frontend `https://igiari.us` returns HTTP 200 | ✅ Pass |
 | Backend health `GET /` returns `{"status":"ok"}` | ✅ Pass |
 | Live scan `POST /api/scan` returns findings JSON | ✅ Pass (Argumentum ad Populum on bandwagon test sentence) |
-| Analytics scripts on live site | ⏳ Pending deploy (wired in repo; token still empty in `site-config.js`) |
+| Analytics scripts on live site | ✅ Cloudflare Pages auto-inject (Web Analytics) |
 | Anthropic spend cap | ⏳ Manual — owner must set in Console |
 
 ---

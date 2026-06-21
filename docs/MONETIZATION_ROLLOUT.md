@@ -16,7 +16,7 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 
 | Task | Status |
 |---|---|
-| Analytics enabled (Cloudflare Web Analytics beacon or Pages dashboard) | ⏳ Beacon wired; paste token in `site-config.js` |
+| Analytics enabled | ✅ Cloudflare Pages auto-inject (Web Analytics in dashboard) |
 | Live deployment smoke test (`06_testing_and_launch_checklist.md`) | ⏳ See automated checks below |
 | Anthropic API spend cap / budget alert | ⏳ Manual — [Anthropic Console](https://console.anthropic.com/settings/limits) |
 | Privacy policy updated (accounts, analytics, subprocessors) | ✅ `legal/privacy.html`, `legal/terms.html` |
