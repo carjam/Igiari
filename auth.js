@@ -577,8 +577,15 @@ function updatePricingUI(account) {
         return;
     }
 
-    const showPricing = account.credit_balance <= 0 && account.payments_enabled;
+    const showPricing = Boolean(account.payments_enabled);
     section.classList.toggle('hidden', !showPricing);
+
+    const label = section.querySelector('.pricing-label');
+    if (label) {
+        label.textContent = account.credit_balance <= 0
+            ? 'Need more scans?'
+            : 'Buy more scans';
+    }
 
     if (balanceEl) {
         balanceEl.classList.toggle('no-credits', account.credit_balance <= 0);
