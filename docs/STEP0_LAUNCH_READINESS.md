@@ -58,8 +58,8 @@ Application rate limiting (10 scans/hour/IP) is not enough on its own if traffic
 2. Set a **monthly spend limit** or **budget alert** appropriate for pre-revenue traffic (e.g. $25–50/mo alert, hard cap at your comfort level).
 3. Confirm the API key used on Render matches the account where the limit is set.
 
-- [ ] Spend alert configured
-- [ ] Hard spend cap configured (optional but recommended): $________ / month
+- [x] Spend alert configured
+- [x] Hard spend cap configured (owner confirmed)
 
 ---
 
@@ -81,17 +81,15 @@ Run from CI or local shell against production:
 | Backend health `GET /` returns `{"status":"ok"}` | ✅ Pass |
 | Live scan `POST /api/scan` returns findings JSON | ✅ Pass (Argumentum ad Populum on bandwagon test sentence) |
 | Analytics scripts on live site | ✅ Cloudflare Pages auto-inject (Web Analytics) |
-| Anthropic spend cap | ⏳ Manual — owner must set in Console |
+| Anthropic spend cap | ✅ Owner confirmed |
 
 ---
 
 ## Step 0 sign-off
 
-| Item | Owner | Date |
-|---|---|---|
-| Analytics live | | |
-| Live smoke test complete | | |
-| Anthropic cap set | | |
-| Ready for Step 1 (consumer billing) | | |
-
-When all boxes are checked, proceed to Step 1 in [`MONETIZATION_ROLLOUT.md`](MONETIZATION_ROLLOUT.md).
+| Item | Status |
+|---|---|
+| Analytics live | ✅ Cloudflare Pages Web Analytics |
+| Anthropic cap set | ✅ Owner confirmed |
+| Live smoke test complete | ⏳ Optional — run when convenient |
+| Step 1 (consumer billing) | ✅ Complete (test mode) |

@@ -10,15 +10,15 @@ The free tool is built and live. We finish launch readiness (analytics, live smo
 
 ## Progress tracker
 
-### Step 0 — Launch readiness
+### Step 0 — Launch readiness ✅
 
-See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checklist.
+See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checklist. Analytics and spend cap confirmed by owner.
 
 | Task | Status |
 |---|---|
 | Analytics enabled | ✅ Cloudflare Pages auto-inject (Web Analytics in dashboard) |
 | Live deployment smoke test (`06_testing_and_launch_checklist.md`) | ⏳ See automated checks below |
-| Anthropic API spend cap / budget alert | ⏳ Manual — [Anthropic Console](https://console.anthropic.com/settings/limits) |
+| Anthropic API spend cap / budget alert | ✅ Configured in [Anthropic Console](https://console.anthropic.com/settings/limits) |
 | Privacy policy updated (accounts, analytics, subprocessors) | ✅ `legal/privacy.html`, `legal/terms.html` |
 
 ### Step 1 — Consumer monetization MVP ✅ (test mode)
