@@ -8,6 +8,8 @@ Billing schema for Step 1 monetization. Migrations live in `migrations/`.
 2. Paste the contents of `migrations/20250620200000_initial_billing_schema.sql`
 3. Click **Run**
 4. Confirm **Table Editor** shows `accounts` and `credit_transactions`
+5. If you disabled **Automatically expose new tables** at project creation, also run  
+   `migrations/20250620210000_grant_billing_api_access.sql` in SQL Editor (one-time)
 
 Re-run after editing a migration only if you roll back first (see `rollbacks/`).
 

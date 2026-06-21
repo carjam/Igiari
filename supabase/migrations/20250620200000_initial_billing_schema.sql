@@ -57,3 +57,8 @@ create policy "Users read own account"
   using (auth.uid() = id);
 
 -- credit_transactions: no client policies; backend uses service role key.
+
+-- Data API grants (required when "Automatically expose new tables" is off)
+grant select, insert, update, delete on public.accounts to service_role;
+grant select, insert on public.credit_transactions to service_role;
+grant select on public.accounts to authenticated;

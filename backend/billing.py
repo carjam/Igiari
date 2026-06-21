@@ -122,11 +122,21 @@ def get_account(user_id: str) -> Optional[Dict[str, Any]]:
     )
     if response.status_code != 200:
         print(f"get_account failed: {response.status_code} {response.text}")
+        message = "Could not load your account. Please try again."
+        try:
+            body = response.json()
+            if body.get("code") == "42501" or "permission denied" in (body.get("message") or "").lower():
+                message = (
+                    "Billing tables are not exposed to the Supabase API yet. "
+                    "Run grant_billing_api_access.sql in the Supabase SQL Editor."
+                )
+        except ValueError:
+            pass
         raise HTTPException(
             status_code=503,
             detail={
                 "code": "ACCOUNT_ERROR",
-                "message": "Could not load your account. Please try again.",
+                "message": message,
             },
         )
 
