@@ -12,16 +12,36 @@ TRIAL_CREDITS = 20
 REQUEST_TIMEOUT = 10
 
 
-def billing_enabled() -> bool:
-    return bool(os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
-
-
 def _supabase_url() -> str:
     return os.environ["SUPABASE_URL"].rstrip("/")
 
 
+def billing_enabled() -> bool:
+    return bool(
+        os.getenv("SUPABASE_URL")
+        and os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        and _publishable_key()
+    )
+
+
+def _publishable_key() -> str:
+    return (
+        os.getenv("SUPABASE_ANON_KEY")
+        or os.getenv("SUPABASE_PUBLISHABLE_KEY")
+        or ""
+    )
+
+
+def _secret_key() -> str:
+    return (
+        os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        or os.getenv("SUPABASE_SECRET_KEY")
+        or ""
+    )
+
+
 def _service_headers(*, prefer: str = "return=representation") -> Dict[str, str]:
-    key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+    key = _secret_key()
     return {
         "apikey": key,
         "Authorization": f"Bearer {key}",
@@ -40,11 +60,21 @@ def verify_access_token(token: str) -> Dict[str, Any]:
             },
         )
 
+    publishable = _publishable_key()
+    if not publishable:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "BILLING_UNAVAILABLE",
+                "message": "Server missing Supabase publishable key configuration.",
+            },
+        )
+
     try:
         response = requests.get(
             f"{_supabase_url()}/auth/v1/user",
             headers={
-                "apikey": os.environ["SUPABASE_SERVICE_ROLE_KEY"],
+                "apikey": publishable,
                 "Authorization": f"Bearer {token}",
             },
             timeout=REQUEST_TIMEOUT,

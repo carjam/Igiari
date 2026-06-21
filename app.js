@@ -3,6 +3,14 @@ const API_URL = 'https://igiari-backend.onrender.com/api/scan';
 const API_BASE = API_URL.replace(/\/api\/scan$/, '');
 window.API_BASE = API_BASE;
 const MAX_CHARS = 4000;
+const SCAN_TIMEOUT_MS = 120000;
+
+function fetchScan(url, options) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), SCAN_TIMEOUT_MS);
+    return fetch(url, { ...options, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+}
 
 // Example text from eval_002 (Straw Man fallacy) per spec
 const EXAMPLE_TEXT = `COUNCILMEMBER A: I think we should pilot a four-day work week for city staff, just for six months, to see the data.
@@ -94,11 +102,10 @@ async function handleScan() {
             headers.Authorization = `Bearer ${token}`;
         }
 
-        const response = await fetch(API_URL, {
+        const response = await fetchScan(API_URL, {
             method: 'POST',
             headers,
             body: JSON.stringify({ text }),
-            signal: AbortSignal.timeout(120000),
         });
         
         const data = await response.json();
@@ -122,7 +129,7 @@ async function handleScan() {
         
     } catch (error) {
         console.error('Scan error:', error);
-        if (error.name === 'TimeoutError') {
+        if (error.name === 'AbortError') {
             showError('Scan timed out. The server may be waking up — try again.');
         } else {
             showError(error.message || 'Unable to connect to the server. Please try again.');

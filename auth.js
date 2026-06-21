@@ -20,10 +20,20 @@ function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
         .finally(() => clearTimeout(timer));
 }
 
-function bindAuthControls() {
-    document.getElementById('signInButton')?.addEventListener('click', handleSignIn);
-    document.getElementById('signOutButton')?.addEventListener('click', handleSignOut);
-}
+document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+        return;
+    }
+    if (target.id === 'signInButton') {
+        event.preventDefault();
+        void handleSignIn();
+    }
+    if (target.id === 'signOutButton') {
+        event.preventDefault();
+        void handleSignOut();
+    }
+});
 
 async function restoreSessionFromUrl() {
     const queryParams = new URLSearchParams(window.location.search);
@@ -64,7 +74,6 @@ async function initAuth() {
     }
 
     section?.classList.remove('hidden');
-    bindAuthControls();
 
     if (!window.supabase) {
         if (statusEl) {
@@ -110,16 +119,22 @@ async function handleSignIn() {
     const email = emailInput?.value.trim();
 
     if (!email) {
-        statusEl.textContent = 'Enter your email address.';
+        if (statusEl) {
+            statusEl.textContent = 'Enter your email address.';
+        }
         return;
     }
 
     if (!supabaseClient) {
-        statusEl.textContent = 'Sign-in is not ready yet. Refresh and try again.';
+        if (statusEl) {
+            statusEl.textContent = 'Sign-in is not ready yet. Refresh and try again.';
+        }
         return;
     }
 
-    statusEl.textContent = 'Sending sign-in link…';
+    if (statusEl) {
+        statusEl.textContent = 'Sending sign-in link…';
+    }
 
     const { error } = await supabaseClient.auth.signInWithOtp({
         email,
@@ -129,25 +144,24 @@ async function handleSignIn() {
     });
 
     if (error) {
-        statusEl.textContent = error.message;
+        if (statusEl) {
+            statusEl.textContent = error.message;
+        }
         return;
     }
 
-    statusEl.textContent = 'Check your email for a sign-in link.';
+    if (statusEl) {
+        statusEl.textContent = 'Check your email for a sign-in link.';
+    }
 }
 
 async function handleSignOut() {
-    currentSession = null;
-    void updateAuthUI();
-
-    if (!supabaseClient) {
-        return;
-    }
-
-    try {
-        await supabaseClient.auth.signOut();
-    } catch (error) {
-        console.error('Sign out failed:', error);
+    if (supabaseClient) {
+        try {
+            await supabaseClient.auth.signOut();
+        } catch (error) {
+            console.error('Sign out failed:', error);
+        }
     }
 
     currentSession = null;
@@ -178,7 +192,7 @@ async function fetchAccount() {
             const detail = data.detail || {};
             const message = typeof detail === 'string'
                 ? detail
-                : (detail.message || 'Could not load your account.');
+                : (detail.message || `Server error (${response.status}).`);
             return { error: message };
         }
 
@@ -203,6 +217,9 @@ async function updateAuthUI() {
         if (balanceEl) {
             balanceEl.textContent = '';
         }
+        if (statusEl) {
+            statusEl.textContent = '';
+        }
         return;
     }
 
@@ -212,24 +229,23 @@ async function updateAuthUI() {
     if (balanceEl) {
         balanceEl.textContent = 'Loading scans…';
     }
+    if (statusEl) {
+        statusEl.textContent = '';
+    }
 
     const result = await fetchAccount();
     if (result.account && balanceEl) {
         balanceEl.textContent = `${result.account.credit_balance} scans left`;
-        if (statusEl) {
-            statusEl.textContent = '';
-        }
         return;
     }
 
     if (balanceEl) {
-        balanceEl.textContent = 'Balance unavailable';
-    }
-    if (statusEl && result.error) {
-        statusEl.textContent = result.error;
+        balanceEl.textContent = result.error || 'Balance unavailable';
     }
 }
 
 document.addEventListener('DOMContentLoaded', initAuth);
 window.getAccessToken = getAccessToken;
 window.updateAuthUI = updateAuthUI;
+window.handleSignIn = handleSignIn;
+window.handleSignOut = handleSignOut;
