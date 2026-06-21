@@ -1,30 +1,41 @@
 # Documentation Index
 
-This directory contains project documentation, testing reports, and deployment guides.
+Operations, deployment, and testing docs. **Build specs** live in [`specs/`](../specs/README.md).
 
-## 📚 Documentation Files
+## Deployment & Operations
 
-### Deployment & Operations
-- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Comprehensive guide for managing live deployment (Render + Cloudflare)
-- **[AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md)** - Recreate Supabase auth, Resend SMTP, domain, and Magic Link email template
-- **[DEPLOY_CLOUDFLARE.md](DEPLOY_CLOUDFLARE.md)** - Quick reference for Cloudflare Pages deployment
+| Doc | Purpose |
+|-----|---------|
+| [INTEGRATIONS.md](INTEGRATIONS.md) | Supabase, Resend, Render, Cloudflare — dashboards, URLs, env vars |
+| [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Live deployment management (Render + Cloudflare) |
+| [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) | Rebuild auth, Resend SMTP, domain, Magic Link template |
+| [DEPLOY_CLOUDFLARE.md](DEPLOY_CLOUDFLARE.md) | Cloudflare Pages quick reference |
+| [../backend/DEPLOY_RENDER.md](../backend/DEPLOY_RENDER.md) | Render backend env vars |
 
-### Testing & Quality
-- **[TEST_REPORT.md](TEST_REPORT.md)** - Comprehensive testing results and validation
-- **[AUTONOMOUS_TESTING_SUMMARY.md](AUTONOMOUS_TESTING_SUMMARY.md)** - Summary of autonomous testing process
-- **[LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md)** - Pre-launch verification checklist
-- **[STEP0_LAUNCH_READINESS.md](STEP0_LAUNCH_READINESS.md)** - Step 0: analytics, live smoke test, spend cap
+## Monetization
 
-### Monetization
-- **[MONETIZATION_ROLLOUT.md](MONETIZATION_ROLLOUT.md)** - Phased plan tracker (consumer → legal → developer API)
+| Doc | Purpose |
+|-----|---------|
+| [MONETIZATION_ROLLOUT.md](MONETIZATION_ROLLOUT.md) | Step 0–3 tracker (human-readable) |
+| [STEP0_LAUNCH_READINESS.md](STEP0_LAUNCH_READINESS.md) | Analytics, live smoke test, spend cap |
+| [../specs/10_monetization.md](../specs/10_monetization.md) | End-state billing architecture |
+| [../specs/11_monetization_rollout_plan.md](../specs/11_monetization_rollout_plan.md) | Phased execution plan |
 
-### Project Decisions
-- **[DECISIONS.md](DECISIONS.md)** - Key decisions and deviations from original spec
+## Testing & Quality
 
-## 📋 Specifications
+| Doc | Purpose |
+|-----|---------|
+| [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) | Launch verification tracker |
+| [TEST_REPORT.md](TEST_REPORT.md) | Phase 0–3 test report *(historical; paths refer to pre-deploy layout)* |
+| [AUTONOMOUS_TESTING_SUMMARY.md](AUTONOMOUS_TESTING_SUMMARY.md) | Autonomous testing process summary |
+| [../specs/06_testing_and_launch_checklist.md](../specs/06_testing_and_launch_checklist.md) | Canonical launch checklist |
 
-For detailed project specifications, see the [`specs/`](../specs/) directory.
+## Project Decisions
 
-## 🔙 Back to Project
+| Doc | Purpose |
+|-----|---------|
+| [DECISIONS.md](DECISIONS.md) | Deviations from spec defaults |
 
-See the main [README.md](../README.md) for project overview and quick start.
+## Back to project
+
+[README.md](../README.md) · [specs/README.md](../specs/README.md)

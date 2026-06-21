@@ -19,14 +19,14 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Analytics enabled (Cloudflare Web Analytics beacon or Pages dashboard) | ⏳ Beacon wired; paste token in `site-config.js` |
 | Live deployment smoke test (`06_testing_and_launch_checklist.md`) | ⏳ See automated checks below |
 | Anthropic API spend cap / budget alert | ⏳ Manual — [Anthropic Console](https://console.anthropic.com/settings/limits) |
-| Privacy policy updated for analytics (if beacon added) | ✅ Updated in `legal/privacy.html` |
+| Privacy policy updated (accounts, analytics, subprocessors) | ✅ `legal/privacy.html`, `legal/terms.html` |
 
 ### Step 1 — Consumer monetization MVP
 
 | Task | Status |
 |---|---|
 | Postgres + credit ledger | ✅ Migrations in `supabase/migrations/` |
-| Auth (magic link + OTP code) + 20 trial credits | ✅ See `docs/AUTH_AND_EMAIL_RECOVERY.md` |
+| Auth (magic link + OTP code) + 20 trial credits | ✅ [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) · [INTEGRATIONS.md](INTEGRATIONS.md) |
 | Sign-in required to scan (no anonymous path in prod) | ✅ |
 | Custom domain + Resend SMTP | ✅ `igiari.us` |
 | Stripe Checkout + webhooks (test mode) | ⬜ |

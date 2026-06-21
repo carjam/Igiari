@@ -11,9 +11,9 @@ Paste an argument, email, article, or transcript and see logical fallacies highl
 - **Frontend:** https://igiari.us (Cloudflare Pages; also https://igiari.pages.dev/)
 - **Backend API:** https://igiari-backend.onrender.com (Render)
 
-✅ **Status:** Phases 0–4 complete and deployed. **Step 1 auth + credits live** — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md). Auth/email rebuild guide: [AUTH_AND_EMAIL_RECOVERY.md](docs/AUTH_AND_EMAIL_RECOVERY.md).
+✅ **Status:** Phases 0–4 complete and deployed. **Step 1 auth + credits live** — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md).
 
-📖 **Managing the deployment?** See [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for dashboard URLs, how to update, logs, troubleshooting, and more.
+📖 **Docs:** [INTEGRATIONS.md](docs/INTEGRATIONS.md) (Supabase, Resend, Render, Cloudflare) · [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) · [AUTH_AND_EMAIL_RECOVERY.md](docs/AUTH_AND_EMAIL_RECOVERY.md)
 
 ## Quick Start
 
@@ -70,9 +70,23 @@ Built as a demand-testing MVP first; now moving to a paid launch experiment. See
 | **Phase 3** | ✅ Complete | Frontend: Vanilla HTML/CSS/JS, copyeditor aesthetic |
 | **Phase 4** | ✅ Complete | Deployment: Backend (Render) + Frontend (Cloudflare Pages) |
 | **Phase 5** | ⏳ In progress | Soft launch + analytics + signal collection — [Step 0 checklist](docs/STEP0_LAUNCH_READINESS.md) |
-| **Monetization** | ⏳ Step 0 → 1 | Phased rollout — [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md) |
+| **Monetization** | ⏳ Step 1 partial | Auth + credits live; Stripe next — [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md) |
 
-## Document index
+## Project structure
+
+```
+igiari/
+├── index.html, app.js, auth.js, styles.css   # static site (repo root)
+├── site-config.js                            # Supabase + analytics config
+├── legal/                                    # privacy, terms
+├── backend/                                  # FastAPI + billing
+├── supabase/                                 # migrations, email templates
+├── specs/                                    # build specifications
+├── docs/                                     # deployment & runbooks
+└── source-materials/                         # original taxonomy + eval
+```
+
+See [specs/README.md](specs/README.md) and [docs/README.md](docs/README.md) for full indexes.
 
 | File | Purpose |
 |---|---|
@@ -89,7 +103,9 @@ Built as a demand-testing MVP first; now moving to a paid launch experiment. See
 | `specs/10_monetization.md` | Full monetization architecture and Stripe/pricing design |
 | `specs/11_monetization_rollout_plan.md` | **Phased execution plan — current work** |
 | `docs/MONETIZATION_ROLLOUT.md` | Human-readable rollout tracker |
+| `docs/INTEGRATIONS.md` | Supabase, Resend, Render, Cloudflare dashboards |
 | `docs/STEP0_LAUNCH_READINESS.md` | Step 0 checklist (analytics, live tests, spend cap) |
+| `specs/README.md` | Spec folder index |
 
 ## Prerequisite materials
 

@@ -14,7 +14,7 @@ Part of the monetization rollout — finish this before starting billing enginee
 Privacy-preserving, no cookies, fits the product voice. Requires a one-time dashboard setup plus a token in the repo.
 
 1. Log in to [Cloudflare Dashboard](https://dash.cloudflare.com/) → **Web Analytics** → **Add a site**.
-2. Enter `igiari.pages.dev` (or your custom domain if configured).
+2. Enter `igiari.us` (primary) or `igiari.pages.dev`.
 3. Copy the **token** from the setup instructions.
 4. Paste it in `site-config.js`:
    ```javascript
@@ -35,7 +35,7 @@ No code change. Go to Cloudflare → Workers & Pages → **igiari** → **Analyt
 
 ## 2. Live deployment smoke test
 
-Run every item against **https://igiari.pages.dev/** in an incognito window, not localhost.
+Run every item against **https://igiari.us** in an incognito window, not localhost. Sign in with email to scan (production requires an account).
 
 ### Functional
 
@@ -87,7 +87,7 @@ Run from CI or local shell against production:
 
 | Check | Result |
 |---|---|
-| Frontend `https://igiari.pages.dev/` returns HTTP 200 | ✅ Pass |
+| Frontend `https://igiari.us` returns HTTP 200 | ✅ Pass |
 | Backend health `GET /` returns `{"status":"ok"}` | ✅ Pass |
 | Live scan `POST /api/scan` returns findings JSON | ✅ Pass (Argumentum ad Populum on bandwagon test sentence) |
 | Analytics scripts on live site | ⏳ Pending deploy (wired in repo; token still empty in `site-config.js`) |

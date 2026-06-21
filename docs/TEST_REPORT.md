@@ -1,4 +1,7 @@
 # Igiari Test Report
+
+> **Historical (June 19, 2026).** Captures Phase 0–3 validation before deployment. Frontend paths cited as `frontend/` — files now live at **repo root**. Production is live at https://igiari.us.
+
 **Date:** June 19, 2026  
 **Phase:** 0-3 Complete, Phase 4 Pending  
 **Status:** ✅ All critical requirements met, ready for deployment

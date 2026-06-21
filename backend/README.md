@@ -15,12 +15,10 @@ FastAPI server for detecting logical fallacies using Claude Haiku 4.5.
    pip install -r requirements.txt
    ```
 
-3. **Configure API key**:
+3. **Configure environment**:
    - Copy `.env.example` to `.env`
-   - Add your Anthropic API key:
-     ```
-     ANTHROPIC_API_KEY=your_actual_api_key_here
-     ```
+   - Add `ANTHROPIC_API_KEY` (required for scans)
+   - For billing locally, add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY` — see [docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md)
    - **Never commit the `.env` file** (already in `.gitignore`)
 
 ## Running Locally
@@ -84,6 +82,7 @@ No need to touch Python code - just edit the template file and restart the serve
 
 - **Model**: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
 - **Input limit**: 4,000 characters
-- **Rate limiting**: In-memory token bucket (resets on server restart)
+- **Rate limiting**: In-memory token bucket (legacy; production scans require auth + credits)
+- **Billing**: Supabase Postgres via REST — see `billing.py`, [DEPLOY_RENDER.md](DEPLOY_RENDER.md)
 - **Taxonomy**: 136 fallacies loaded at startup from `fallacy_reference/fallacies.json`
 - **Prompt**: Loaded from `prompt_template.txt` at runtime

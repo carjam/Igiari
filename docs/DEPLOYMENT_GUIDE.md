@@ -10,19 +10,20 @@ Quick reference for managing your live Igiari deployment.
 - **Backend Health Check:** https://igiari-backend.onrender.com/ (returns `{"status":"ok","service":"fallacy-scanner-api"}`)
 - **API Endpoint:** https://igiari-backend.onrender.com/api/scan
 
-Auth, email, and domain recovery: **[AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md)**
+Auth, email, and domain recovery: **[AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md)**  
+All integrations (Supabase, Resend, Render, Cloudflare): **[INTEGRATIONS.md](INTEGRATIONS.md)**
 
 ## 🎛️ Dashboard Access
 
-### Render (Backend)
-- **Dashboard:** https://dashboard.render.com/
-- **Service Name:** `igiari-backend`
-- **Direct URL:** Look for "igiari-backend" in your services list
+| Service | Dashboard | Notes |
+|---------|-----------|--------|
+| **Render** | https://dashboard.render.com/ | Service: `igiari-backend` |
+| **Cloudflare Pages** | https://dash.cloudflare.com/ → Workers & Pages → **igiari** | Custom domain: `igiari.us` |
+| **Supabase** | https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw | DB, auth, SMTP, email templates |
+| **Resend** | https://resend.com/domains | Domain `igiari.us`; API key → Supabase SMTP |
+| **Anthropic** | https://console.anthropic.com/settings/keys | `ANTHROPIC_API_KEY` on Render |
 
-### Cloudflare Pages (Frontend)
-- **Dashboard:** https://dash.cloudflare.com/
-- Navigate to: Account Home → Workers & Pages → Pages
-- **Project Name:** `igiari`
+Details per service: **[INTEGRATIONS.md](INTEGRATIONS.md)**
 
 ## 📁 Configuration Files
 
@@ -94,17 +95,22 @@ Auth, email, and domain recovery: **[AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_
 ### Backend (Render)
 
 **Required:**
-- `ANTHROPIC_API_KEY` - Your Anthropic API key
+- `ANTHROPIC_API_KEY` — https://console.anthropic.com/settings/keys
+- `SUPABASE_URL` — `https://yvkrihgjcoyqytwoisgw.supabase.co`
+- `SUPABASE_SERVICE_ROLE_KEY` — Supabase → Settings → API → Secret key
+- `SUPABASE_ANON_KEY` — Supabase → Settings → API → Publishable key
 
-**How to update:**
-1. Go to Render dashboard → Your service → "Environment"
-2. Update the value
-3. Click "Save Changes"
-4. Render will automatically redeploy
+Without the three Supabase vars, sign-in works but balance/scans fail. See [INTEGRATIONS.md](INTEGRATIONS.md#render-backend-api).
+
+**How to update:** Render → **igiari-backend** → Environment → Save Changes (auto-redeploy).
 
 ### Frontend (Cloudflare Pages)
 
-No environment variables needed - API URL is hardcoded in `app.js`
+No Cloudflare env vars. Supabase publishable key in `site-config.js`; API URL in `app.js` / `auth.js` → Render.
+
+### Supabase / Resend
+
+Configured in Supabase dashboard (not Render). See [INTEGRATIONS.md](INTEGRATIONS.md#supabase-database--auth) and [INTEGRATIONS.md](INTEGRATIONS.md#resend-email-sending).
 
 ## 📊 Monitoring & Logs
 

@@ -1,41 +1,60 @@
 # Supabase — database & auth
 
-Billing schema and auth/email recovery instructions for Step 1 monetization.
+Postgres, magic-link auth, and credit ledger for Step 1 monetization.
+
+| | |
+|---|---|
+| **Project dashboard** | https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw |
+| **Project URL** | https://yvkrihgjcoyqytwoisgw.supabase.co |
+| **SQL Editor** | […/sql](https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/sql) |
+| **API keys** | […/settings/api-keys](https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/settings/api-keys) |
+| **Auth / SMTP / templates** | […/auth](https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/auth/providers) |
+
+All integrations (Render env, Resend, URLs): **[docs/INTEGRATIONS.md](../docs/INTEGRATIONS.md)** · Full rebuild: **[docs/AUTH_AND_EMAIL_RECOVERY.md](../docs/AUTH_AND_EMAIL_RECOVERY.md)**
+
+---
 
 ## Migrations
 
-Migrations live in `migrations/`.
+Files in `migrations/`. Apply in **SQL Editor** (no CLI required):
 
-### Apply (no CLI required)
+1. `20250620200000_initial_billing_schema.sql` — tables + RLS  
+2. `20250620210000_grant_billing_api_access.sql` — Data API grants (required if “Automatically expose new tables” was off)
 
-1. Supabase dashboard → **SQL Editor** → **New query**
-2. Paste and run `migrations/20250620200000_initial_billing_schema.sql`
-3. Paste and run `migrations/20250620210000_grant_billing_api_access.sql` if **Automatically expose new tables** was off at project creation
-4. Confirm **Table Editor** shows `accounts` and `credit_transactions`
+Confirm **Table Editor** shows `accounts` and `credit_transactions`.
 
-Re-run after editing a migration only if you roll back first (see `rollbacks/`).
+**Rollback:** `rollbacks/20250620200000_initial_billing_schema.down.sql` (destroys billing data).
 
-### Optional CLI
+**New project settings:** Data API On · auto-expose new tables Off · automatic RLS On.
 
-`supabase link --project-ref YOUR_REF` then `supabase db push`
+---
 
-## Auth, email, SMTP, domain
+## Auth & email
 
-**Full rebuild runbook:** [`docs/AUTH_AND_EMAIL_RECOVERY.md`](../docs/AUTH_AND_EMAIL_RECOVERY.md)
+| Setting | Value |
+|---------|--------|
+| Site URL | `https://igiari.us` |
+| Redirect URLs | `https://igiari.us/**` |
+| SMTP | Resend → `smtp.resend.com:587`, sender `noreply@igiari.us` |
+| Magic Link template | [`email-templates/magic-link.html`](email-templates/magic-link.html) |
 
-**Magic Link template (copy-paste):** [`email-templates/magic-link.html`](email-templates/magic-link.html)
+---
 
-## Frontend & backend config
+## App configuration
 
 **Frontend** (`site-config.js`):
 
 ```javascript
-window.IGIARI_SUPABASE_URL = 'https://YOUR_REFERENCE_ID.supabase.co';
-window.IGIARI_SUPABASE_ANON_KEY = 'your-publishable-key';
+window.IGIARI_SUPABASE_URL = 'https://yvkrihgjcoyqytwoisgw.supabase.co';
+window.IGIARI_SUPABASE_ANON_KEY = 'sb_publishable_...'; // publishable key only
 ```
 
-**Backend (Render):** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY` — see recovery doc.
+**Backend** (Render → `igiari-backend` → Environment):
 
-## Rollback
+| Variable | Key type |
+|----------|----------|
+| `SUPABASE_URL` | Project URL (above) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Secret key — server only |
+| `SUPABASE_ANON_KEY` | Publishable key — JWT verification |
 
-Run `rollbacks/20250620200000_initial_billing_schema.down.sql` in SQL Editor (destroys billing data).
+See `backend/.env.example` for local dev.

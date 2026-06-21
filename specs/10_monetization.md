@@ -4,9 +4,13 @@ This is the single, current spec for adding payment to the live Igiari! fallacy 
 
 **How to build it:** Do **not** implement everything here at once. Follow the phased rollout in `11_monetization_rollout_plan.md` — consumer billing MVP first, legal landing second, developer API third. Step 0 (launch readiness) must complete before Step 1.
 
-## What exists today
+## What exists today (June 2026)
 
-A live, free, anonymous web tool at the deployed Pages URL. Paste text, get fallacies highlighted, no account needed. Backend calls Claude Haiku 4.5 with the full fallacy taxonomy as context. IP-based rate limiting and basic caching are already in place. **Do not rebuild any of this — extend it.**
+Live fallacy scanner at **https://igiari.us** (Cloudflare Pages) with backend on Render. Claude Haiku 4.5, IP rate limiting, response caching.
+
+**Step 1 shipped:** Supabase auth (magic link + OTP), credit ledger, sign-in required to scan in production (anonymous path disabled when billing env is set). **Not yet shipped:** Stripe Checkout, paid packs, account purchase UI.
+
+**Do not rebuild the scan pipeline — extend it.**
 
 ## What we're building now
 

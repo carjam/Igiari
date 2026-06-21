@@ -12,9 +12,12 @@ If you are an agent picking this up cold: read `10_monetization.md` for the end-
 
 | Layer | Status |
 |---|---|
-| Core scan product | ✅ Live at https://igiari.pages.dev/ |
+| Core scan product | ✅ Live at https://igiari.us |
 | Backend (`/api/scan`) | ✅ Rate limiting, caching, Haiku 4.5 |
-| Accounts / billing | ❌ Not built |
+| Auth + credit ledger | ✅ Supabase; 20 trial credits on signup |
+| Sign-in to scan (prod) | ✅ No anonymous path when billing env set |
+| Custom domain + email | ✅ `igiari.us`, Resend SMTP via Supabase |
+| Stripe Checkout + purchase UI | ❌ Step 1 remainder |
 | Analytics | ⏳ Step 0 (in progress) |
 
 Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + signal collection) overlaps with Step 0 below and should be finished before or in parallel with monetization engineering — not skipped entirely.
@@ -61,7 +64,7 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 |---|---|---|
 | 1 | Postgres + ledger tables | Supabase free tier recommended (DB + auth in one) |
 | 2 | Magic-link auth + `account_type: "consumer"` | 20 trial credits on signup, no card |
-| 3 | Credit-gated `/api/scan` | Debit after success only; cache hits free; anonymous path unchanged (consider tightening to 3–5 scans before signup prompt) |
+| 3 | Credit-gated `/api/scan` | Debit after success only; cache hits free; **prod requires sign-in** (anonymous path disabled) |
 | 4 | Stripe Checkout (test mode) | Start with **one pack + one subscription** (e.g. Starter $8 / Casual $9/mo) |
 | 5 | Minimal account UI | Balance, buy credits, Stripe Billing Portal link |
 
@@ -70,9 +73,9 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 **Optional shortcut for first dollars:** Stripe Payment Link + manual credit grant while webhook idempotency is still in test — not spec-pure, acceptable for validating willingness to pay with ≤5 early customers.
 
 **Acceptance criteria:**
-- [ ] New user signs up → receives 20 trial credits.
-- [ ] Successful scan debits 1 credit; failed scan and cache hit do not.
-- [ ] Anonymous visitor path still works within IP rate limit.
+- [x] New user signs up → receives 20 trial credits.
+- [x] Successful scan debits 1 credit; failed scan and cache hit do not.
+- [x] Sign-in required to scan in production (no anonymous bypass).
 - [ ] Test-mode Checkout grants credits via webhook; duplicate webhook does not double-grant.
 - [ ] User with 0 credits sees pricing inline, not a failed scan.
 

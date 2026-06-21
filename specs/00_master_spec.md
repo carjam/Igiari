@@ -19,22 +19,27 @@ A web page where someone pastes in text (an email, an article, an ad, a transcri
 - Not multi-language (English only for v1)
 - Not a fine-tuned or custom model — this calls the Anthropic API with the fallacy-detection skill's taxonomy as context, nothing more exotic
 
-## Repo / file structure this spec assumes
+## Repo / file structure (actual layout)
+
+The MVP spec originally assumed a `frontend/` subdirectory. **Production static files live at the repository root** (Cloudflare Pages deploys `/`). The empty `frontend/` folder only holds a pointer README.
 
 ```
-fallacy-scanner/
-├── frontend/              # static site, paste box + results UI
-│   ├── index.html
-│   ├── styles.css
-│   ├── app.js
-│   └── assets/
-├── backend/                # thin API server, the ONLY thing holding the API key
-│   ├── server.py  (or server.js — see 03_architecture.md for the decision)
-│   ├── fallacy_reference/  # copy of the taxonomy from the existing skill
-│   │   ├── fallacies.json
-│   │   └── fallacy_taxonomy.md
-│   ├── requirements.txt   (or package.json)
+igiari/
+├── index.html, app.js, auth.js, styles.css, analytics.js
+├── site-config.js          # Supabase publishable key, analytics token (committed)
+├── legal/                  # privacy, terms, copyright
+├── backend/                # FastAPI — holds API key + billing
+│   ├── server.py, billing.py
+│   ├── fallacy_reference/
+│   ├── requirements.txt, Procfile, runtime.txt
 │   └── .env.example
+├── supabase/               # SQL migrations, email templates
+│   ├── migrations/
+│   └── email-templates/
+├── specs/                  # build + monetization specifications
+├── docs/                   # deployment, integrations, runbooks
+├── source-materials/       # original taxonomy + eval set (read-only reference)
+├── render.yaml             # Render service definition
 └── README.md
 ```
 

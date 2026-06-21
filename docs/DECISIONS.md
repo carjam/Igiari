@@ -26,4 +26,26 @@ Append-only. Each entry: what default was changed, why, and which spec section i
 - Optional: Max size (e.g., 1000 entries) with LRU eviction
 - Optional: TTL (e.g., 24 hours)
 
-**Status:** TODO - implement after Phase 2 passes, before Phase 4 deployment.
+**Status:** ✅ Implemented in `backend/server.py` (in-memory SHA-256 cache).
+
+## 2026-06-20: Static files at repo root
+
+**Deviation from:** `specs/00_master_spec.md` (assumed `frontend/` subdirectory)
+
+**Decision:** Deploy static site from repository root for Cloudflare Pages (no build step).
+
+**Reason:** Simpler Pages config; `frontend/` retained as pointer README only.
+
+## 2026-06-20: Sign-in required in production
+
+**Deviation from:** `specs/10_monetization.md` (anonymous taste path unchanged)
+
+**Decision:** When Supabase billing env vars are set on Render, `/api/scan` requires a valid Bearer token; anonymous IP-only scans disabled.
+
+**Reason:** Anonymous free scans undermined signup conversion for Step 1 monetization experiment.
+
+## 2026-06-20: Supabase REST from backend
+
+**Decision:** Use `requests` against Supabase REST with service role key (`backend/billing.py`), not `supabase-py`.
+
+**Reason:** `supabase-py` hung on Render during initial deploy.

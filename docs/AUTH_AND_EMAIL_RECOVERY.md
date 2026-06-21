@@ -1,28 +1,34 @@
 # Auth & Email — Recovery Runbook
 
-Use this document to recreate sign-in, email delivery, and the custom domain if Supabase, Resend, Cloudflare, or Render are reset or rebuilt. Secrets live in each provider’s dashboard — **do not commit API keys or SMTP passwords to git**.
+Use this document to recreate sign-in, email delivery, and the custom domain if anything is reset or rebuilt.
 
-**Production URLs (June 2026):**
+**Integration quick reference (all dashboards + URLs):** [INTEGRATIONS.md](INTEGRATIONS.md)  
+**Secrets:** store only in provider dashboards — never commit to git.
+
+**Production (June 2026):**
 
 | Service | URL |
 |---------|-----|
 | Site (primary) | https://igiari.us |
 | Site (Pages default) | https://igiari.pages.dev |
 | Backend API | https://igiari-backend.onrender.com |
-| Supabase project | https://yvkrihgjcoyqytwoisgw.supabase.co |
+| Supabase | https://yvkrihgjcoyqytwoisgw.supabase.co |
+| Supabase dashboard | https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw |
+| Resend | https://resend.com/domains |
+| Render service | https://dashboard.render.com/ → **igiari-backend** |
+| Cloudflare Pages | https://dash.cloudflare.com/ → Workers & Pages → **igiari** |
 
 ---
 
-## 1. Supabase project (database + auth)
+## 1. Supabase (database + auth)
 
-### 1.1 Create project
+**Dashboard:** https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw
 
-1. [supabase.com/dashboard](https://supabase.com/dashboard) → New project
-2. Recommended settings at creation:
-   - **Enable Data API:** On
-   - **Automatically expose new tables:** Off (grant manually — see migrations)
-   - **Enable automatic RLS:** On
-3. Note **Project URL** and keys under **Project Settings → API Keys** (publishable + secret)
+### 1.1 Create project (if starting fresh)
+
+1. https://supabase.com/dashboard → New project
+2. Settings: **Data API** On · **Automatically expose new tables** Off · **Automatic RLS** On
+3. Copy keys from https://supabase.com/dashboard/project/_/settings/api-keys (publishable + secret)
 
 ### 1.2 Database schema
 
@@ -35,11 +41,11 @@ Confirm **Table Editor** shows `accounts` and `credit_transactions`.
 
 ### 1.3 Auth provider
 
-**Authentication → Providers → Email:** enabled (magic link / OTP).
+https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/auth/providers → **Email** enabled.
 
 ### 1.4 URL configuration
 
-**Authentication → URL Configuration:**
+https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/auth/url-configuration
 
 | Setting | Value |
 |---------|--------|
@@ -49,7 +55,7 @@ Confirm **Table Editor** shows `accounts` and `credit_transactions`.
 
 ### 1.5 Custom SMTP (Resend)
 
-**Authentication → SMTP Settings** → Enable custom SMTP:
+https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/auth/smtp → Enable custom SMTP:
 
 | Field | Value |
 |-------|--------|
@@ -58,19 +64,19 @@ Confirm **Table Editor** shows `accounts` and `credit_transactions`.
 | Host | `smtp.resend.com` |
 | Port | `587` |
 | Username | `resend` |
-| Password | Resend API key (`re_...`) from [resend.com/api-keys](https://resend.com/api-keys) |
+| Password | Resend API key from https://resend.com/api-keys |
 
-After SMTP is enabled, raise **Authentication → Rate Limits → Email sent** if needed (default ~30/hour with custom SMTP).
+Rate limits: https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/auth/rate-limits (raise **Email sent** after SMTP is on).
 
 ### 1.6 Magic Link email template
 
-**Do not use `{{ .ConfirmationURL }}` alone** on this static site. It uses Supabase PKCE redirects that break on Cloudflare Pages, and mail clients may prefetch the link and burn the one-time token.
-
-**Authentication → Email Templates → Magic Link** — paste the full body from:
+https://supabase.com/dashboard/project/yvkrihgjcoyqytwoisgw/auth/templates → **Magic Link**
 
 `supabase/email-templates/magic-link.html`
 
-Contents (keep in sync with that file):
+**Do not use `{{ .ConfirmationURL }}` alone** — breaks on static Pages; mail clients may prefetch and burn the token.
+
+Paste from:
 
 ```html
 <h2>Sign in to Igiari</h2>
@@ -89,10 +95,17 @@ Contents (keep in sync with that file):
 
 ## 2. Resend (transactional email)
 
-### 2.1 Account & API key
+| | |
+|---|---|
+| Dashboard | https://resend.com/home |
+| Domains | https://resend.com/domains |
+| API keys | https://resend.com/api-keys |
 
-1. [resend.com](https://resend.com) → sign up
-2. **API Keys** → Create → **Sending access** → copy `re_...` (used as Supabase SMTP password)
+Resend sends mail **through Supabase SMTP** (not from app code).
+
+### 2.1 API key
+
+Create key (**Sending access**) → use as Supabase SMTP **Password**.
 
 ### 2.2 Domain
 
@@ -104,13 +117,19 @@ Free tier limits apply (~100 emails/day); sufficient for early launch.
 
 ---
 
-## 3. Custom domain (igiari.us)
+## 3. Cloudflare (site + domain igiari.us)
 
-### 3.1 Register
+| | |
+|---|---|
+| Dashboard | https://dash.cloudflare.com/ |
+| Pages | Workers & Pages → **igiari** |
+| DNS zone | Websites → **igiari.us** |
 
-Registered via **Cloudflare Registrar** (5-year term). Zone DNS is managed in the same Cloudflare account.
+### 3.1 Domain
 
-### 3.2 Cloudflare Pages
+Registered via Cloudflare Registrar; DNS in same account.
+
+### 3.2 Pages custom domain
 
 **Workers & Pages → igiari → Custom domains:**
 
@@ -133,22 +152,27 @@ window.IGIARI_SUPABASE_ANON_KEY = 'sb_publishable_...'; // Project Settings → 
 
 ---
 
-## 4. Render backend
+## 4. Render (backend API)
 
-Service: **igiari-backend** — [dashboard.render.com](https://dashboard.render.com/)
+| | |
+|---|---|
+| Dashboard | https://dashboard.render.com/ |
+| Service | **igiari-backend** |
+| Live URL | https://igiari-backend.onrender.com |
+| Repo config | `render.yaml`, `backend/` |
 
-### 4.1 Required environment variables
+Environment tab — required variables:
 
 | Variable | Value |
 |----------|--------|
-| `ANTHROPIC_API_KEY` | From Anthropic Console |
+| `ANTHROPIC_API_KEY` | https://console.anthropic.com/settings/keys |
 | `SUPABASE_URL` | `https://yvkrihgjcoyqytwoisgw.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase secret key (`sb_secret_...`) |
-| `SUPABASE_ANON_KEY` | Supabase publishable key (`sb_publishable_...`) — used to verify user JWTs |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase secret key |
+| `SUPABASE_ANON_KEY` | Supabase publishable key |
 
-Billing/account endpoints fail without all three Supabase vars.
+Billing fails without all three Supabase vars. See also [INTEGRATIONS.md](INTEGRATIONS.md#render-backend-api).
 
-### 4.2 Auth behavior (code)
+### 4.1 Auth behavior (code)
 
 - **Signed-in scans:** require Bearer token; debit credits after successful scan
 - **Anonymous scans:** disabled when billing env is configured
@@ -191,6 +215,7 @@ After rebuild, test in order:
 | `site-config.js` | Supabase URL + publishable key |
 | `specs/10_monetization.md` | Credits, pricing, data model |
 | `specs/11_monetization_rollout_plan.md` | Step 1–3 rollout order |
+| `docs/INTEGRATIONS.md` | All services — dashboards, env vars, URLs |
 
 ---
 

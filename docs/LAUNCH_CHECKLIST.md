@@ -1,4 +1,7 @@
 # Igiari Launch Checklist Tracker
+
+> **Note:** Static files are at the **repo root** (`index.html`, `app.js`, …), not `frontend/`. Some line references below are from the original build layout.
+
 **Based on:** `specs/06_testing_and_launch_checklist.md`  
 **Step 0 rollout:** [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md)  
 **Last Updated:** 2026-06-20

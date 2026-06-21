@@ -1,5 +1,7 @@
 # 03 — Architecture
 
+> **Historical MVP decisions.** Phases 0–4 followed this document. Step 1 monetization added Postgres (Supabase), auth, and credit gating — see `10_monetization.md` and `11_monetization_rollout_plan.md`. Sections below remain valid for scan pipeline, model choice, and cost controls.
+
 This document makes concrete decisions rather than presenting options, so a building agent doesn't stall on choices. If you have a strong reason to deviate, document the reason in `08_future_ideas.md` or a `DECISIONS.md` you create, but default to what's written here.
 
 ## Stack decision
@@ -10,6 +12,8 @@ This document makes concrete decisions rather than presenting options, so a buil
   - Frontend: any static host (Cloudflare Pages, Netlify, GitHub Pages, or Vercel static). Pick whichever the deploying agent/human already has an account for. No strong preference.
   - Backend: a small always-on or serverless host that supports Python — Render, Fly.io, or a single small VM. Needs to support environment variables (for the API key) and outbound HTTPS to api.anthropic.com.
 - **No database for v1.** Rate limiting can be done in-memory or via a simple file/Redis if available — see "Rate limiting" below. Do not stand up Postgres/etc for this phase; there is no user data model yet.
+
+  **Update (Step 1, June 2026):** Supabase Postgres now holds `accounts` and `credit_transactions`. See `supabase/migrations/` and `10_monetization.md`.
 
 ## Why the API key MUST live server-side, never client-side
 
