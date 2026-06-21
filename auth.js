@@ -1,9 +1,14 @@
 // Magic-link sign-in via Supabase. Requires site-config.js values.
-const API_BASE = window.API_BASE || 'https://igiari-backend.onrender.com';
 const FETCH_TIMEOUT_MS = 15000;
+
+function apiBase() {
+    return window.API_BASE || 'https://igiari-backend.onrender.com';
+}
 
 let supabaseClient = null;
 let currentSession = null;
+let ignoreAuthEvents = false;
+let authUiRequestId = 0;
 
 function authConfigured() {
     return Boolean(window.IGIARI_SUPABASE_URL && window.IGIARI_SUPABASE_ANON_KEY);
@@ -20,20 +25,16 @@ function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
         .finally(() => clearTimeout(timer));
 }
 
-document.addEventListener('click', (event) => {
-    const target = event.target;
-    if (!(target instanceof Element)) {
-        return;
-    }
-    if (target.id === 'signInButton') {
+function bindAuthButtons() {
+    document.getElementById('signInButton')?.addEventListener('click', (event) => {
         event.preventDefault();
         void handleSignIn();
-    }
-    if (target.id === 'signOutButton') {
+    });
+    document.getElementById('signOutButton')?.addEventListener('click', (event) => {
         event.preventDefault();
         void handleSignOut();
-    }
-});
+    });
+}
 
 async function restoreSessionFromUrl() {
     const queryParams = new URLSearchParams(window.location.search);
@@ -74,6 +75,7 @@ async function initAuth() {
     }
 
     section?.classList.remove('hidden');
+    bindAuthButtons();
 
     if (!window.supabase) {
         if (statusEl) {
@@ -108,6 +110,9 @@ async function initAuth() {
     void updateAuthUI();
 
     supabaseClient.auth.onAuthStateChange((_event, session) => {
+        if (ignoreAuthEvents) {
+            return;
+        }
         currentSession = session;
         void updateAuthUI();
     });
@@ -156,6 +161,10 @@ async function handleSignIn() {
 }
 
 async function handleSignOut() {
+    ignoreAuthEvents = true;
+    currentSession = null;
+    void updateAuthUI();
+
     if (supabaseClient) {
         try {
             await supabaseClient.auth.signOut();
@@ -164,7 +173,7 @@ async function handleSignOut() {
         }
     }
 
-    currentSession = null;
+    ignoreAuthEvents = false;
     void updateAuthUI();
 }
 
@@ -175,7 +184,7 @@ async function fetchAccount() {
     }
 
     try {
-        const response = await fetchWithTimeout(`${API_BASE}/api/account/me`, {
+        const response = await fetchWithTimeout(`${apiBase()}/api/account/me`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -233,7 +242,11 @@ async function updateAuthUI() {
         statusEl.textContent = '';
     }
 
+    const requestId = ++authUiRequestId;
     const result = await fetchAccount();
+    if (requestId !== authUiRequestId || !currentSession) {
+        return;
+    }
     if (result.account && balanceEl) {
         balanceEl.textContent = `${result.account.credit_balance} scans left`;
         return;

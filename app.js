@@ -44,6 +44,7 @@ function init() {
     resetButton.addEventListener('click', handleReset);
     
     updateCharCount();
+    updateScanButton();
 }
 
 // Handle text input
