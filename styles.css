@@ -579,6 +579,15 @@ main.legal-page {
     flex-wrap: wrap;
 }
 
+.auth-otp-row {
+    margin-top: 8px;
+}
+
+.auth-otp-input {
+    flex: 0 1 180px;
+    letter-spacing: 0.08em;
+}
+
 .auth-input {
     flex: 1 1 200px;
     min-width: 0;

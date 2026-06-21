@@ -27,6 +27,18 @@
                     />
                     <button type="button" id="signInButton" class="btn btn-secondary">Send sign-in link</button>
                 </div>
+                <div class="auth-row auth-otp-row">
+                    <input
+                        type="text"
+                        id="authOtp"
+                        class="auth-input auth-otp-input"
+                        placeholder="6-digit code from email"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        maxlength="8"
+                    />
+                    <button type="button" id="verifyOtpButton" class="btn btn-secondary">Verify code</button>
+                </div>
                 <p class="auth-status" id="authStatus"></p>
             </div>
             <div id="authSignedIn" class="auth-panel hidden">

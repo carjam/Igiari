@@ -45,7 +45,11 @@ Supabase dashboard → **Authentication** → **URL Configuration**:
 
 Sign-in uses the same magic link for new and returning accounts. After the first sign-in, the browser keeps the session in localStorage — a normal reload should not ask for email again.
 
-If Supabase shows **email rate limit exceeded**, wait about an hour or open a recent sign-in link already in your inbox (links expire after ~1 hour by default). For production traffic, configure custom SMTP in Supabase to raise email limits.
+If Supabase shows **email rate limit exceeded**, use the **6-digit code** from your latest sign-in email (shown on the site below the email field). That works even when you cannot request another link.
+
+Magic links use PKCE: the link works most reliably when opened in the **same browser profile** where you clicked “Send sign-in link”. If the link fails, use the 6-digit code instead.
+
+Redirect URLs must include `https://igiari.pages.dev` and `https://igiari.pages.dev/**`.
 
 ## Rollback
 

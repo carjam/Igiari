@@ -53,9 +53,71 @@ function refreshScanControls() {
 function formatAuthError(error) {
     const message = error?.message || 'Sign-in failed. Please try again.';
     if (/rate limit/i.test(message)) {
-        return 'Too many sign-in emails sent. Wait about an hour, or open a recent sign-in link from your inbox.';
+        return 'Too many sign-in emails sent. Use the 6-digit code from your latest email instead (below).';
+    }
+    if (/code verifier|pkce|invalid flow state|both auth code and code verifier/i.test(message)) {
+        return 'That link could not be verified in this browser. Enter the 6-digit code from the same email below instead.';
     }
     return message;
+}
+
+function clearAuthCallbackFromUrl() {
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+async function completeAuthFromUrl(statusEl) {
+    const url = new URL(window.location.href);
+    const authError = url.searchParams.get('error_description') || url.searchParams.get('error');
+    if (authError) {
+        const message = decodeURIComponent(authError.replace(/\+/g, ' '));
+        if (statusEl) {
+            statusEl.textContent = message;
+        }
+        clearAuthCallbackFromUrl();
+        return false;
+    }
+
+    const code = url.searchParams.get('code');
+    if (code) {
+        if (statusEl) {
+            statusEl.textContent = 'Completing sign-in…';
+        }
+        const { data, error } = await supabaseClient.auth.exchangeCodeForSession(code);
+        clearAuthCallbackFromUrl();
+        if (error) {
+            if (statusEl) {
+                statusEl.textContent = formatAuthError(error);
+            }
+            return false;
+        }
+        if (data.session) {
+            applySession(data.session);
+            return true;
+        }
+    }
+
+    const hashParams = new URLSearchParams(url.hash.replace(/^#/, '?'));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    if (accessToken && refreshToken) {
+        const { data, error } = await supabaseClient.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        });
+        clearAuthCallbackFromUrl();
+        if (error) {
+            if (statusEl) {
+                statusEl.textContent = formatAuthError(error);
+            }
+            return false;
+        }
+        if (data.session) {
+            applySession(data.session);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
@@ -78,6 +140,16 @@ function bindAuthButtons() {
         if (event.key === 'Enter') {
             event.preventDefault();
             void handleSignIn();
+        }
+    });
+    document.getElementById('verifyOtpButton')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        void handleVerifyOtp();
+    });
+    document.getElementById('authOtp')?.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            void handleVerifyOtp();
         }
     });
 }
@@ -115,7 +187,7 @@ async function initAuth() {
         {
             auth: {
                 autoRefreshToken: true,
-                detectSessionInUrl: true,
+                detectSessionInUrl: false,
                 persistSession: true,
                 flowType: 'pkce',
                 storage: window.localStorage,
@@ -130,14 +202,21 @@ async function initAuth() {
         applySession(session);
     });
 
-    const { data, error: sessionError } = await supabaseClient.auth.getSession();
-    if (sessionError) {
-        console.error('Session restore failed:', sessionError);
+    try {
+        await completeAuthFromUrl(statusEl);
+    } catch (error) {
+        console.error('Sign-in redirect failed:', error);
+        if (statusEl) {
+            statusEl.textContent = formatAuthError(error);
+        }
     }
-    if (data.session) {
-        applySession(data.session);
-    } else {
-        applySession(null);
+
+    if (!currentSession) {
+        const { data, error: sessionError } = await supabaseClient.auth.getSession();
+        if (sessionError) {
+            console.error('Session restore failed:', sessionError);
+        }
+        applySession(data.session ?? null);
     }
 
     prefillEmail();
@@ -169,7 +248,7 @@ async function handleSignIn() {
     const { error } = await supabaseClient.auth.signInWithOtp({
         email,
         options: {
-            emailRedirectTo: window.location.origin + window.location.pathname,
+            emailRedirectTo: window.location.origin,
         },
     });
 
@@ -183,8 +262,61 @@ async function handleSignIn() {
     }
 
     if (statusEl) {
-        statusEl.textContent = 'Check your email for a sign-in link. Returning users: open the link on this device to stay signed in.';
+        statusEl.textContent = 'Check your email. Click the link or enter the 6-digit code below.';
     }
+}
+
+async function handleVerifyOtp() {
+    const emailInput = document.getElementById('authEmail');
+    const otpInput = document.getElementById('authOtp');
+    const statusEl = document.getElementById('authStatus');
+    const email = emailInput?.value.trim();
+    const token = otpInput?.value.trim().replace(/\s/g, '');
+
+    if (!email) {
+        if (statusEl) {
+            statusEl.textContent = 'Enter your email address.';
+        }
+        return;
+    }
+
+    if (!token) {
+        if (statusEl) {
+            statusEl.textContent = 'Enter the 6-digit code from your email.';
+        }
+        return;
+    }
+
+    if (!supabaseClient) {
+        if (statusEl) {
+            statusEl.textContent = 'Sign-in is not ready yet. Refresh and try again.';
+        }
+        return;
+    }
+
+    rememberEmail(email);
+
+    if (statusEl) {
+        statusEl.textContent = 'Verifying code…';
+    }
+
+    const { data, error } = await supabaseClient.auth.verifyOtp({
+        email,
+        token,
+        type: 'email',
+    });
+
+    if (error) {
+        if (statusEl) {
+            statusEl.textContent = formatAuthError(error);
+        }
+        return;
+    }
+
+    if (otpInput) {
+        otpInput.value = '';
+    }
+    applySession(data.session);
 }
 
 async function handleSignOut() {
@@ -252,9 +384,6 @@ async function updateAuthUI() {
         signedIn?.classList.add('hidden');
         if (balanceEl) {
             balanceEl.textContent = '';
-        }
-        if (statusEl) {
-            statusEl.textContent = '';
         }
         refreshScanControls();
         return;
