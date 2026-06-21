@@ -14,7 +14,7 @@ If you are an agent picking this up cold: read `10_monetization.md` for the end-
 |---|---|
 | Core scan product | ✅ Live at https://igiari.us |
 | Backend (`/api/scan`) | ✅ Rate limiting, caching, Haiku 4.5 |
-| Auth + credit ledger | ✅ Supabase; 20 trial credits on signup |
+| Auth + credit ledger | ✅ Supabase; 5 trial credits on signup |
 | Sign-in to scan (prod) | ✅ No anonymous path when billing env set |
 | Custom domain + email | ✅ `igiari.us`, Resend SMTP via Supabase |
 | Stripe Checkout + purchase UI | ✅ Test mode — [STRIPE_SETUP.md](../docs/STRIPE_SETUP.md) |
@@ -63,7 +63,7 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 | # | Work item | Notes |
 |---|---|---|
 | 1 | Postgres + ledger tables | Supabase free tier recommended (DB + auth in one) |
-| 2 | Magic-link auth + `account_type: "consumer"` | 20 trial credits on signup, no card |
+| 2 | Magic-link auth + `account_type: "consumer"` | 5 trial credits on signup, no card |
 | 3 | Credit-gated `/api/scan` | Debit after success only; cache hits free; **prod requires sign-in** (anonymous path disabled) |
 | 4 | Stripe Checkout (test mode) | Start with **one pack + one subscription** (e.g. Starter $8 / Casual $9/mo) |
 | 5 | Minimal account UI | Balance, buy credits, Stripe Billing Portal link |
@@ -73,7 +73,7 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 **Optional shortcut for first dollars:** Stripe Payment Link + manual credit grant while webhook idempotency is still in test — not spec-pure, acceptable for validating willingness to pay with ≤5 early customers.
 
 **Acceptance criteria:**
-- [x] New user signs up → receives 20 trial credits.
+- [x] New user signs up → receives 5 trial credits.
 - [x] Successful scan debits 1 credit; failed scan and cache hit do not.
 - [x] Sign-in required to scan in production (no anonymous bypass).
 - [x] Test-mode Checkout grants credits via webhook.

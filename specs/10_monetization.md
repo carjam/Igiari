@@ -116,7 +116,7 @@ Hosting cost is fixed per month, not per scan — its per-scan share shrinks as 
 
 ### Free trial (all surfaces)
 
-**20 free scans on signup, no card required.** Real cost exposure: $0.20/signup; ~$200 worst case at 1,000 zero-converting signups — small, and already bounded by the existing Anthropic Console spend cap.
+**5 free scans on signup, no card required.** Real cost exposure: ~$0.05/signup; ~$50 worst case at 1,000 zero-converting signups — small, and already bounded by the existing Anthropic Console spend cap.
 
 ### Consumer pricing (debate coaches, law students, writers — web UI)
 
@@ -166,9 +166,9 @@ Independent of credit balance — e.g. 60 scans/hour even for paid accounts — 
 
 ## 5. UX notes
 
-**Consumer flow**: anonymous visitors keep their small no-account taste of the tool (unchanged). Hitting that limit prompts account creation → 20 free trial credits granted automatically on signup. Hitting 0 credits shows pricing inline (pack + subscription side by side, no forced default) instead of attempting a failed scan. Minimal account dashboard: balance, subscription status, link to Stripe's Billing Portal. Keep existing product voice — plain, dry, no countdown timers or fake urgency badges; this audience will trust the tool more for restraint here, not less.
+**Consumer flow**: anonymous visitors keep their small no-account taste of the tool (unchanged). Hitting that limit prompts account creation → 5 free trial credits granted automatically on signup. Hitting 0 credits shows pricing inline (pack + subscription side by side, no forced default) instead of attempting a failed scan. Minimal account dashboard: balance, subscription status, link to Stripe's Billing Portal. Keep existing product voice — plain, dry, no countdown timers or fake urgency badges; this audience will trust the tool more for restraint here, not less.
 
-**Developer flow**: distinct `/developers` page with a real copy-pasteable request/response example and pricing in API terms (not consumer subscription language). Sign up → key generated and shown once → 20 free trial credits, no card required. A single static `/docs` page covering auth, the request/response shape, every error code, and rate limits is sufficient — no interactive API explorer needed yet.
+**Developer flow**: distinct `/developers` page with a real copy-pasteable request/response example and pricing in API terms (not consumer subscription language). Sign up → key generated and shown once → 5 free trial credits, no card required. A single static `/docs` page covering auth, the request/response shape, every error code, and rate limits is sufficient — no interactive API explorer needed yet.
 
 **Legal flow**: distinct `/legal` page, reusing the existing scan UI and credit system — not a forked product. Lead copy: "check whether the argument actually holds up," not "AI-powered legal assistant" (that phrasing reads as indistinguishable from the drafting/case-management tools this audience already has, and actively hurts differentiation) and not "logical fallacy detector" as the primary hook (correct but reads as academic jargon to a practicing attorney — use "fallacy" as supporting detail once they're already engaged, not as the headline). Default "try an example" on this page should be a realistic PI demand-letter excerpt with a weak causation claim (anonymized/synthetic, never a real client's text), not the debate/political example used on the consumer page. State plainly what the tool doesn't do (no case law database, no citation validation, not a substitute for attorney judgment) — this audience is primed by bar-association guidance to distrust AI overclaiming, and explicit limits read as more credible, not less.
 

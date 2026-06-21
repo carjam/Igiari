@@ -26,7 +26,7 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Task | Status |
 |---|---|
 | Postgres + credit ledger | ✅ Migrations in `supabase/migrations/` |
-| Auth (magic link + OTP code) + 20 trial credits | ✅ [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) · [INTEGRATIONS.md](INTEGRATIONS.md) |
+| Auth (magic link + OTP code) + 5 trial credits | ✅ [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) · [INTEGRATIONS.md](INTEGRATIONS.md) |
 | Sign-in required to scan (no anonymous path in prod) | ✅ |
 | Custom domain + Resend SMTP | ✅ `igiari.us` |
 | Stripe Checkout + webhooks (test mode) | ✅ Idempotency verified (replay → balance unchanged) |

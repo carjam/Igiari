@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 import requests
 from fastapi import HTTPException
 
-TRIAL_CREDITS = 20
+TRIAL_CREDITS = 5
 REQUEST_TIMEOUT = 10
 INSUFFICIENT_CREDIT_MESSAGE = (
     "You have no scans left. Choose a plan below to continue."

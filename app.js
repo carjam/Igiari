@@ -74,7 +74,7 @@ function updateScanButton() {
 }
 
 function promptSignIn() {
-    showError('Sign in with your email to scan. New accounts get 20 free scans.');
+    showError('Sign in with your email to scan. New accounts get 5 free scans.');
     document.getElementById('authSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     document.getElementById('authEmail')?.focus();
 }

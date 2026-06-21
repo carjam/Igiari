@@ -62,7 +62,7 @@ All of the above sit at roughly 92–95% gross margin over true cost (API + Stri
 
 ### Free trial
 
-Same mechanism as the rest of the product: **20 free scans, no card required.** For this audience specifically, frame the trial copy around a real use case on the landing page itself ("run your last demand letter through it, free") rather than a generic "try it" button — concreteness matters more to this buyer than to the consumer/debate audience.
+Same mechanism as the rest of the product: **5 free scans, no card required.** For this audience specifically, frame the trial copy around a real use case on the landing page itself ("run your last demand letter through it, free") rather than a generic "try it" button — concreteness matters more to this buyer than to the consumer/debate audience.
 
 ### Why not a flat per-seat subscription like the enterprise platforms
 

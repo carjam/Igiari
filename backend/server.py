@@ -427,7 +427,7 @@ async def scan_text(
             status_code=401,
             detail={
                 "code": "NOT_SIGNED_IN",
-                "message": "Sign in to scan. New accounts get 20 free scans.",
+                "message": "Sign in to scan. New accounts get 5 free scans.",
             },
         )
     else:
