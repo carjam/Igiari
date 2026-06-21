@@ -275,8 +275,8 @@ async def scan_text(
 ):
     """
     Main endpoint: analyze text for logical fallacies.
-    Anonymous visitors: IP rate limit (unchanged).
-    Signed-in users: credit balance required; debit after successful scan only.
+    When billing is enabled: sign-in and credits required (no anonymous scans).
+    When billing is disabled: anonymous IP rate limit (local dev only).
     """
     token = extract_bearer_token(authorization)
     account = None
@@ -292,6 +292,14 @@ async def scan_text(
             detail={
                 "code": "BILLING_UNAVAILABLE",
                 "message": "Sign-in is not available on this server yet.",
+            },
+        )
+    elif billing_enabled():
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "NOT_SIGNED_IN",
+                "message": "Sign in to scan. New accounts get 20 free scans.",
             },
         )
     else:

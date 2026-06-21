@@ -14,8 +14,22 @@ function authConfigured() {
     return Boolean(window.IGIARI_SUPABASE_URL && window.IGIARI_SUPABASE_ANON_KEY);
 }
 
+function signInRequired() {
+    return authConfigured();
+}
+
 function getAccessToken() {
     return currentSession?.access_token || null;
+}
+
+function isSignedIn() {
+    return Boolean(currentSession);
+}
+
+function refreshScanControls() {
+    if (window.updateScanButton) {
+        window.updateScanButton();
+    }
 }
 
 function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
@@ -229,6 +243,7 @@ async function updateAuthUI() {
         if (statusEl) {
             statusEl.textContent = '';
         }
+        refreshScanControls();
         return;
     }
 
@@ -249,16 +264,20 @@ async function updateAuthUI() {
     }
     if (result.account && balanceEl) {
         balanceEl.textContent = `${result.account.credit_balance} scans left`;
+        refreshScanControls();
         return;
     }
 
     if (balanceEl) {
         balanceEl.textContent = result.error || 'Balance unavailable';
     }
+    refreshScanControls();
 }
 
 document.addEventListener('DOMContentLoaded', initAuth);
 window.getAccessToken = getAccessToken;
+window.signInRequired = signInRequired;
+window.isSignedIn = isSignedIn;
 window.updateAuthUI = updateAuthUI;
 window.handleSignIn = handleSignIn;
 window.handleSignOut = handleSignOut;

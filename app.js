@@ -65,11 +65,25 @@ function updateCharCount() {
 function updateScanButton() {
     const isEmpty = textInput.value.trim().length === 0;
     const isTooLong = textInput.value.length > MAX_CHARS;
-    scanButton.disabled = isEmpty || isTooLong;
+    const needsSignIn = window.signInRequired?.() && !window.isSignedIn?.();
+    scanButton.disabled = isEmpty || isTooLong || needsSignIn;
+    if (tryExampleButton) {
+        tryExampleButton.disabled = Boolean(needsSignIn);
+    }
+}
+
+function promptSignIn() {
+    showError('Sign in with your email to scan. New accounts get 20 free scans.');
+    document.getElementById('authSection')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('authEmail')?.focus();
 }
 
 // Handle "Try an Example" button
 function handleTryExample() {
+    if (window.signInRequired?.() && !window.isSignedIn?.()) {
+        promptSignIn();
+        return;
+    }
     textInput.value = EXAMPLE_TEXT;
     handleTextInput();
     textInput.focus();
@@ -77,6 +91,11 @@ function handleTryExample() {
 
 // Handle "Scan" button
 async function handleScan() {
+    if (window.signInRequired?.() && !window.isSignedIn?.()) {
+        promptSignIn();
+        return;
+    }
+
     const text = textInput.value.trim();
     
     if (!text) {
@@ -268,3 +287,4 @@ function escapeHtml(text) {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', init);
+window.updateScanButton = updateScanButton;
