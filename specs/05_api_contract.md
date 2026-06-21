@@ -35,7 +35,8 @@ Content-Type: application/json
       "category": "Informal",
       "subcategory": "Other Informal Fallacy",
       "confidence": "high",
-      "explanation": "One sentence explaining why this span matches the fallacy's pattern in context."
+      "explanation": "One sentence explaining why this span matches the fallacy's pattern in context.",
+      "what_would_strengthen_this": "One sentence naming what evidence, qualifier, or missing link would address the gap — not a rewritten version of the span."
     }
   ]
 }
@@ -51,6 +52,7 @@ Content-Type: application/json
 | `findings[].category` / `subcategory` | string | Pulled from `fallacies.json` for the matched fallacy name |
 | `findings[].confidence` | string | One of `"high"`, `"medium"`, `"low"` |
 | `findings[].explanation` | string | One to two sentences, plain language, specific to the quoted span — not a copy-pasted dictionary definition |
+| `findings[].what_would_strengthen_this` | string | One sentence diagnosing what's missing (fact, qualifier, causal link, source). Must not be replacement prose for the flagged span — may be empty if the model omits it |
 
 ## Error responses
 

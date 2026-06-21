@@ -71,6 +71,7 @@ class Finding(BaseModel):
     subcategory: str
     confidence: str
     explanation: str
+    what_would_strengthen_this: str = ""
 
 class ScanResponse(BaseModel):
     input_length: int
@@ -417,14 +418,6 @@ async def scan_text(
         account = load_account_from_token(token)
         require_credits(account)
         user_id = account["id"]
-    elif token and not billing_enabled():
-        raise HTTPException(
-            status_code=503,
-            detail={
-                "code": "BILLING_UNAVAILABLE",
-                "message": "Sign-in is not available on this server yet.",
-            },
-        )
     elif billing_enabled():
         raise HTTPException(
             status_code=401,
@@ -524,7 +517,8 @@ async def scan_text(
             category=finding.get("category", "Unknown"),
             subcategory=finding.get("subcategory", "Unknown"),
             confidence=finding.get("confidence", "medium"),
-            explanation=finding.get("explanation", "")
+            explanation=finding.get("explanation", ""),
+            what_would_strengthen_this=finding.get("what_would_strengthen_this", "").strip(),
         ))
     
     # Store in cache (Phase 3.5)

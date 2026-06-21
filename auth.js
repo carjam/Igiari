@@ -39,7 +39,14 @@ function authConfigured() {
     return Boolean(window.IGIARI_SUPABASE_URL && window.IGIARI_SUPABASE_ANON_KEY);
 }
 
+function isLocalDev() {
+    return Boolean(window.IGIARI_LOCAL_DEV);
+}
+
 function signInRequired() {
+    if (isLocalDev()) {
+        return false;
+    }
     return authConfigured();
 }
 
@@ -743,6 +750,17 @@ async function updateAuthUI() {
 
     signedOut?.classList.add('hidden');
     signedIn?.classList.remove('hidden');
+
+    if (isLocalDev()) {
+        if (balanceEl) {
+            balanceEl.textContent = 'Local dev — no billing';
+        }
+        if (statusEl) {
+            statusEl.textContent = '';
+        }
+        refreshScanControls();
+        return;
+    }
 
     if (balanceEl) {
         balanceEl.textContent = 'Loading scans…';

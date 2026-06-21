@@ -1,7 +1,8 @@
 // Configuration
-const API_URL = 'https://igiari-backend.onrender.com/api/scan';
-const API_BASE = API_URL.replace(/\/api\/scan$/, '');
+const PROD_API_BASE = 'https://igiari-backend.onrender.com';
+const API_BASE = window.API_BASE || PROD_API_BASE;
 window.API_BASE = API_BASE;
+const API_URL = `${API_BASE}/api/scan`;
 const MAX_CHARS = 4000;
 const SCAN_TIMEOUT_MS = 120000;
 
@@ -119,7 +120,7 @@ async function handleScan() {
             'Content-Type': 'application/json',
         };
         const token = window.getAccessToken ? window.getAccessToken() : null;
-        if (token) {
+        if (token && !window.IGIARI_LOCAL_DEV) {
             headers.Authorization = `Bearer ${token}`;
         }
 
@@ -229,6 +230,7 @@ function renderAnnotatedText() {
             <span class="tooltip">
                 <span class="tooltip-fallacy">${escapeHtml(finding.fallacy)}</span>
                 <span class="tooltip-explanation">${escapeHtml(finding.explanation)}</span>
+                ${renderStrengthenHtml(finding.what_would_strengthen_this, 'tooltip')}
                 <span class="tooltip-confidence">Confidence: ${escapeHtml(finding.confidence)}</span>
             </span>
         </span>`;
@@ -255,6 +257,7 @@ function renderFindingsList() {
             <div class="finding-category">${escapeHtml(finding.category)} › ${escapeHtml(finding.subcategory)}</div>
             <div class="finding-span">"${escapeHtml(finding.span)}"</div>
             <div class="finding-explanation">${escapeHtml(finding.explanation)}</div>
+            ${renderStrengthenHtml(finding.what_would_strengthen_this, 'card')}
         `;
         
         findingsList.appendChild(card);
@@ -288,6 +291,20 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+function renderStrengthenHtml(text, context) {
+    const value = (text || '').trim();
+    if (!value) {
+        return '';
+    }
+    if (context === 'tooltip') {
+        return `<span class="tooltip-strengthen">${escapeHtml(value)}</span>`;
+    }
+    return `
+        <div class="finding-strengthen-label">What would strengthen this</div>
+        <div class="finding-strengthen">${escapeHtml(value)}</div>
+    `;
 }
 
 // Initialize on page load

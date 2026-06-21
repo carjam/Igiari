@@ -31,6 +31,15 @@ Server runs on `http://localhost:8000`
 
 API endpoint: `POST /api/scan`
 
+### Full-stack UI (static site + backend)
+
+1. Add at least `ANTHROPIC_API_KEY` to `backend/.env` (Supabase/Stripe optional for local scans).
+2. Start the backend (above).
+3. From the repo root, serve the static frontend on any port (e.g. `python -m http.server 49200`).
+4. Open `http://127.0.0.1:49200/` — `site-config.js` points the UI at `http://127.0.0.1:8000` and skips sign-in/billing.
+
+If your browser still has a production Supabase session, local mode ignores it so scans use the anonymous rate limit (10/hour per IP) instead of returning 503.
+
 ## Testing
 
 ### Quick Manual Test
@@ -59,6 +68,16 @@ This will:
 - ✅ Precision and recall computed (no fixed threshold for MVP)
 - ✅ True-negative accuracy > 60% (don't hallucinate fallacies in clean text)
 - ✅ Results reviewed by human before proceeding to Phase 3
+
+### Unit tests
+
+```bash
+cd backend
+pip install -r requirements.txt
+python -m pytest tests/ -v
+```
+
+CI runs the same suite on every push to `master` / `main` (`.github/workflows/backend-tests.yml`).
 
 ## Rate Limiting
 

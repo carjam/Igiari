@@ -300,6 +300,21 @@ body {
     color: #E8E6E0;
 }
 
+.tooltip-strengthen {
+    display: block;
+    margin-top: 6px;
+    color: #D8D4C8;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.tooltip-strengthen::before {
+    content: 'Gap: ';
+    font-style: normal;
+    font-weight: 600;
+    color: #E8E6E0;
+}
+
 .tooltip-confidence {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -369,6 +384,25 @@ body {
     font-size: 14px;
     line-height: 1.5;
     color: var(--color-text);
+}
+
+.finding-strengthen-label {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-secondary);
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.finding-strengthen {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-text);
+    font-style: italic;
 }
 
 /* Footer */
