@@ -1,6 +1,6 @@
 """
 Stripe Checkout, Billing Portal, and webhook credit grants.
-Test mode first — set STRIPE_SECRET_KEY and price IDs from Stripe Dashboard.
+Supports consumer and legal product surfaces (spec 10_monetization.md).
 """
 import os
 from typing import Any, Dict, List, Optional
@@ -9,7 +9,6 @@ import stripe
 from fastapi import HTTPException
 
 from billing import (
-    REQUEST_TIMEOUT,
     get_account,
     get_account_by_stripe_customer,
     grant_credits,
@@ -17,8 +16,7 @@ from billing import (
     webhook_event_processed,
 )
 
-# Step 1 consumer tiers (spec 10_monetization.md)
-PRODUCTS: Dict[str, Dict[str, Any]] = {
+CONSUMER_PRODUCTS: Dict[str, Dict[str, Any]] = {
     "starter_pack": {
         "price_env": "STRIPE_PRICE_STARTER_PACK",
         "credits": 50,
@@ -36,6 +34,40 @@ PRODUCTS: Dict[str, Dict[str, Any]] = {
         "amount_display": "$9/mo",
     },
 }
+
+# Step 2 legal tier — enable by setting STRIPE_PRICE_LEGAL_* on Render (sandbox or live).
+LEGAL_PRODUCTS: Dict[str, Dict[str, Any]] = {
+    "legal_starter": {
+        "price_env": "STRIPE_PRICE_LEGAL_STARTER",
+        "credits": 25,
+        "mode": "payment",
+        "name": "Legal Starter",
+        "description": "25 scans, one-time",
+        "amount_display": "$29",
+    },
+    "legal_solo_sub": {
+        "price_env": "STRIPE_PRICE_LEGAL_SOLO_SUB",
+        "credits": 50,
+        "mode": "subscription",
+        "name": "Legal Solo",
+        "description": "50 scans per month",
+        "amount_display": "$39/mo",
+    },
+}
+
+SURFACES: Dict[str, Dict[str, Dict[str, Any]]] = {
+    "consumer": CONSUMER_PRODUCTS,
+    "legal": LEGAL_PRODUCTS,
+}
+
+VALID_SURFACES = frozenset(SURFACES.keys())
+
+
+def normalize_surface(surface: Optional[str]) -> str:
+    value = (surface or "consumer").strip().lower()
+    if value not in VALID_SURFACES:
+        return "consumer"
+    return value
 
 
 def stripe_enabled() -> bool:
@@ -59,8 +91,20 @@ def site_url() -> str:
     return os.getenv("SITE_URL", "https://igiari.us").rstrip("/")
 
 
-def _price_id(product_key: str) -> str:
-    product = PRODUCTS.get(product_key)
+def _catalog(surface: str) -> Dict[str, Dict[str, Any]]:
+    return SURFACES[normalize_surface(surface)]
+
+
+def _all_products() -> Dict[str, Dict[str, Any]]:
+    merged: Dict[str, Dict[str, Any]] = {}
+    for catalog in SURFACES.values():
+        merged.update(catalog)
+    return merged
+
+
+def _price_id(product_key: str, surface: str) -> str:
+    catalog = _catalog(surface)
+    product = catalog.get(product_key)
     if not product:
         raise HTTPException(
             status_code=400,
@@ -81,11 +125,12 @@ def _price_id(product_key: str) -> str:
     return price_id
 
 
-def list_public_products() -> List[Dict[str, Any]]:
+def _products_for_surface(surface: str) -> List[Dict[str, Any]]:
     if not stripe_enabled():
         return []
-    items = []
-    for key, product in PRODUCTS.items():
+    normalized = normalize_surface(surface)
+    items: List[Dict[str, Any]] = []
+    for key, product in _catalog(normalized).items():
         if os.getenv(product["price_env"], "").strip():
             items.append(
                 {
@@ -95,9 +140,29 @@ def list_public_products() -> List[Dict[str, Any]]:
                     "amount_display": product["amount_display"],
                     "credits": product["credits"],
                     "mode": product["mode"],
+                    "surface": normalized,
                 }
             )
     return items
+
+
+def list_public_products(surface: str = "consumer") -> Dict[str, Any]:
+    normalized = normalize_surface(surface)
+    products = _products_for_surface(normalized)
+    interim_consumer_pricing = False
+
+    if normalized == "legal" and not products:
+        products = _products_for_surface("consumer")
+        for item in products:
+            item["surface"] = "consumer"
+        interim_consumer_pricing = True
+
+    return {
+        "surface": normalized,
+        "products": products,
+        "interim_consumer_pricing": interim_consumer_pricing,
+        "legal_billing_ready": bool(_products_for_surface("legal")),
+    }
 
 
 def get_or_create_stripe_customer(account: Dict[str, Any]) -> str:
@@ -117,9 +182,18 @@ def get_or_create_stripe_customer(account: Dict[str, Any]) -> str:
 def create_checkout_session(
     account: Dict[str, Any],
     product_key: str,
+    surface: str = "consumer",
 ) -> str:
     _stripe()
-    product = PRODUCTS.get(product_key)
+    normalized = normalize_surface(surface)
+    catalog = _catalog(normalized)
+    product = catalog.get(product_key)
+
+    if not product and normalized == "legal":
+        catalog = _catalog("consumer")
+        product = catalog.get(product_key)
+        normalized = "consumer"
+
     if not product:
         raise HTTPException(
             status_code=400,
@@ -128,20 +202,29 @@ def create_checkout_session(
                 "message": "Unknown product.",
             },
         )
-    price_id = _price_id(product_key)
+
+    price_id = _price_id(product_key, normalized)
     customer_id = get_or_create_stripe_customer(account)
     base = site_url()
+
+    if normalized == "legal":
+        success_url = f"{base}/legal/?checkout=success"
+        cancel_url = f"{base}/legal/?checkout=cancel"
+    else:
+        success_url = f"{base}/?checkout=success"
+        cancel_url = f"{base}/?checkout=cancel"
 
     params: Dict[str, Any] = {
         "customer": customer_id,
         "mode": product["mode"],
         "line_items": [{"price": price_id, "quantity": 1}],
-        "success_url": f"{base}/?checkout=success",
-        "cancel_url": f"{base}/?checkout=cancel",
+        "success_url": success_url,
+        "cancel_url": cancel_url,
         "metadata": {
             "account_id": account["id"],
             "product_key": product_key,
             "credits": str(product["credits"]),
+            "surface": normalized,
         },
     }
 
@@ -151,6 +234,7 @@ def create_checkout_session(
                 "account_id": account["id"],
                 "product_key": product_key,
                 "credits": str(product["credits"]),
+                "surface": normalized,
             },
         }
 
@@ -166,7 +250,7 @@ def create_checkout_session(
     return session.url
 
 
-def create_portal_session(account: Dict[str, Any]) -> str:
+def create_portal_session(account: Dict[str, Any], surface: str = "consumer") -> str:
     _stripe()
     customer_id = account.get("stripe_customer_id")
     if not customer_id:
@@ -178,9 +262,13 @@ def create_portal_session(account: Dict[str, Any]) -> str:
             },
         )
 
+    return_url = site_url()
+    if normalize_surface(surface) == "legal":
+        return_url = f"{return_url}/legal/"
+
     session = stripe.billing_portal.Session.create(
         customer=customer_id,
-        return_url=site_url(),
+        return_url=return_url,
     )
     return session.url
 
@@ -188,11 +276,18 @@ def create_portal_session(account: Dict[str, Any]) -> str:
 def _credits_for_price(price_id: Optional[str]) -> int:
     if not price_id:
         return 0
-    for product in PRODUCTS.values():
+    for product in _all_products().values():
         env_price = os.getenv(product["price_env"], "").strip()
         if env_price == price_id:
             return int(product["credits"])
     return 0
+
+
+def _credits_for_product_key(product_key: Optional[str]) -> int:
+    if not product_key:
+        return 0
+    product = _all_products().get(product_key)
+    return int(product["credits"]) if product else 0
 
 
 def _handle_checkout_completed(session: Dict[str, Any], event_id: str) -> None:
@@ -207,6 +302,10 @@ def _handle_checkout_completed(session: Dict[str, Any], event_id: str) -> None:
     if customer_id:
         updates["stripe_customer_id"] = customer_id
 
+    surface = metadata.get("surface")
+    if surface == "legal":
+        updates["account_type"] = "legal"
+
     if session.get("mode") == "subscription":
         updates["subscription_status"] = "active"
         update_account_fields(account_id, updates)
@@ -214,9 +313,7 @@ def _handle_checkout_completed(session: Dict[str, Any], event_id: str) -> None:
 
     credits = int(metadata.get("credits") or 0)
     if credits <= 0:
-        product_key = metadata.get("product_key")
-        if product_key and product_key in PRODUCTS:
-            credits = int(PRODUCTS[product_key]["credits"])
+        credits = _credits_for_product_key(metadata.get("product_key"))
 
     if updates:
         update_account_fields(account_id, updates)
@@ -252,6 +349,9 @@ def _handle_invoice_paid(invoice: Dict[str, Any], event_id: str) -> None:
         except stripe.error.StripeError as exc:
             print(f"Could not load subscription {subscription_id}: {exc}")
 
+    if sub_metadata.get("surface") == "legal":
+        update_account_fields(account["id"], {"account_type": "legal"})
+
     if sub_metadata.get("credits"):
         credits = int(sub_metadata["credits"])
     else:
@@ -262,9 +362,7 @@ def _handle_invoice_paid(invoice: Dict[str, Any], event_id: str) -> None:
             credits = _credits_for_price(price_id)
 
     if credits <= 0:
-        product_key = sub_metadata.get("product_key")
-        if product_key and product_key in PRODUCTS:
-            credits = int(PRODUCTS[product_key]["credits"])
+        credits = _credits_for_product_key(sub_metadata.get("product_key"))
 
     if credits > 0:
         grant_credits(

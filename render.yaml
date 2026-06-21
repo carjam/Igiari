@@ -28,3 +28,7 @@ services:
         sync: false
       - key: STRIPE_PRICE_CASUAL_SUB
         sync: false
+      - key: STRIPE_PRICE_LEGAL_STARTER
+        sync: false
+      - key: STRIPE_PRICE_LEGAL_SOLO_SUB
+        sync: false

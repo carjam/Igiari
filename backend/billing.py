@@ -279,16 +279,26 @@ def grant_trial_credits(user_id: str) -> None:
         print(f"trial grant update failed: {updated.status_code} {updated.text}")
 
 
-def ensure_account(user_id: str, email: str) -> Dict[str, Any]:
+def ensure_account(
+    user_id: str,
+    email: str,
+    account_type_hint: Optional[str] = None,
+) -> Dict[str, Any]:
+    valid_types = frozenset(("consumer", "legal", "developer"))
     account = get_account(user_id)
     if account is None:
+        account_type = (
+            account_type_hint
+            if account_type_hint in valid_types
+            else "consumer"
+        )
         created = requests.post(
             f"{_supabase_url()}/rest/v1/accounts",
             headers=_service_headers(),
             json={
                 "id": user_id,
                 "email": email,
-                "account_type": "consumer",
+                "account_type": account_type,
             },
             timeout=REQUEST_TIMEOUT,
         )
@@ -302,6 +312,12 @@ def ensure_account(user_id: str, email: str) -> Dict[str, Any]:
                 },
             )
         grant_trial_credits(user_id)
+        account = get_account(user_id)
+    elif (
+        account_type_hint == "legal"
+        and account.get("account_type") == "consumer"
+    ):
+        update_account_fields(user_id, {"account_type": "legal"})
         account = get_account(user_id)
 
     if account and not account.get("free_trial_granted"):
@@ -320,9 +336,12 @@ def ensure_account(user_id: str, email: str) -> Dict[str, Any]:
     return account
 
 
-def load_account_from_token(token: str) -> Dict[str, Any]:
+def load_account_from_token(
+    token: str,
+    account_type_hint: Optional[str] = None,
+) -> Dict[str, Any]:
     user = verify_access_token(token)
-    return ensure_account(user["id"], user["email"])
+    return ensure_account(user["id"], user["email"], account_type_hint)
 
 
 def require_credits(account: Dict[str, Any]) -> None:

@@ -27,6 +27,7 @@ from stripe_billing import (
     create_portal_session,
     handle_webhook_payload,
     list_public_products,
+    normalize_surface,
     stripe_enabled,
 )
 
@@ -79,6 +80,7 @@ class ScanResponse(BaseModel):
 
 class CheckoutRequest(BaseModel):
     product_key: str = Field(..., min_length=1)
+    surface: str = Field(default="consumer")
 
 
 class CheckoutResponse(BaseModel):
@@ -266,8 +268,18 @@ def extract_bearer_token(authorization: Optional[str]) -> Optional[str]:
     return token or None
 
 
+def account_type_from_header(x_igiari_surface: Optional[str] = Header(default=None)) -> Optional[str]:
+    surface = normalize_surface(x_igiari_surface)
+    if surface == "legal":
+        return "legal"
+    return None
+
+
 @app.get("/api/account/me")
-async def get_account_me(authorization: Optional[str] = Header(default=None)):
+async def get_account_me(
+    authorization: Optional[str] = Header(default=None),
+    x_igiari_surface: Optional[str] = Header(default=None),
+):
     token = extract_bearer_token(authorization)
     if not token:
         raise HTTPException(
@@ -278,26 +290,37 @@ async def get_account_me(authorization: Optional[str] = Header(default=None)):
             },
         )
 
-    account = load_account_from_token(token)
+    account = load_account_from_token(
+        token,
+        account_type_hint=account_type_from_header(x_igiari_surface),
+    )
+    product_surface = (
+        "legal" if account.get("account_type") == "legal" else normalize_surface(x_igiari_surface)
+    )
+    billing_info = list_public_products(product_surface)
     return {
         "email": account["email"],
         "credit_balance": account["credit_balance"],
         "free_trial_granted": account["free_trial_granted"],
         "subscription_status": account["subscription_status"],
+        "account_type": account.get("account_type", "consumer"),
         "stripe_customer_id": account.get("stripe_customer_id"),
         "payments_enabled": stripe_enabled(),
+        "legal_billing_ready": billing_info.get("legal_billing_ready", False),
+        "interim_consumer_pricing": billing_info.get("interim_consumer_pricing", False),
     }
 
 
 @app.get("/api/billing/products")
-async def get_billing_products():
-    return {"products": list_public_products()}
+async def get_billing_products(surface: str = "consumer"):
+    return list_public_products(surface)
 
 
 @app.post("/api/billing/checkout", response_model=CheckoutResponse)
 async def post_billing_checkout(
     body: CheckoutRequest,
     authorization: Optional[str] = Header(default=None),
+    x_igiari_surface: Optional[str] = Header(default=None),
 ):
     if not stripe_enabled():
         raise HTTPException(
@@ -318,13 +341,24 @@ async def post_billing_checkout(
             },
         )
 
-    account = load_account_from_token(token)
-    url = create_checkout_session(account, body.product_key.strip())
+    surface = normalize_surface(body.surface or x_igiari_surface)
+    account = load_account_from_token(
+        token,
+        account_type_hint="legal" if surface == "legal" else None,
+    )
+    url = create_checkout_session(
+        account,
+        body.product_key.strip(),
+        surface=surface,
+    )
     return {"url": url}
 
 
 @app.post("/api/billing/portal", response_model=PortalResponse)
-async def post_billing_portal(authorization: Optional[str] = Header(default=None)):
+async def post_billing_portal(
+    authorization: Optional[str] = Header(default=None),
+    x_igiari_surface: Optional[str] = Header(default=None),
+):
     if not stripe_enabled():
         raise HTTPException(
             status_code=503,
@@ -344,8 +378,12 @@ async def post_billing_portal(authorization: Optional[str] = Header(default=None
             },
         )
 
-    account = load_account_from_token(token)
-    url = create_portal_session(account)
+    account = load_account_from_token(
+        token,
+        account_type_hint=account_type_from_header(x_igiari_surface),
+    )
+    surface = "legal" if account.get("account_type") == "legal" else normalize_surface(x_igiari_surface)
+    url = create_portal_session(account, surface=surface)
     return {"url": url}
 
 

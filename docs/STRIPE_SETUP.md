@@ -88,6 +88,6 @@ Redeploy after saving. Frontend reads products from `GET /api/billing/products` 
 
 ## 7. Go live
 
-Switch to [live mode](https://dashboard.stripe.com/apikeys) keys and live Price IDs; create a **live** webhook endpoint with the same event list. Update Render env vars. Re-test one purchase before promoting.
+Do **not** flip Render to live keys until you have completed the checklist in [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md) (create live products + webhook first, then Phase C env swap).
 
 See also [INTEGRATIONS.md](INTEGRATIONS.md).

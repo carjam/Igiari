@@ -31,14 +31,16 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Custom domain + Resend SMTP | ✅ `igiari.us` |
 | Stripe Checkout + webhooks (test mode) | ✅ Idempotency verified (replay → balance unchanged) |
 | Account UI (balance, buy, Billing Portal) | ✅ |
+| Live prep (dual catalog, legal surface tagging) | ✅ Code ready — see [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md) |
 
-**Next:** Step 2 — `/legal` landing + outreach, or Stripe live mode for real charges.
+**Next:** Create live Stripe products (Phase A in go-live doc), then flip Render when ready — or Step 2 outreach first in sandbox.
 
 ### Step 2 — First revenue channel ⏳
 
 | Task | Status |
 |---|---|
 | `/legal` landing page + PI example | ✅ [legal/index.html](../legal/index.html) |
+| Legal Stripe products (sandbox test optional) | ⬜ Set `STRIPE_PRICE_LEGAL_*` on Render |
 | Targeted outreach (PI / debate communities) | ⬜ |
 | First paying customer | ⬜ |
 
@@ -48,7 +50,7 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 |---|---|
 | Full pricing tiers from spec | ⬜ |
 | Developer API (`/v1/scan`, `/docs`) | ⬜ |
-| Stripe live mode | ⬜ |
+| Stripe live mode | ⬜ [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md) Phase C |
 
 ---
 
@@ -72,4 +74,4 @@ Early margins are thin at low scan volume — normal for the first weeks. Revisi
 
 ---
 
-**Last updated:** June 2026 (Step 1 complete in Stripe test mode)
+**Last updated:** June 2026 (live prep complete; still on Stripe test mode)

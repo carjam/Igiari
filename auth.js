@@ -2,6 +2,27 @@
 const FETCH_TIMEOUT_MS = 15000;
 const LAST_EMAIL_KEY = 'igiari_last_email';
 
+const SURFACE_KEY = 'igiari_surface';
+
+function captureSurfaceFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('surface') === 'legal') {
+        localStorage.setItem(SURFACE_KEY, 'legal');
+    }
+}
+
+function getSurface() {
+    return localStorage.getItem(SURFACE_KEY) || 'consumer';
+}
+
+function apiHeaders(extra = {}) {
+    const headers = { ...extra };
+    if (getSurface() === 'legal') {
+        headers['X-Igiari-Surface'] = 'legal';
+    }
+    return headers;
+}
+
 function apiBase() {
     return window.API_BASE || 'https://igiari-backend.onrender.com';
 }
@@ -11,6 +32,7 @@ let currentSession = null;
 let ignoreAuthEvents = false;
 let authUiRequestId = 0;
 let billingProducts = [];
+let billingInterimConsumerPricing = false;
 let lastAccount = null;
 
 function authConfigured() {
@@ -244,6 +266,8 @@ async function initAuth() {
     section?.classList.remove('hidden');
     bindAuthButtons();
 
+    captureSurfaceFromUrl();
+
     if (!window.supabase) {
         if (statusEl) {
             statusEl.textContent = 'Sign-in failed to load. Try disabling ad blockers and refresh.';
@@ -416,14 +440,21 @@ async function handleSignOut() {
 
 async function fetchBillingProducts() {
     try {
-        const response = await fetchWithTimeout(`${apiBase()}/api/billing/products`);
+        const surface = getSurface();
+        const response = await fetchWithTimeout(
+            `${apiBase()}/api/billing/products?surface=${encodeURIComponent(surface)}`,
+            { headers: apiHeaders() },
+        );
         if (!response.ok) {
-            return [];
+            return { products: [], interim_consumer_pricing: false };
         }
         const data = await response.json();
-        return data.products || [];
+        return {
+            products: data.products || [],
+            interim_consumer_pricing: Boolean(data.interim_consumer_pricing),
+        };
     } catch (_error) {
-        return [];
+        return { products: [], interim_consumer_pricing: false };
     }
 }
 
@@ -444,11 +475,14 @@ async function startCheckout(productKey) {
     try {
         const response = await fetchWithTimeout(`${apiBase()}/api/billing/checkout`, {
             method: 'POST',
-            headers: {
+            headers: apiHeaders({
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ product_key: productKey }),
+            }),
+            body: JSON.stringify({
+                product_key: productKey,
+                surface: getSurface(),
+            }),
         });
 
         let data = {};
@@ -495,9 +529,9 @@ async function handleBillingPortal() {
     try {
         const response = await fetchWithTimeout(`${apiBase()}/api/billing/portal`, {
             method: 'POST',
-            headers: {
+            headers: apiHeaders({
                 Authorization: `Bearer ${token}`,
-            },
+            }),
         });
 
         let data = {};
@@ -539,6 +573,13 @@ function renderPricingProducts() {
     if (!billingProducts.length) {
         container.innerHTML = '<p class="pricing-card-detail">Paid plans are not available yet.</p>';
         return;
+    }
+
+    if (billingInterimConsumerPricing) {
+        const note = document.createElement('p');
+        note.className = 'pricing-card-detail';
+        note.textContent = 'Introductory pricing — legal-tier checkout ships separately.';
+        container.appendChild(note);
     }
 
     billingProducts.forEach((product) => {
@@ -606,7 +647,9 @@ function updatePricingUI(account) {
 }
 
 async function loadBillingProducts() {
-    billingProducts = await fetchBillingProducts();
+    const result = await fetchBillingProducts();
+    billingProducts = result.products;
+    billingInterimConsumerPricing = result.interim_consumer_pricing;
     renderPricingProducts();
 }
 
@@ -650,9 +693,9 @@ async function fetchAccount() {
 
     try {
         const response = await fetchWithTimeout(`${apiBase()}/api/account/me`, {
-            headers: {
+            headers: apiHeaders({
                 Authorization: `Bearer ${token}`,
-            },
+            }),
         });
 
         let data = {};
