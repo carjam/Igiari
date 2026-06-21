@@ -25,7 +25,7 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 
 | Task | Status |
 |---|---|
-| Postgres + credit ledger | ⬜ |
+| Postgres + credit ledger | ⏳ Migration in `supabase/migrations/` — run `supabase db push` |
 | Auth (magic link) + 20 trial credits | ⬜ |
 | Credit-gated `/api/scan` | ⬜ |
 | Stripe Checkout + webhooks (test mode) | ⬜ |

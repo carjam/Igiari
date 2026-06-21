@@ -9,13 +9,19 @@ import hashlib
 from pathlib import Path
 from typing import Dict, List, Optional
 from collections import defaultdict
-from datetime import datetime, timedelta
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import anthropic
+
+from billing import (
+    billing_enabled,
+    debit_scan_credit,
+    load_account_from_token,
+    require_credits,
+)
 
 # Load environment variables
 load_dotenv()
@@ -61,6 +67,7 @@ class Finding(BaseModel):
 class ScanResponse(BaseModel):
     input_length: int
     findings: List[Finding]
+    credits_remaining: Optional[int] = None
 
 class ErrorResponse(BaseModel):
     error: Dict[str, str]
@@ -229,23 +236,74 @@ async def root():
     return {"status": "ok", "service": "fallacy-scanner-api"}
 
 
+def extract_bearer_token(authorization: Optional[str]) -> Optional[str]:
+    if not authorization:
+        return None
+    parts = authorization.split(" ", 1)
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        return None
+    token = parts[1].strip()
+    return token or None
+
+
+@app.get("/api/account/me")
+async def get_account_me(authorization: Optional[str] = Header(default=None)):
+    token = extract_bearer_token(authorization)
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "NOT_SIGNED_IN",
+                "message": "Sign in to view your account.",
+            },
+        )
+
+    account = load_account_from_token(token)
+    return {
+        "email": account["email"],
+        "credit_balance": account["credit_balance"],
+        "free_trial_granted": account["free_trial_granted"],
+        "subscription_status": account["subscription_status"],
+    }
+
+
 @app.post("/api/scan", response_model=ScanResponse)
-async def scan_text(request: Request, body: ScanRequest):
+async def scan_text(
+    request: Request,
+    body: ScanRequest,
+    authorization: Optional[str] = Header(default=None),
+):
     """
     Main endpoint: analyze text for logical fallacies.
+    Anonymous visitors: IP rate limit (unchanged).
+    Signed-in users: credit balance required; debit after successful scan only.
     """
-    # Get client IP
-    client_ip = request.client.host
-    
-    # Check rate limit
-    if not check_rate_limit(client_ip):
+    token = extract_bearer_token(authorization)
+    account = None
+    user_id = None
+
+    if token and billing_enabled():
+        account = load_account_from_token(token)
+        require_credits(account)
+        user_id = account["id"]
+    elif token and not billing_enabled():
         raise HTTPException(
-            status_code=429,
+            status_code=503,
             detail={
-                "code": "RATE_LIMITED",
-                "message": "You've exceeded the rate limit of 10 scans per hour. Please try again later."
-            }
+                "code": "BILLING_UNAVAILABLE",
+                "message": "Sign-in is not available on this server yet.",
+            },
         )
+    else:
+        client_ip = request.client.host
+        if not check_rate_limit(client_ip):
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "code": "RATE_LIMITED",
+                    "message": "You've exceeded the rate limit of 10 scans per hour. Please try again later.",
+                },
+            )
     
     # Trim and validate input
     text = body.text.strip()
@@ -273,7 +331,12 @@ async def scan_text(request: Request, body: ScanRequest):
     if cache_key in response_cache:
         print(f"Cache hit for hash: {cache_key[:16]}...")
         cached_response = response_cache[cache_key]
-        return ScanResponse(**cached_response)
+        credits_remaining = account["credit_balance"] if account else None
+        return ScanResponse(
+            input_length=cached_response["input_length"],
+            findings=[Finding(**f) for f in cached_response["findings"]],
+            credits_remaining=credits_remaining,
+        )
     
     # Cache miss - proceed with API call
     print(f"Cache miss for hash: {cache_key[:16]}...")
@@ -328,7 +391,7 @@ async def scan_text(request: Request, body: ScanRequest):
     # Store in cache (Phase 3.5)
     response_data = {
         "input_length": len(text),
-        "findings": [f.dict() for f in findings]
+        "findings": [f.model_dump() for f in findings]
     }
     response_cache[cache_key] = response_data
     
@@ -337,10 +400,15 @@ async def scan_text(request: Request, body: ScanRequest):
         oldest_key = next(iter(response_cache))
         del response_cache[oldest_key]
         print(f"Cache evicted oldest entry (size was {CACHE_MAX_SIZE + 1})")
-    
+
+    credits_remaining = None
+    if user_id:
+        credits_remaining = debit_scan_credit(user_id)
+
     return ScanResponse(
         input_length=len(text),
-        findings=findings
+        findings=findings,
+        credits_remaining=credits_remaining,
     )
 
 
