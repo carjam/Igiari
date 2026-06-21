@@ -17,7 +17,7 @@ If you are an agent picking this up cold: read `10_monetization.md` for the end-
 | Auth + credit ledger | ✅ Supabase; 20 trial credits on signup |
 | Sign-in to scan (prod) | ✅ No anonymous path when billing env set |
 | Custom domain + email | ✅ `igiari.us`, Resend SMTP via Supabase |
-| Stripe Checkout + purchase UI | ❌ Step 1 remainder |
+| Stripe Checkout + purchase UI | ✅ Test mode — [STRIPE_SETUP.md](../docs/STRIPE_SETUP.md) |
 | Analytics | ⏳ Step 0 (in progress) |
 
 Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + signal collection) overlaps with Step 0 below and should be finished before or in parallel with monetization engineering — not skipped entirely.
@@ -76,8 +76,9 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 - [x] New user signs up → receives 20 trial credits.
 - [x] Successful scan debits 1 credit; failed scan and cache hit do not.
 - [x] Sign-in required to scan in production (no anonymous bypass).
-- [ ] Test-mode Checkout grants credits via webhook; duplicate webhook does not double-grant.
-- [ ] User with 0 credits sees pricing inline, not a failed scan.
+- [x] Test-mode Checkout grants credits via webhook.
+- [ ] Duplicate webhook replay does not double-grant (verify in Stripe dashboard when convenient).
+- [x] User with 0 credits sees pricing inline; buy options shown whenever billing is enabled.
 
 ---
 

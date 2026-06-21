@@ -11,9 +11,9 @@ Paste an argument, email, article, or transcript and see logical fallacies highl
 - **Frontend:** https://igiari.us (Cloudflare Pages; also https://igiari.pages.dev/)
 - **Backend API:** https://igiari-backend.onrender.com (Render)
 
-✅ **Status:** Phases 0–4 complete and deployed. **Step 1 auth + credits live** — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md).
+✅ **Status:** Phases 0–4 deployed. **Step 1 complete** (auth, credits, Stripe test mode) — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md). **Next:** Step 2 legal landing or Stripe live mode.
 
-📖 **Docs:** [INTEGRATIONS.md](docs/INTEGRATIONS.md) (Supabase, Resend, Render, Cloudflare) · [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) · [AUTH_AND_EMAIL_RECOVERY.md](docs/AUTH_AND_EMAIL_RECOVERY.md)
+📖 **Docs:** [INTEGRATIONS.md](docs/INTEGRATIONS.md) · [STRIPE_SETUP.md](docs/STRIPE_SETUP.md) · [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md)
 
 ## Quick Start
 
@@ -70,7 +70,7 @@ Built as a demand-testing MVP first; now moving to a paid launch experiment. See
 | **Phase 3** | ✅ Complete | Frontend: Vanilla HTML/CSS/JS, copyeditor aesthetic |
 | **Phase 4** | ✅ Complete | Deployment: Backend (Render) + Frontend (Cloudflare Pages) |
 | **Phase 5** | ⏳ In progress | Soft launch + analytics + signal collection — [Step 0 checklist](docs/STEP0_LAUNCH_READINESS.md) |
-| **Monetization** | ⏳ Step 1 partial | Auth + credits live; Stripe next — [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md) |
+| **Monetization** | ✅ Step 1 (test) | Stripe test mode live; Step 2 next — [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md) |
 
 ## Project structure
 

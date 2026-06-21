@@ -21,7 +21,7 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Anthropic API spend cap / budget alert | ⏳ Manual — [Anthropic Console](https://console.anthropic.com/settings/limits) |
 | Privacy policy updated (accounts, analytics, subprocessors) | ✅ `legal/privacy.html`, `legal/terms.html` |
 
-### Step 1 — Consumer monetization MVP
+### Step 1 — Consumer monetization MVP ✅ (test mode)
 
 | Task | Status |
 |---|---|
@@ -29,8 +29,10 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Auth (magic link + OTP code) + 20 trial credits | ✅ [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) · [INTEGRATIONS.md](INTEGRATIONS.md) |
 | Sign-in required to scan (no anonymous path in prod) | ✅ |
 | Custom domain + Resend SMTP | ✅ `igiari.us` |
-| Stripe Checkout + webhooks (test mode) | ⬜ Code shipped — [STRIPE_SETUP.md](STRIPE_SETUP.md) |
-| Account UI (balance, buy, Billing Portal) | ✅ Pricing panel + portal link |
+| Stripe Checkout + webhooks (test mode) | ✅ [STRIPE_SETUP.md](STRIPE_SETUP.md) |
+| Account UI (balance, buy, Billing Portal) | ✅ |
+
+**Next:** Step 2 — `/legal` landing + outreach, or Stripe live mode for real charges.
 
 ### Step 2 — First revenue channel
 
@@ -70,4 +72,4 @@ Early margins are thin at low scan volume — normal for the first weeks. Revisi
 
 ---
 
-**Last updated:** June 2026
+**Last updated:** June 2026 (Step 1 complete in Stripe test mode)

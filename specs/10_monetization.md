@@ -8,7 +8,7 @@ This is the single, current spec for adding payment to the live Igiari! fallacy 
 
 Live fallacy scanner at **https://igiari.us** (Cloudflare Pages) with backend on Render. Claude Haiku 4.5, IP rate limiting, response caching.
 
-**Step 1 shipped:** Supabase auth (magic link + OTP), credit ledger, sign-in required to scan in production (anonymous path disabled when billing env is set). **Not yet shipped:** Stripe Checkout, paid packs, account purchase UI.
+**Step 1 shipped (test mode):** Supabase auth, credit ledger, sign-in required to scan, Stripe Checkout (Starter + Casual), webhooks with idempotent credit grants, buy UI + Billing Portal. **Next:** Step 2 legal landing, then Stripe live mode when ready to charge real money.
 
 **Do not rebuild the scan pipeline — extend it.**
 

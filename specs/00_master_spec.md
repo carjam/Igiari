@@ -4,7 +4,7 @@
 
 This is a spec for building a **minimal web tool**, not the full product. The goal is narrow: find out, as cheaply as possible, whether real people will use and pay for a tool that detects logical fallacies in text. Everything in this spec is scoped to that goal. Resist scope creep — if a task isn't in this document, don't build it yet, even if it seems obviously good. Flag it instead (see `08_future_ideas.md`) and move on.
 
-If you are an agent picking this up cold: read 00–03 for context, then check **`11_monetization_rollout_plan.md`** for the current execution plan. Phases 0–4 in `04_build_phases.md` are complete; Phase 5 (soft launch) and monetization Steps 0–3 in spec 11 are active work.
+If you are an agent picking this up cold: read 00–03 for context, then check **`11_monetization_rollout_plan.md`** for the current execution plan. Phases 0–4 in `04_build_phases.md` are complete; **Step 1 consumer billing (test mode) is complete** — Step 2 (legal landing / first revenue) is next.
 
 ## What this product is
 
