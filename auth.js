@@ -1,5 +1,6 @@
 // Magic-link sign-in via Supabase. Requires site-config.js values.
 const API_BASE = window.API_BASE || 'https://igiari-backend.onrender.com';
+const FETCH_TIMEOUT_MS = 15000;
 
 let supabaseClient = null;
 let currentSession = null;
@@ -10,6 +11,18 @@ function authConfigured() {
 
 function getAccessToken() {
     return currentSession?.access_token || null;
+}
+
+function fetchWithTimeout(url, options = {}, timeoutMs = FETCH_TIMEOUT_MS) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    return fetch(url, { ...options, signal: controller.signal })
+        .finally(() => clearTimeout(timer));
+}
+
+function bindAuthControls() {
+    document.getElementById('signInButton')?.addEventListener('click', handleSignIn);
+    document.getElementById('signOutButton')?.addEventListener('click', handleSignOut);
 }
 
 async function restoreSessionFromUrl() {
@@ -51,6 +64,14 @@ async function initAuth() {
     }
 
     section?.classList.remove('hidden');
+    bindAuthControls();
+
+    if (!window.supabase) {
+        if (statusEl) {
+            statusEl.textContent = 'Sign-in failed to load. Try disabling ad blockers and refresh.';
+        }
+        return;
+    }
 
     supabaseClient = window.supabase.createClient(
         window.IGIARI_SUPABASE_URL,
@@ -75,15 +96,12 @@ async function initAuth() {
 
     const { data } = await supabaseClient.auth.getSession();
     currentSession = data.session;
-    await updateAuthUI();
+    void updateAuthUI();
 
     supabaseClient.auth.onAuthStateChange((_event, session) => {
         currentSession = session;
-        updateAuthUI();
+        void updateAuthUI();
     });
-
-    document.getElementById('signInButton')?.addEventListener('click', handleSignIn);
-    document.getElementById('signOutButton')?.addEventListener('click', handleSignOut);
 }
 
 async function handleSignIn() {
@@ -93,6 +111,11 @@ async function handleSignIn() {
 
     if (!email) {
         statusEl.textContent = 'Enter your email address.';
+        return;
+    }
+
+    if (!supabaseClient) {
+        statusEl.textContent = 'Sign-in is not ready yet. Refresh and try again.';
         return;
     }
 
@@ -114,9 +137,21 @@ async function handleSignIn() {
 }
 
 async function handleSignOut() {
-    await supabaseClient.auth.signOut();
     currentSession = null;
-    updateAuthUI();
+    void updateAuthUI();
+
+    if (!supabaseClient) {
+        return;
+    }
+
+    try {
+        await supabaseClient.auth.signOut();
+    } catch (error) {
+        console.error('Sign out failed:', error);
+    }
+
+    currentSession = null;
+    void updateAuthUI();
 }
 
 async function fetchAccount() {
@@ -125,28 +160,35 @@ async function fetchAccount() {
         return { error: 'Not signed in.' };
     }
 
-    const response = await fetch(`${API_BASE}/api/account/me`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-
-    let data = {};
     try {
-        data = await response.json();
-    } catch (_error) {
-        return { error: 'Could not read account response from server.' };
-    }
+        const response = await fetchWithTimeout(`${API_BASE}/api/account/me`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
 
-    if (!response.ok) {
-        const detail = data.detail || {};
-        const message = typeof detail === 'string'
-            ? detail
-            : (detail.message || 'Could not load your account.');
-        return { error: message };
-    }
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (_error) {
+            return { error: 'Could not read account response from server.' };
+        }
 
-    return { account: data };
+        if (!response.ok) {
+            const detail = data.detail || {};
+            const message = typeof detail === 'string'
+                ? detail
+                : (detail.message || 'Could not load your account.');
+            return { error: message };
+        }
+
+        return { account: data };
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            return { error: 'Loading account timed out. Try again in a moment.' };
+        }
+        return { error: 'Could not reach the server.' };
+    }
 }
 
 async function updateAuthUI() {

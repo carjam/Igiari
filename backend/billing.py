@@ -1,5 +1,6 @@
 """
 Supabase-backed accounts and credit ledger for authenticated scans.
+Uses Supabase REST directly (requests) for reliability on Render.
 """
 import os
 from typing import Any, Dict, Optional
@@ -8,18 +9,25 @@ import requests
 from fastapi import HTTPException
 
 TRIAL_CREDITS = 20
+REQUEST_TIMEOUT = 10
 
 
 def billing_enabled() -> bool:
     return bool(os.getenv("SUPABASE_URL") and os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
 
 
-def get_supabase():
-    from supabase import create_client
+def _supabase_url() -> str:
+    return os.environ["SUPABASE_URL"].rstrip("/")
 
-    url = os.environ["SUPABASE_URL"]
+
+def _service_headers(*, prefer: str = "return=representation") -> Dict[str, str]:
     key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-    return create_client(url, key)
+    return {
+        "apikey": key,
+        "Authorization": f"Bearer {key}",
+        "Content-Type": "application/json",
+        "Prefer": prefer,
+    }
 
 
 def verify_access_token(token: str) -> Dict[str, Any]:
@@ -32,17 +40,14 @@ def verify_access_token(token: str) -> Dict[str, Any]:
             },
         )
 
-    url = os.environ["SUPABASE_URL"].rstrip("/")
-    service_key = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-
     try:
         response = requests.get(
-            f"{url}/auth/v1/user",
+            f"{_supabase_url()}/auth/v1/user",
             headers={
-                "apikey": service_key,
+                "apikey": os.environ["SUPABASE_SERVICE_ROLE_KEY"],
                 "Authorization": f"Bearer {token}",
             },
-            timeout=10,
+            timeout=REQUEST_TIMEOUT,
         )
     except requests.RequestException as exc:
         print(f"Auth verification request failed: {exc}")
@@ -79,9 +84,23 @@ def verify_access_token(token: str) -> Dict[str, Any]:
 
 
 def get_account(user_id: str) -> Optional[Dict[str, Any]]:
-    client = get_supabase()
-    result = client.table("accounts").select("*").eq("id", user_id).limit(1).execute()
-    rows = result.data or []
+    response = requests.get(
+        f"{_supabase_url()}/rest/v1/accounts",
+        params={"id": f"eq.{user_id}", "select": "*"},
+        headers=_service_headers(),
+        timeout=REQUEST_TIMEOUT,
+    )
+    if response.status_code != 200:
+        print(f"get_account failed: {response.status_code} {response.text}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "ACCOUNT_ERROR",
+                "message": "Could not load your account. Please try again.",
+            },
+        )
+
+    rows = response.json()
     return rows[0] if rows else None
 
 
@@ -91,33 +110,63 @@ def grant_trial_credits(user_id: str) -> None:
         return
 
     new_balance = account["credit_balance"] + TRIAL_CREDITS
-    client = get_supabase()
-    client.table("credit_transactions").insert(
-        {
+
+    txn = requests.post(
+        f"{_supabase_url()}/rest/v1/credit_transactions",
+        headers=_service_headers(),
+        json={
             "account_id": user_id,
             "delta": TRIAL_CREDITS,
             "reason": "trial_grant",
-        }
-    ).execute()
-    client.table("accounts").update(
-        {
+        },
+        timeout=REQUEST_TIMEOUT,
+    )
+    if txn.status_code not in (200, 201):
+        print(f"trial grant txn failed: {txn.status_code} {txn.text}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "ACCOUNT_ERROR",
+                "message": "Could not grant trial credits. Please try again.",
+            },
+        )
+
+    updated = requests.patch(
+        f"{_supabase_url()}/rest/v1/accounts",
+        params={"id": f"eq.{user_id}", "free_trial_granted": "eq.false"},
+        headers=_service_headers(),
+        json={
             "credit_balance": new_balance,
             "free_trial_granted": True,
-        }
-    ).eq("id", user_id).eq("free_trial_granted", False).execute()
+        },
+        timeout=REQUEST_TIMEOUT,
+    )
+    if updated.status_code != 200:
+        print(f"trial grant update failed: {updated.status_code} {updated.text}")
 
 
 def ensure_account(user_id: str, email: str) -> Dict[str, Any]:
     account = get_account(user_id)
     if account is None:
-        client = get_supabase()
-        client.table("accounts").insert(
-            {
+        created = requests.post(
+            f"{_supabase_url()}/rest/v1/accounts",
+            headers=_service_headers(),
+            json={
                 "id": user_id,
                 "email": email,
                 "account_type": "consumer",
-            }
-        ).execute()
+            },
+            timeout=REQUEST_TIMEOUT,
+        )
+        if created.status_code not in (200, 201):
+            print(f"create account failed: {created.status_code} {created.text}")
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "code": "ACCOUNT_ERROR",
+                    "message": "Could not create your account. Please try again.",
+                },
+            )
         grant_trial_credits(user_id)
         account = get_account(user_id)
 
@@ -135,7 +184,6 @@ def ensure_account(user_id: str, email: str) -> Dict[str, Any]:
         )
 
     return account
-
 
 
 def load_account_from_token(token: str) -> Dict[str, Any]:
@@ -166,15 +214,35 @@ def debit_scan_credit(user_id: str) -> int:
         )
 
     new_balance = account["credit_balance"] - 1
-    client = get_supabase()
-    client.table("credit_transactions").insert(
-        {
+
+    txn = requests.post(
+        f"{_supabase_url()}/rest/v1/credit_transactions",
+        headers=_service_headers(),
+        json={
             "account_id": user_id,
             "delta": -1,
             "reason": "scan_usage",
-        }
-    ).execute()
-    client.table("accounts").update({"credit_balance": new_balance}).eq(
-        "id", user_id
-    ).execute()
+        },
+        timeout=REQUEST_TIMEOUT,
+    )
+    if txn.status_code not in (200, 201):
+        print(f"debit txn failed: {txn.status_code} {txn.text}")
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "ACCOUNT_ERROR",
+                "message": "Could not update your balance. Please try again.",
+            },
+        )
+
+    updated = requests.patch(
+        f"{_supabase_url()}/rest/v1/accounts",
+        params={"id": f"eq.{user_id}"},
+        headers=_service_headers(),
+        json={"credit_balance": new_balance},
+        timeout=REQUEST_TIMEOUT,
+    )
+    if updated.status_code != 200:
+        print(f"debit update failed: {updated.status_code} {updated.text}")
+
     return new_balance

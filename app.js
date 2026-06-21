@@ -98,6 +98,7 @@ async function handleScan() {
             method: 'POST',
             headers,
             body: JSON.stringify({ text }),
+            signal: AbortSignal.timeout(120000),
         });
         
         const data = await response.json();
@@ -121,7 +122,11 @@ async function handleScan() {
         
     } catch (error) {
         console.error('Scan error:', error);
-        showError(error.message || 'Unable to connect to the server. Please try again.');
+        if (error.name === 'TimeoutError') {
+            showError('Scan timed out. The server may be waking up — try again.');
+        } else {
+            showError(error.message || 'Unable to connect to the server. Please try again.');
+        }
     } finally {
         hideLoading();
         updateScanButton();
