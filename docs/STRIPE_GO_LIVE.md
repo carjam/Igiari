@@ -1,107 +1,123 @@
 # Stripe Go-Live Checklist
 
-**Purpose:** Prepare real-money billing without flipping production until you choose to.  
-**Current state:** Sandbox (`sk_test_...`) on Render — keep it until the final step below.
+**Purpose:** Track Stripe live rollout for Igiari production billing.
 
-Related: [STRIPE_SETUP.md](STRIPE_SETUP.md) (sandbox) · [INTEGRATIONS.md](INTEGRATIONS.md)
+Related: [STRIPE_SETUP.md](STRIPE_SETUP.md) (sandbox / local dev) · [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md) · [INTEGRATIONS.md](INTEGRATIONS.md)
 
 ---
 
-## Phase A — Prepare in Stripe (no Render changes)
+## Current production state (June 2026)
 
-Do these in Stripe **live** mode (exit sandbox). Nothing here charges customers until Phase C.
+| Item | Status |
+|------|--------|
+| Render `STRIPE_SECRET_KEY` | ✅ Live (`sk_live_...`) |
+| Render consumer price IDs | ✅ Live Starter + Casual |
+| Render live webhook secret | ✅ Live `whsec_...` |
+| Consumer checkout | ✅ Real charges on https://igiari.us |
+| Legal price env vars on Render | ⬜ **Not set** — legal funnel uses interim consumer pricing |
+| Legal live products in Stripe | ⬜ Optional until [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md) |
 
-### A1. Account readiness
+**Sandbox** remains available for local development — production no longer uses test keys.
 
-- [ ] Stripe account fully activated (identity, bank account verified)
-- [ ] Payouts enabled (or know expected delay)
-- [ ] [Customer portal](https://dashboard.stripe.com/settings/billing/portal) enabled for **live**
+---
 
-### A2. Live products — consumer
+## Phase A — Prepare in Stripe (live dashboard) ✅
 
-Create in [Product catalog](https://dashboard.stripe.com/products) (**live**, not sandbox):
+Completed in Stripe **live** mode (not sandbox).
 
-| Product | Type | Price | Save as |
-|---------|------|-------|---------|
-| Igiari Starter | One-time | $8 | `STRIPE_PRICE_STARTER_PACK` (live `price_...`) |
-| Igiari Casual | Recurring monthly | $9 | `STRIPE_PRICE_CASUAL_SUB` (live `price_...`) |
+### A1. Account readiness ✅
 
-### A3. Live products — legal (for `/legal` outreach)
+- [x] Stripe account activated
+- [x] [Customer portal](https://dashboard.stripe.com/settings/billing/portal) enabled (live) — cancel, payment methods, invoices
 
-| Product | Type | Price | Save as |
-|---------|------|-------|---------|
+### A2. Live products — consumer ✅
+
+| Product | Type | Price | Render env var |
+|---------|------|-------|----------------|
+| Igiari Starter | One-time | $8 | `STRIPE_PRICE_STARTER_PACK` |
+| Igiari Casual | Recurring monthly | $9 | `STRIPE_PRICE_CASUAL_SUB` |
+
+### A3. Live products — legal ⬜
+
+Not required for consumer go-live. Do before `/legal` outreach at target pricing:
+
+| Product | Type | Price | Render env var |
+|---------|------|-------|----------------|
 | Objection Legal Starter | One-time | $29 | `STRIPE_PRICE_LEGAL_STARTER` |
 | Objection Legal Solo | Recurring monthly | $39 | `STRIPE_PRICE_LEGAL_SOLO_SUB` |
 
-Store live price IDs in a password manager — **do not** put them on Render yet.
+See [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md).
 
-### A4. Live webhook
+### A4. Live webhook ✅
 
-1. [Developers → Webhooks / Event destinations](https://dashboard.stripe.com/webhooks) (**live**)
-2. URL: `https://igiari-backend.onrender.com/api/webhooks/stripe`
-3. Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`
-4. Save **live** signing secret (`whsec_...`) — not on Render yet
+- [x] URL: `https://igiari-backend.onrender.com/api/webhooks/stripe`
+- [x] Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`
+- [x] Live signing secret saved and on Render
+
+**Note:** Stripe’s UI may use an event-first flow (select events → webhook destination). Choose **snapshot** payload if offered — the backend expects classic `event.data.object` webhooks.
 
 ---
 
-## Phase B — Code ready (done in repo)
+## Phase B — Code ready ✅
 
 - [x] Consumer + legal product catalogs in `backend/stripe_billing.py`
 - [x] Legal signup tagging (`?surface=legal`, `X-Igiari-Surface: legal`)
-- [x] Interim consumer pricing fallback until legal price env vars are set
-- [x] Webhook idempotency verified in sandbox
+- [x] Interim consumer pricing fallback when legal env vars unset
+- [x] Webhook idempotency verified (sandbox)
 - [x] `/legal` landing page
-
-**Optional before go-live:** Add legal price env vars in **sandbox** on Render and test a $29 legal Starter purchase + replay.
 
 ---
 
-## Phase C — Flip Render to live (only when ready)
+## Phase C — Flip Render to live ✅
 
-**Warning:** After this, Checkout charges real cards. Use a small self-test first.
+Consumer billing on Render uses live keys and live consumer price IDs.
 
-Update **igiari-backend → Environment** (mark secrets as Secret):
-
-| Variable | Change to |
-|----------|-----------|
+| Variable | Production |
+|----------|------------|
 | `STRIPE_SECRET_KEY` | `sk_live_...` |
 | `STRIPE_WEBHOOK_SECRET` | Live `whsec_...` |
-| `STRIPE_PRICE_STARTER_PACK` | Live consumer Starter `price_...` |
-| `STRIPE_PRICE_CASUAL_SUB` | Live consumer Casual `price_...` |
-| `STRIPE_PRICE_LEGAL_STARTER` | Live legal Starter `price_...` (when outreach starts) |
-| `STRIPE_PRICE_LEGAL_SOLO_SUB` | Live legal Solo `price_...` (when outreach starts) |
-
-Keep `SITE_URL=https://igiari.us`. Save → wait for redeploy.
+| `STRIPE_PRICE_STARTER_PACK` | Live Starter `price_...` |
+| `STRIPE_PRICE_CASUAL_SUB` | Live Casual `price_...` |
+| `STRIPE_PRICE_LEGAL_STARTER` | ⬜ Not set |
+| `STRIPE_PRICE_LEGAL_SOLO_SUB` | ⬜ Not set |
+| `SITE_URL` | `https://igiari.us` |
 
 ---
 
 ## Phase D — Verify live (real money)
 
-1. Sign in on https://igiari.us
-2. Buy **Starter** with your real card (or smallest pack)
-3. Confirm credits increase
-4. Stripe **live** dashboard → webhook **200**
-5. Resend webhook → balance unchanged (idempotency)
-6. Optional refund test purchase in Stripe Dashboard
+Run once after Phase C (or re-run after any Stripe env change):
+
+1. Sign in on https://igiari.us (new account → **5** trial scans)
+2. Buy **Starter** ($8) with a real card
+3. Confirm credits increase by **50**
+4. Stripe **live** → Webhooks → delivery **200**
+5. Resend `checkout.session.completed` → balance unchanged (idempotency)
+6. Optional: refund test purchase in Stripe Dashboard
+
+For **Casual** ($9/mo): subscribe → **60** credits on `invoice.paid`; test Billing Portal cancel.
 
 ---
 
 ## Phase E — Outreach (Step 2)
 
-Only after Phase D:
+Before PI/family-law outreach at **legal** prices:
 
-- [ ] `/legal` pricing matches live legal products (env vars set)
-- [ ] First targeted outreach (PI / family-law communities)
-- [ ] Support email ready for billing questions (`legal/terms.html` contact)
+- [ ] Complete [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md)
+- [ ] Confirm `/legal?surface=legal` checkout shows Legal Starter / Legal Solo (not interim consumer packs)
+- [ ] First targeted outreach
+- [ ] Support email ready (`legal/terms.html` contact)
+
+Consumer-only outreach (main site, debate forums) can proceed now — live Starter/Casual are active.
 
 ---
 
 ## Rollback
 
-If something breaks after Phase C:
+If something breaks:
 
 1. Revert Render `STRIPE_*` to **sandbox** values → redeploy (real charges stop)
-2. Or disable Checkout by clearing `STRIPE_SECRET_KEY` temporarily (payments off; scans still work for existing credits)
+2. Or clear `STRIPE_SECRET_KEY` temporarily (payments off; existing credits still work)
 
 ---
 

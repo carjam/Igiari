@@ -37,6 +37,19 @@ Same product, same pitch, riding alongside PI rather than requiring separate pos
 
 ---
 
+## Implementation status (June 2026)
+
+| Item | Status |
+|------|--------|
+| `/legal` landing + copy | ✅ Live |
+| Legal surface tagging (`?surface=legal`) | ✅ Code deployed |
+| Legal Stripe on Render ($29 / $39) | ⬜ **Not configured** |
+| Checkout from legal funnel today | Interim consumer Starter ($8) / Casual ($9/mo) |
+
+Enable legal checkout: [docs/LEGAL_BILLING_SETUP.md](../docs/LEGAL_BILLING_SETUP.md).
+
+---
+
 ## Pricing
 
 ### Why legal pricing sits well above the consumer/debate tier

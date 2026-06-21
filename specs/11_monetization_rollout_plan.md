@@ -14,13 +14,15 @@ If you are an agent picking this up cold: read `10_monetization.md` for the end-
 |---|---|
 | Core scan product | ✅ Live at https://igiari.us |
 | Backend (`/api/scan`) | ✅ Rate limiting, caching, Haiku 4.5 |
-| Auth + credit ledger | ✅ Supabase; 5 trial credits on signup |
+| Auth + credit ledger | ✅ Supabase; **5 trial credits** on signup |
 | Sign-in to scan (prod) | ✅ No anonymous path when billing env set |
 | Custom domain + email | ✅ `igiari.us`, Resend SMTP via Supabase |
-| Stripe Checkout + purchase UI | ✅ Test mode — [STRIPE_SETUP.md](../docs/STRIPE_SETUP.md) |
-| Analytics | ⏳ Step 0 (in progress) |
+| Stripe consumer billing | ✅ **Live mode** on Render — Starter + Casual |
+| Stripe legal billing | ⬜ Not on Render — [LEGAL_BILLING_SETUP.md](../docs/LEGAL_BILLING_SETUP.md) |
+| `/legal` landing | ✅ Copy + PI example; interim consumer checkout |
+| Analytics | ✅ Step 0 complete |
 
-Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + signal collection) overlaps with Step 0 below and should be finished before or in parallel with monetization engineering — not skipped entirely.
+Phases 0–4 from `04_build_phases.md` are complete. Step 0 launch readiness is complete.
 
 ---
 
@@ -29,7 +31,7 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 1. **One revenue surface at a time.** Consumer web first; legal landing second; developer API third.
 2. **Don't rebuild what works.** Extend `/api/scan`, caching, rate limiting, and the existing UI — see `10_monetization.md` § "What exists today."
 3. **No ads.** Still rejected — see `07_monetization_notes.md`.
-4. **Test mode before live mode.** Every Stripe and auth integration must work end-to-end in test mode before switching keys.
+4. **Test mode before live mode.** Consumer billing was validated in Stripe test mode before switching Render to live keys (complete).
 5. **Revenue follows outreach, not vice versa.** Code enables charging; communities (PI solos, debate/law, developers) drive first sales.
 
 ---
@@ -86,12 +88,15 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 
 **Goal:** First paying customers from a deliberate beachhead, not broad promotion.
 
-**Recommended priority:** Legal landing (`/legal`) — highest $/scan, positioning already written in `09_legal_positioning_and_pricing..md`.
+**Recommended priority:** Legal landing (`/legal`) — highest $/scan, positioning in `09_legal_positioning_and_pricing..md`.
+
+**Before legal outreach:** Configure legal Stripe products on Render — [LEGAL_BILLING_SETUP.md](../docs/LEGAL_BILLING_SETUP.md). Until then, legal-funnel users checkout at consumer prices ($8 / $9).
 
 | Surface | Effort | When |
 |---|---|---|
-| `/legal` landing + PI example | ~1 day (copy + example text; reuses Step 1 billing) | **First outreach target** |
-| Consumer (debate/law student forums) | Minimal extra code | Parallel if easy |
+| `/legal` landing + PI example | ✅ Shipped | — |
+| Legal Stripe on Render ($29 / $39) | ~30 min dashboard | **Before PI outreach** |
+| Consumer (debate/law student forums) | Minimal extra code | Can start now (live Starter/Casual) |
 | Developer API (`/developers`, `/v1/scan`, `/docs`) | ~2–3 days backend | Only after someone asks or consumer/legal stalls |
 
 **Outreach (cheap, targeted):** PI/family-law solo communities, debate/law-student forums — not broad legal-tech press.
@@ -107,7 +112,7 @@ Only after Step 2 shows at least one paying customer (or strong trial-to-paid si
 - Remaining pack tiers and subscription plans from `10_monetization.md` §4.
 - Developer API surface if requested.
 - Eval/precision improvements if legal users report false positives (current eval: ~45% precision, ~89% true-negative accuracy — adequate for consumer; set expectations carefully for legal).
-- Stripe live mode + soft launch to wider audiences.
+- Broader promotion beyond targeted beachhead outreach.
 
 ---
 
@@ -120,6 +125,8 @@ Only after Step 2 shows at least one paying customer (or strong trial-to-paid si
 | `07_monetization_notes.md` | Historical deferral rationale; **ads still rejected** |
 | `11_monetization_rollout_plan.md` | **This file — execution order and scope per step** |
 | `docs/MONETIZATION_ROLLOUT.md` | Human-readable summary and checklist tracker |
+| `docs/STRIPE_GO_LIVE.md` | Stripe live phases A–E (consumer live ✅) |
+| `docs/LEGAL_BILLING_SETUP.md` | Enable legal-tier checkout on Render |
 | `docs/STEP0_LAUNCH_READINESS.md` | Step 0 task checklist |
 
 ---
@@ -128,4 +135,4 @@ Only after Step 2 shows at least one paying customer (or strong trial-to-paid si
 
 Not: passive income, all three surfaces live, enterprise features.
 
-Yes: live billing on consumer web, legal landing live, Anthropic costs covered by revenue, documented learnings about who pays and why.
+Yes: live billing on consumer web, legal landing live, legal Stripe configured before legal outreach, Anthropic costs covered by revenue, documented learnings about who pays and why.

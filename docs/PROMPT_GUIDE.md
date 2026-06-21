@@ -10,7 +10,7 @@ The system prompt is now stored in **`prompt_template.txt`** for easy editing wi
 2. Test locally: `python server.py`
 3. Commit and push to redeploy
 
-**Note**: The `{TAXONOMY}` placeholder is automatically replaced with the full fallacy taxonomy at runtime.
+**Note**: The `{TAXONOMY}` and `{USER_TEXT}` placeholders are replaced at runtime in `server.py`.
 
 ## Testing Your Changes
 
@@ -160,6 +160,5 @@ Or modify `server.py` to accept a prompt variant parameter.
 ## Questions?
 
 See also:
-- `specs/03_architecture.md` - Why Claude Haiku, model choice reasoning
-- `backend/TODO_CACHING.md` - Performance optimization ideas
-- `docs/DEPLOYMENT_GUIDE.md` - How deployments work
+- [specs/03_architecture.md](../specs/03_architecture.md) — Why Claude Haiku, model choice reasoning
+- [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) — How deployments work

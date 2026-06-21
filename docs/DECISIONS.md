@@ -49,3 +49,17 @@ Append-only. Each entry: what default was changed, why, and which spec section i
 **Decision:** Use `requests` against Supabase REST with service role key (`backend/billing.py`), not `supabase-py`.
 
 **Reason:** `supabase-py` hung on Render during initial deploy.
+
+## 2026-06-20: Free trial reduced to 5 scans
+
+**Decision:** `TRIAL_CREDITS = 5` (was 20 in spec).
+
+**Reason:** Lower API exposure per signup while still enough to evaluate the tool. Existing accounts retain prior balances.
+
+## 2026-06-20: Consumer Stripe live; legal billing deferred
+
+**Decision:** Render uses Stripe **live** keys for consumer Starter ($8) and Casual ($9/mo). Legal price env vars (`STRIPE_PRICE_LEGAL_*`) remain unset until outreach prep.
+
+**Reason:** Ship real consumer revenue first; legal funnel uses interim consumer checkout until [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md) is completed.
+
+**Docs:** [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md), [MONETIZATION_ROLLOUT.md](MONETIZATION_ROLLOUT.md).

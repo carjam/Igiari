@@ -93,4 +93,5 @@ See full report: [LIVE_SMOKE_TEST.md](LIVE_SMOKE_TEST.md)
 | Analytics live | ✅ Cloudflare Pages Web Analytics |
 | Anthropic cap set | ✅ Owner confirmed |
 | Live smoke test complete | ✅ [LIVE_SMOKE_TEST.md](LIVE_SMOKE_TEST.md) |
-| Step 1 (consumer billing) | ✅ Complete (test mode) |
+| Step 1 (consumer billing) | ✅ Complete (**Stripe live** on Render) |
+| Legal billing on Render | ⬜ See [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md) |

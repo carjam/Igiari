@@ -144,9 +144,9 @@ def load_prompt_template() -> str:
         return f.read()
 
 
-def build_system_prompt() -> str:
+def build_system_prompt(user_text: str) -> str:
     """
-    Construct system prompt with taxonomy and calibration guidance.
+    Construct system prompt with taxonomy, user text, and calibration guidance.
     Using full taxonomy (option a) per spec 03_architecture.md.
     """
     # Create condensed taxonomy entries
@@ -155,9 +155,12 @@ def build_system_prompt() -> str:
         for f in fallacy_taxonomy
     ])
     
-    # Load template and inject taxonomy
+    # Load template and inject taxonomy + scanned text (prompt-injection boundary)
     template = load_prompt_template()
-    prompt = template.replace("{TAXONOMY}", taxonomy_text)
+    prompt = (
+        template.replace("{TAXONOMY}", taxonomy_text)
+        .replace("{USER_TEXT}", user_text)
+    )
     
     return prompt
 
@@ -183,7 +186,7 @@ async def call_anthropic_api(user_text: str) -> Dict:
         raise ValueError("ANTHROPIC_API_KEY environment variable not set")
     
     client = anthropic.Anthropic(api_key=api_key)
-    system_prompt = build_system_prompt()
+    system_prompt = build_system_prompt(user_text)
     
     try:
         message = client.messages.create(
@@ -191,7 +194,7 @@ async def call_anthropic_api(user_text: str) -> Dict:
             max_tokens=4096,
             system=system_prompt,
             messages=[
-                {"role": "user", "content": user_text}
+                {"role": "user", "content": "Analyze the text in <user_text> and return JSON only."}
             ]
         )
         

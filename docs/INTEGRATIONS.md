@@ -172,12 +172,18 @@ Only Render holds `ANTHROPIC_API_KEY`. Set a monthly spend cap as a backstop bel
 
 | | |
 |---|---|
+| **Dashboard (live)** | https://dashboard.stripe.com/dashboard |
 | **Dashboard (test)** | https://dashboard.stripe.com/test/dashboard |
 | **Setup guide** | [STRIPE_SETUP.md](STRIPE_SETUP.md) |
+| **Go-live / status** | [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md) |
+| **Legal billing (not configured)** | [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md) |
 | **Webhook URL** | `https://igiari-backend.onrender.com/api/webhooks/stripe` |
-| **Test card** | `4242 4242 4242 4242` |
+
+**Production:** Consumer Starter ($8) and Casual ($9/mo) charge **real money** via live keys on Render. **Legal-tier prices are not on Render yet** — `/legal` funnel uses interim consumer checkout until `STRIPE_PRICE_LEGAL_*` is set.
 
 Checkout is hosted by Stripe (no card data in our UI). Credits grant on webhook with idempotency via `credit_transactions.stripe_event_id`.
+
+**Sandbox test card** (local/dev only): `4242 4242 4242 4242`
 
 ---
 
@@ -193,4 +199,4 @@ Checkout is hosted by Stripe (no card data in our UI). Credits grant on webhook 
 
 ---
 
-**Last updated:** June 2026
+**Last updated:** June 2026 (consumer Stripe live; legal billing pending)

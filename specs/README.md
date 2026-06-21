@@ -17,6 +17,8 @@ Agent-oriented build specs for Igiari. **Start with `11_monetization_rollout_pla
 | 10 | [10_monetization.md](10_monetization.md) | End-state billing architecture |
 | 11 | [11_monetization_rollout_plan.md](11_monetization_rollout_plan.md) | **Active execution plan** |
 
-**Operations docs** (deploy, integrations, recovery): [`../docs/README.md`](../docs/README.md)
+**Operations docs** (deploy, integrations, recovery): [`docs/README.md`](../docs/README.md) · [docs/CONVENTIONS.md](../docs/CONVENTIONS.md)
 
 **Live URLs:** https://igiari.us · https://igiari-backend.onrender.com
+
+**Billing:** Consumer Stripe **live** on Render. Legal billing: [docs/LEGAL_BILLING_SETUP.md](../docs/LEGAL_BILLING_SETUP.md).

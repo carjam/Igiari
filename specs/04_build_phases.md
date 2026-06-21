@@ -115,8 +115,8 @@ Execute these phases in order. Each phase lists its dependencies, tasks, and acc
 | Step | Scope | Depends on |
 |---|---|---|
 | Step 0 | Launch readiness (analytics, live checklist, spend cap) | Phase 4 |
-| Step 1 | Consumer billing MVP (auth, credits, Stripe test mode) | Step 0 |
-| Step 2 | `/legal` landing + first outreach | Step 1 |
-| Step 3 | Full tiers, developer API, Stripe live | Step 2 + first paying users |
+| Step 1 | Consumer billing (auth, credits, Stripe **live**) | Step 0 |
+| Step 2 | `/legal` landing + legal Stripe on Render + outreach | Step 1 |
+| Step 3 | Full tiers, developer API | Step 2 + first paying users |
 
 Full architecture: `10_monetization.md`. Human tracker: `docs/MONETIZATION_ROLLOUT.md`.

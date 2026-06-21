@@ -1,19 +1,40 @@
-# Stripe Setup (Step 1 — test mode)
+# Stripe Setup
 
-Consumer billing: **Starter pack** ($8 / 50 scans) and **Casual subscription** ($9/mo / 60 scans). Code lives in `backend/stripe_billing.py`.
-
-**Dashboard:** https://dashboard.stripe.com/test/dashboard
+Stripe configuration for Igiari billing. Code: `backend/stripe_billing.py`.
 
 ---
 
-## 1. API keys
+## Production (live) — current
+
+**https://igiari.us** uses **Stripe live mode** on Render:
+
+| Product | Price | Render env var |
+|---------|-------|----------------|
+| Igiari Starter | $8 one-time (50 scans) | `STRIPE_PRICE_STARTER_PACK` |
+| Igiari Casual | $9/mo (60 scans/mo) | `STRIPE_PRICE_CASUAL_SUB` |
+
+Also on Render: `STRIPE_SECRET_KEY` (`sk_live_...`), `STRIPE_WEBHOOK_SECRET` (live `whsec_...`), `SITE_URL=https://igiari.us`.
+
+**Legal billing is not configured** — see [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md).
+
+Go-live checklist and history: [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md).
+
+**Live dashboard:** https://dashboard.stripe.com/dashboard
+
+---
+
+## Sandbox (local dev & testing)
+
+Use Stripe **test mode** for local `.env` and sandbox purchases. Do not point production Render at test keys.
+
+**Test dashboard:** https://dashboard.stripe.com/test/dashboard
+
+### 1. API keys
 
 1. [Developers → API keys](https://dashboard.stripe.com/test/apikeys) → copy **Secret key** (`sk_test_...`)
-2. Render → **igiari-backend** → Environment → add `STRIPE_SECRET_KEY`
+2. Local `backend/.env` → `STRIPE_SECRET_KEY`
 
----
-
-## 2. Products and prices
+### 2. Products and prices
 
 Create in [Product catalog](https://dashboard.stripe.com/test/products) (test mode):
 
@@ -22,23 +43,15 @@ Create in [Product catalog](https://dashboard.stripe.com/test/products) (test mo
 | Igiari Starter | One-time | $8.00 USD | `STRIPE_PRICE_STARTER_PACK` = `price_...` |
 | Igiari Casual | Recurring monthly | $9.00 USD | `STRIPE_PRICE_CASUAL_SUB` = `price_...` |
 
-Copy each **Price ID** (starts with `price_`), not the Product ID.
+Optional legal sandbox products: `STRIPE_PRICE_LEGAL_STARTER`, `STRIPE_PRICE_LEGAL_SOLO_SUB` — see [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md).
 
----
+Copy each **Price ID** (`price_...`), not the Product ID.
 
-## 3. Webhook
+### 3. Webhook (local)
 
-**Production endpoint:** `https://igiari-backend.onrender.com/api/webhooks/stripe`
+**Production endpoint (live):** `https://igiari-backend.onrender.com/api/webhooks/stripe`
 
-1. [Developers → Webhooks](https://dashboard.stripe.com/test/webhooks) → Add endpoint
-2. Events to send:
-   - `checkout.session.completed`
-   - `invoice.paid`
-   - `invoice.payment_failed`
-   - `customer.subscription.deleted`
-3. Copy **Signing secret** (`whsec_...`) → Render env `STRIPE_WEBHOOK_SECRET`
-
-**Local testing** (Stripe CLI):
+For local dev with Stripe CLI:
 
 ```bash
 stripe listen --forward-to localhost:8000/api/webhooks/stripe
@@ -46,31 +59,13 @@ stripe listen --forward-to localhost:8000/api/webhooks/stripe
 
 Use the CLI’s `whsec_...` in local `.env`.
 
----
+Events: `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`.
 
-## 4. Billing Portal
+### 4. Billing Portal
 
-1. [Settings → Billing → Customer portal](https://dashboard.stripe.com/test/settings/billing/portal)
-2. Enable portal; allow subscription cancel
-3. No code change — `/api/billing/portal` uses default portal config
+[Settings → Billing → Customer portal](https://dashboard.stripe.com/settings/billing/portal) — enable in **live** for production; test mode for sandbox experiments.
 
----
-
-## 5. Render environment
-
-| Variable | Example |
-|----------|---------|
-| `STRIPE_SECRET_KEY` | `sk_test_...` |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` |
-| `STRIPE_PRICE_STARTER_PACK` | `price_...` |
-| `STRIPE_PRICE_CASUAL_SUB` | `price_...` |
-| `SITE_URL` | `https://igiari.us` |
-
-Redeploy after saving. Frontend reads products from `GET /api/billing/products` — no Stripe keys in the browser.
-
----
-
-## 6. Test card
+### 5. Test card (sandbox only)
 
 | Field | Value |
 |-------|--------|
@@ -78,16 +73,28 @@ Redeploy after saving. Frontend reads products from `GET /api/billing/products` 
 | Expiry | Any future date |
 | CVC | Any 3 digits |
 
-**Verify:**
+**Verify in sandbox:**
 
-1. Sign in → use trial credits until 0 (or test with a fresh account)
-2. Pricing panel appears → buy Starter → return to site → balance +50
-3. Stripe Dashboard → Webhooks → resend `checkout.session.completed` → credits do **not** double (verified: balance unchanged on replay).
+1. Sign in → use **5** trial credits (or fresh account)
+2. Buy Starter → balance +50
+3. Resend `checkout.session.completed` → credits do **not** double
 
 ---
 
-## 7. Go live
+## Render environment (reference)
 
-Do **not** flip Render to live keys until you have completed the checklist in [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md) (create live products + webhook first, then Phase C env swap).
+| Variable | Production | Local dev |
+|----------|------------|-----------|
+| `STRIPE_SECRET_KEY` | `sk_live_...` | `sk_test_...` |
+| `STRIPE_WEBHOOK_SECRET` | Live `whsec_...` | CLI or test `whsec_...` |
+| `STRIPE_PRICE_STARTER_PACK` | Live `price_...` | Test `price_...` |
+| `STRIPE_PRICE_CASUAL_SUB` | Live `price_...` | Test `price_...` |
+| `STRIPE_PRICE_LEGAL_STARTER` | ⬜ Not set | Optional test `price_...` |
+| `STRIPE_PRICE_LEGAL_SOLO_SUB` | ⬜ Not set | Optional test `price_...` |
+| `SITE_URL` | `https://igiari.us` | `http://localhost:8080` |
 
-See also [INTEGRATIONS.md](INTEGRATIONS.md).
+See also [INTEGRATIONS.md](INTEGRATIONS.md) · [DEPLOY_RENDER.md](DEPLOY_RENDER.md).
+
+---
+
+**Last updated:** June 2026

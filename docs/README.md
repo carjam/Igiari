@@ -2,22 +2,28 @@
 
 Operations, deployment, and testing docs. **Build specs** live in [`specs/`](../specs/README.md).
 
+**Layout rules:** [CONVENTIONS.md](CONVENTIONS.md) — what belongs in `docs/` vs `specs/` vs service folders.
+
 ## Deployment & Operations
 
 | Doc | Purpose |
 |-----|---------|
 | [INTEGRATIONS.md](INTEGRATIONS.md) | Supabase, Resend, Render, Cloudflare — dashboards, URLs, env vars |
 | [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) | Live deployment management (Render + Cloudflare) |
-| [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) | Rebuild auth, Resend SMTP, domain, Magic Link template |
+| [DEPLOY_RENDER.md](DEPLOY_RENDER.md) | Render backend service config and env vars |
 | [DEPLOY_CLOUDFLARE.md](DEPLOY_CLOUDFLARE.md) | Cloudflare Pages quick reference |
-| [../backend/DEPLOY_RENDER.md](../backend/DEPLOY_RENDER.md) | Render backend env vars |
+| [SUPABASE.md](SUPABASE.md) | Migrations, auth settings, project URLs |
+| [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) | Rebuild auth, Resend SMTP, domain, Magic Link template |
+| [PROMPT_GUIDE.md](PROMPT_GUIDE.md) | Edit `prompt_template.txt`, eval workflow |
 
 ## Monetization
 
 | Doc | Purpose |
 |-----|---------|
-| [MONETIZATION_ROLLOUT.md](MONETIZATION_ROLLOUT.md) | Step 0–3 tracker (human-readable) |
-| [STRIPE_SETUP.md](STRIPE_SETUP.md) | Stripe test mode: products, webhook, env vars |
+| [MONETIZATION_ROLLOUT.md](MONETIZATION_ROLLOUT.md) | **Current status** — Step 0–3 tracker |
+| [STRIPE_SETUP.md](STRIPE_SETUP.md) | Stripe: production (live) + sandbox dev setup |
+| [STRIPE_GO_LIVE.md](STRIPE_GO_LIVE.md) | Go-live phases A–E; consumer live ✅, legal ⬜ |
+| [LEGAL_BILLING_SETUP.md](LEGAL_BILLING_SETUP.md) | Enable legal-tier checkout ($29 / $39) on Render |
 | [STEP0_LAUNCH_READINESS.md](STEP0_LAUNCH_READINESS.md) | Analytics, live smoke test, spend cap |
 | [../specs/10_monetization.md](../specs/10_monetization.md) | End-state billing architecture |
 | [../specs/11_monetization_rollout_plan.md](../specs/11_monetization_rollout_plan.md) | Phased execution plan |
