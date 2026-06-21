@@ -27,6 +27,8 @@ Operations, deployment, and testing docs. **Build specs** live in [`specs/`](../
 | Doc | Purpose |
 |-----|---------|
 | [LAUNCH_CHECKLIST.md](LAUNCH_CHECKLIST.md) | Launch verification tracker |
+| [LIVE_SMOKE_TEST.md](LIVE_SMOKE_TEST.md) | Production smoke test results (2026-06-21) |
+| [STEP0_LAUNCH_READINESS.md](STEP0_LAUNCH_READINESS.md) | Step 0 checklist |
 | [TEST_REPORT.md](TEST_REPORT.md) | Phase 0–3 test report *(historical; paths refer to pre-deploy layout)* |
 | [AUTONOMOUS_TESTING_SUMMARY.md](AUTONOMOUS_TESTING_SUMMARY.md) | Autonomous testing process summary |
 | [../specs/06_testing_and_launch_checklist.md](../specs/06_testing_and_launch_checklist.md) | Canonical launch checklist |

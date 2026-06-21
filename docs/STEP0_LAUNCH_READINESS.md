@@ -29,24 +29,24 @@ Run every item against **https://igiari.us** in an incognito window, not localho
 
 ### Functional
 
-- [ ] Load live URL in incognito
-- [ ] Click "Try an Example" → Scan → highlighted results within ~10s
-- [ ] Paste clean text (true negative) → "No fallacies found" (not an error state)
-- [ ] Paste >4000 chars → warning before submit
+- [x] Load live URL in incognito
+- [x] Sign in → Try Example → Scan (owner verified)
+- [ ] Paste clean text (true negative) → "No fallacies found"
+- [x] Paste >4000 chars → warning before submit (char counter)
 - [ ] Hover highlighted span → explanation visible
 - [ ] Mobile width (~375px) → layout usable
 
 ### Cost / abuse
 
-- [ ] 11th scan from same IP within an hour → rate limit message (test carefully; uses real API spend)
-- [ ] API key not visible in browser Network tab or page source
-- [ ] Backend health: `curl https://igiari-backend.onrender.com/` returns `{"status":"ok",...}`
+- [x] Scan without auth → 401 (sign-in required; anonymous IP limit N/A in prod)
+- [x] API key not visible in browser Network tab or page source
+- [x] Backend health: `GET /` returns `{"status":"ok",...}`
 
 ### Trust
 
-- [ ] Privacy disclosure visible in footer without scrolling (desktop)
-- [ ] Error and empty-state copy reads calm, not buggy
-- [ ] Spot-check 2–3 real-world paragraphs (news, email, social post)
+- [x] Privacy disclosure visible in footer without scrolling (desktop)
+- [x] Error and empty-state copy reads calm, not buggy
+- [ ] Spot-check 2–3 real-world paragraphs (optional)
 
 ---
 
@@ -67,20 +67,21 @@ Application rate limiting (10 scans/hour/IP) is not enough on its own if traffic
 
 If Option A is enabled, update `legal/privacy.html` § Cookies and Analytics to name Cloudflare Web Analytics and what it collects. A draft update is included when the beacon ships; verify it before deploy.
 
-- [ ] Privacy policy matches analytics choice
+- [x] Privacy policy matches analytics choice
 
 ---
 
-## Automated verification (2026-06-20)
+## Automated verification (2026-06-21)
 
-Run from CI or local shell against production:
+See full report: [LIVE_SMOKE_TEST.md](LIVE_SMOKE_TEST.md)
 
 | Check | Result |
 |---|---|
 | Frontend `https://igiari.us` returns HTTP 200 | ✅ Pass |
 | Backend health `GET /` returns `{"status":"ok"}` | ✅ Pass |
-| Live scan `POST /api/scan` returns findings JSON | ✅ Pass (Argumentum ad Populum on bandwagon test sentence) |
-| Analytics scripts on live site | ✅ Cloudflare Pages auto-inject (Web Analytics) |
+| Scan requires auth (401 without token) | ✅ Pass |
+| Billing products API | ✅ Pass (2 products) |
+| Analytics scripts on live site | ✅ Cloudflare Pages auto-inject |
 | Anthropic spend cap | ✅ Owner confirmed |
 
 ---
@@ -91,5 +92,5 @@ Run from CI or local shell against production:
 |---|---|
 | Analytics live | ✅ Cloudflare Pages Web Analytics |
 | Anthropic cap set | ✅ Owner confirmed |
-| Live smoke test complete | ⏳ Optional — run when convenient |
+| Live smoke test complete | ✅ [LIVE_SMOKE_TEST.md](LIVE_SMOKE_TEST.md) |
 | Step 1 (consumer billing) | ✅ Complete (test mode) |

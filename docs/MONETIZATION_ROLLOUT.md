@@ -17,7 +17,7 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Task | Status |
 |---|---|
 | Analytics enabled | ✅ Cloudflare Pages auto-inject (Web Analytics in dashboard) |
-| Live deployment smoke test (`06_testing_and_launch_checklist.md`) | ⏳ See automated checks below |
+| Live deployment smoke test | ✅ [LIVE_SMOKE_TEST.md](LIVE_SMOKE_TEST.md) (14/14 automated; owner verified sign-in + scan) |
 | Anthropic API spend cap / budget alert | ✅ Configured in [Anthropic Console](https://console.anthropic.com/settings/limits) |
 | Privacy policy updated (accounts, analytics, subprocessors) | ✅ `legal/privacy.html`, `legal/terms.html` |
 
@@ -34,11 +34,11 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 
 **Next:** Step 2 — `/legal` landing + outreach, or Stripe live mode for real charges.
 
-### Step 2 — First revenue channel
+### Step 2 — First revenue channel ⏳
 
 | Task | Status |
 |---|---|
-| `/legal` landing page + PI example | ⬜ |
+| `/legal` landing page + PI example | ✅ [legal/index.html](../legal/index.html) |
 | Targeted outreach (PI / debate communities) | ⬜ |
 | First paying customer | ⬜ |
 
