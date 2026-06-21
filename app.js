@@ -1,5 +1,7 @@
 // Configuration
 const API_URL = 'https://igiari-backend.onrender.com/api/scan';
+const API_BASE = API_URL.replace(/\/api\/scan$/, '');
+window.API_BASE = API_BASE;
 const MAX_CHARS = 4000;
 
 // Example text from eval_002 (Straw Man fallacy) per spec
@@ -84,26 +86,38 @@ async function handleScan() {
     scanButton.disabled = true;
     
     try {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        const token = window.getAccessToken ? window.getAccessToken() : null;
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers,
             body: JSON.stringify({ text }),
         });
         
         const data = await response.json();
         
         if (!response.ok) {
-            // Handle error responses from backend
             const errorDetail = data.detail || data.error || {};
-            throw new Error(errorDetail.message || 'An error occurred while scanning.');
+            const message = typeof errorDetail === 'string'
+                ? errorDetail
+                : (errorDetail.message || 'An error occurred while scanning.');
+            throw new Error(message);
         }
         
         // Success - show results
         currentText = text;
         currentFindings = data.findings || [];
         showResults();
+
+        if (window.updateAuthUI) {
+            window.updateAuthUI();
+        }
         
     } catch (error) {
         console.error('Scan error:', error);

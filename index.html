@@ -13,6 +13,27 @@
             <p class="subtitle">異議あり! — A fallacy scanner for text</p>
         </header>
 
+        <section class="auth-section hidden" id="authSection">
+            <div id="authSignedOut" class="auth-panel">
+                <p class="auth-label">Sign in for 20 free scans</p>
+                <div class="auth-row">
+                    <input
+                        type="email"
+                        id="authEmail"
+                        class="auth-input"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                    />
+                    <button type="button" id="signInButton" class="btn btn-secondary">Email me a link</button>
+                </div>
+                <p class="auth-status" id="authStatus"></p>
+            </div>
+            <div id="authSignedIn" class="auth-panel hidden">
+                <span class="auth-balance" id="creditBalance"></span>
+                <button type="button" id="signOutButton" class="btn btn-text">Sign out</button>
+            </div>
+        </section>
+
         <div class="scan-section" id="scanSection">
             <div class="textarea-wrapper">
                 <textarea 
@@ -80,8 +101,10 @@
         </footer>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="site-config.js"></script>
     <script src="analytics.js"></script>
+    <script src="auth.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
