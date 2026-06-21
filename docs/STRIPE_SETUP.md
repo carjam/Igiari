@@ -82,7 +82,7 @@ Redeploy after saving. Frontend reads products from `GET /api/billing/products` 
 
 1. Sign in → use trial credits until 0 (or test with a fresh account)
 2. Pricing panel appears → buy Starter → return to site → balance +50
-3. Stripe Dashboard → Webhooks → event delivered once; replay event → credits do **not** double (idempotency via `stripe_event_id`)
+3. Stripe Dashboard → Webhooks → resend `checkout.session.completed` → credits do **not** double (verified: balance unchanged on replay).
 
 ---
 

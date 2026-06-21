@@ -29,7 +29,7 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Auth (magic link + OTP code) + 20 trial credits | ✅ [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) · [INTEGRATIONS.md](INTEGRATIONS.md) |
 | Sign-in required to scan (no anonymous path in prod) | ✅ |
 | Custom domain + Resend SMTP | ✅ `igiari.us` |
-| Stripe Checkout + webhooks (test mode) | ✅ [STRIPE_SETUP.md](STRIPE_SETUP.md) |
+| Stripe Checkout + webhooks (test mode) | ✅ Idempotency verified (replay → balance unchanged) |
 | Account UI (balance, buy, Billing Portal) | ✅ |
 
 **Next:** Step 2 — `/legal` landing + outreach, or Stripe live mode for real charges.

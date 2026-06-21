@@ -77,7 +77,7 @@ Phases 0–4 from `04_build_phases.md` are complete. Phase 5 (soft launch + sign
 - [x] Successful scan debits 1 credit; failed scan and cache hit do not.
 - [x] Sign-in required to scan in production (no anonymous bypass).
 - [x] Test-mode Checkout grants credits via webhook.
-- [ ] Duplicate webhook replay does not double-grant (verify in Stripe dashboard when convenient).
+- [x] Duplicate webhook replay does not double-grant (verified 2026-06-21: 69 → resend → 69).
 - [x] User with 0 credits sees pricing inline; buy options shown whenever billing is enabled.
 
 ---
