@@ -10,6 +10,9 @@ from fastapi import HTTPException
 
 TRIAL_CREDITS = 20
 REQUEST_TIMEOUT = 10
+INSUFFICIENT_CREDIT_MESSAGE = (
+    "You have no scans left. Choose a plan below to continue."
+)
 
 
 def _supabase_url() -> str:
@@ -144,6 +147,97 @@ def get_account(user_id: str) -> Optional[Dict[str, Any]]:
     return rows[0] if rows else None
 
 
+def get_account_by_stripe_customer(stripe_customer_id: str) -> Optional[Dict[str, Any]]:
+    response = requests.get(
+        f"{_supabase_url()}/rest/v1/accounts",
+        params={
+            "stripe_customer_id": f"eq.{stripe_customer_id}",
+            "select": "*",
+        },
+        headers=_service_headers(),
+        timeout=REQUEST_TIMEOUT,
+    )
+    if response.status_code != 200:
+        print(f"get_account_by_stripe_customer failed: {response.status_code} {response.text}")
+        return None
+    rows = response.json()
+    return rows[0] if rows else None
+
+
+def update_account_fields(user_id: str, fields: Dict[str, Any]) -> None:
+    response = requests.patch(
+        f"{_supabase_url()}/rest/v1/accounts",
+        params={"id": f"eq.{user_id}"},
+        headers=_service_headers(),
+        json=fields,
+        timeout=REQUEST_TIMEOUT,
+    )
+    if response.status_code != 200:
+        print(f"update_account failed: {response.status_code} {response.text}")
+
+
+def webhook_event_processed(stripe_event_id: str) -> bool:
+    response = requests.get(
+        f"{_supabase_url()}/rest/v1/credit_transactions",
+        params={
+            "stripe_event_id": f"eq.{stripe_event_id}",
+            "select": "id",
+        },
+        headers=_service_headers(),
+        timeout=REQUEST_TIMEOUT,
+    )
+    if response.status_code != 200:
+        return False
+    return len(response.json()) > 0
+
+
+def grant_credits(
+    user_id: str,
+    delta: int,
+    reason: str,
+    stripe_event_id: Optional[str] = None,
+) -> int:
+    if stripe_event_id and webhook_event_processed(stripe_event_id):
+        account = get_account(user_id)
+        return account["credit_balance"] if account else 0
+
+    account = get_account(user_id)
+    if not account:
+        print(f"grant_credits: account not found {user_id}")
+        return 0
+
+    new_balance = account["credit_balance"] + delta
+    payload: Dict[str, Any] = {
+        "account_id": user_id,
+        "delta": delta,
+        "reason": reason,
+    }
+    if stripe_event_id:
+        payload["stripe_event_id"] = stripe_event_id
+
+    txn = requests.post(
+        f"{_supabase_url()}/rest/v1/credit_transactions",
+        headers=_service_headers(),
+        json=payload,
+        timeout=REQUEST_TIMEOUT,
+    )
+    if txn.status_code not in (200, 201):
+        print(f"grant_credits txn failed: {txn.status_code} {txn.text}")
+        if stripe_event_id and txn.status_code == 409:
+            account = get_account(user_id)
+            return account["credit_balance"] if account else 0
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "ACCOUNT_ERROR",
+                "message": "Could not update your balance. Please try again.",
+            },
+        )
+
+    update_account_fields(user_id, {"credit_balance": new_balance})
+    return new_balance
+
+
 def grant_trial_credits(user_id: str) -> None:
     account = get_account(user_id)
     if not account or account.get("free_trial_granted"):
@@ -237,7 +331,7 @@ def require_credits(account: Dict[str, Any]) -> None:
             status_code=402,
             detail={
                 "code": "INSUFFICIENT_CREDIT",
-                "message": "You have no scans left. Purchase credits to continue (coming soon).",
+                "message": INSUFFICIENT_CREDIT_MESSAGE,
             },
         )
 
@@ -249,7 +343,7 @@ def debit_scan_credit(user_id: str) -> int:
             status_code=402,
             detail={
                 "code": "INSUFFICIENT_CREDIT",
-                "message": "You have no scans left. Purchase credits to continue (coming soon).",
+                "message": INSUFFICIENT_CREDIT_MESSAGE,
             },
         )
 

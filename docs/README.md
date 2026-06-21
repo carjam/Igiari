@@ -17,6 +17,7 @@ Operations, deployment, and testing docs. **Build specs** live in [`specs/`](../
 | Doc | Purpose |
 |-----|---------|
 | [MONETIZATION_ROLLOUT.md](MONETIZATION_ROLLOUT.md) | Step 0–3 tracker (human-readable) |
+| [STRIPE_SETUP.md](STRIPE_SETUP.md) | Stripe test mode: products, webhook, env vars |
 | [STEP0_LAUNCH_READINESS.md](STEP0_LAUNCH_READINESS.md) | Analytics, live smoke test, spend cap |
 | [../specs/10_monetization.md](../specs/10_monetization.md) | End-state billing architecture |
 | [../specs/11_monetization_rollout_plan.md](../specs/11_monetization_rollout_plan.md) | Phased execution plan |

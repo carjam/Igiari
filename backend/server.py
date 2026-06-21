@@ -22,6 +22,13 @@ from billing import (
     load_account_from_token,
     require_credits,
 )
+from stripe_billing import (
+    create_checkout_session,
+    create_portal_session,
+    handle_webhook_payload,
+    list_public_products,
+    stripe_enabled,
+)
 
 # Load environment variables
 load_dotenv()
@@ -68,6 +75,19 @@ class ScanResponse(BaseModel):
     input_length: int
     findings: List[Finding]
     credits_remaining: Optional[int] = None
+
+
+class CheckoutRequest(BaseModel):
+    product_key: str = Field(..., min_length=1)
+
+
+class CheckoutResponse(BaseModel):
+    url: str
+
+
+class PortalResponse(BaseModel):
+    url: str
+
 
 class ErrorResponse(BaseModel):
     error: Dict[str, str]
@@ -264,7 +284,77 @@ async def get_account_me(authorization: Optional[str] = Header(default=None)):
         "credit_balance": account["credit_balance"],
         "free_trial_granted": account["free_trial_granted"],
         "subscription_status": account["subscription_status"],
+        "stripe_customer_id": account.get("stripe_customer_id"),
+        "payments_enabled": stripe_enabled(),
     }
+
+
+@app.get("/api/billing/products")
+async def get_billing_products():
+    return {"products": list_public_products()}
+
+
+@app.post("/api/billing/checkout", response_model=CheckoutResponse)
+async def post_billing_checkout(
+    body: CheckoutRequest,
+    authorization: Optional[str] = Header(default=None),
+):
+    if not stripe_enabled():
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "STRIPE_UNAVAILABLE",
+                "message": "Payments are not configured on this server yet.",
+            },
+        )
+
+    token = extract_bearer_token(authorization)
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "NOT_SIGNED_IN",
+                "message": "Sign in to purchase scans.",
+            },
+        )
+
+    account = load_account_from_token(token)
+    url = create_checkout_session(account, body.product_key.strip())
+    return {"url": url}
+
+
+@app.post("/api/billing/portal", response_model=PortalResponse)
+async def post_billing_portal(authorization: Optional[str] = Header(default=None)):
+    if not stripe_enabled():
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "code": "STRIPE_UNAVAILABLE",
+                "message": "Payments are not configured on this server yet.",
+            },
+        )
+
+    token = extract_bearer_token(authorization)
+    if not token:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "code": "NOT_SIGNED_IN",
+                "message": "Sign in to manage billing.",
+            },
+        )
+
+    account = load_account_from_token(token)
+    url = create_portal_session(account)
+    return {"url": url}
+
+
+@app.post("/api/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    signature = request.headers.get("stripe-signature")
+    handle_webhook_payload(payload, signature)
+    return {"received": True}
 
 
 @app.post("/api/scan", response_model=ScanResponse)

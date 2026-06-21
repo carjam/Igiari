@@ -66,9 +66,10 @@ function updateScanButton() {
     const isEmpty = textInput.value.trim().length === 0;
     const isTooLong = textInput.value.length > MAX_CHARS;
     const needsSignIn = window.signInRequired?.() && !window.isSignedIn?.();
-    scanButton.disabled = isEmpty || isTooLong || needsSignIn;
+    const noCredits = window.getAccountBalance?.() === 0;
+    scanButton.disabled = isEmpty || isTooLong || needsSignIn || noCredits;
     if (tryExampleButton) {
-        tryExampleButton.disabled = Boolean(needsSignIn);
+        tryExampleButton.disabled = Boolean(needsSignIn || noCredits);
     }
 }
 
@@ -132,9 +133,13 @@ async function handleScan() {
         
         if (!response.ok) {
             const errorDetail = data.detail || data.error || {};
+            const code = typeof errorDetail === 'object' ? errorDetail.code : '';
             const message = typeof errorDetail === 'string'
                 ? errorDetail
                 : (errorDetail.message || 'An error occurred while scanning.');
+            if (response.status === 402 || code === 'INSUFFICIENT_CREDIT') {
+                window.showPricingPanel?.();
+            }
             throw new Error(message);
         }
         

@@ -14,9 +14,10 @@ Concise reference for every external service Igiari uses. **Secrets stay in dash
 | **Render** | FastAPI backend (`/api/scan`, `/api/account/me`) | https://igiari-backend.onrender.com |
 | **Supabase** | Postgres, auth, account/credit data | `yvkrihgjcoyqytwoisgw` · https://yvkrihgjcoyqytwoisgw.supabase.co |
 | **Resend** | Sign-in email delivery (via Supabase SMTP) | From: `noreply@igiari.us` |
+| **Stripe** | Checkout, subscriptions, webhooks | https://dashboard.stripe.com/ · [setup guide](STRIPE_SETUP.md) |
 | **Anthropic** | Fallacy detection (Claude Haiku) | API only — no public URL |
 
-**Data flow:** Browser → Cloudflare Pages → Render API → Anthropic; sign-in → Supabase Auth → email via Resend → credits in Supabase Postgres (Render uses service role).
+**Data flow:** Browser → Cloudflare Pages → Render API → Anthropic; sign-in → Supabase Auth → email via Resend → credits in Supabase Postgres; purchases → Stripe Checkout → webhook → credit ledger.
 
 ---
 
@@ -55,8 +56,13 @@ Concise reference for every external service Igiari uses. **Secrets stay in dash
 | `SUPABASE_URL` | Supabase → Settings → API → Project URL | Accounts, credits |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → Secret key | DB writes (backend only) |
 | `SUPABASE_ANON_KEY` | Supabase → Settings → API → Publishable key | Verify user JWTs |
+| `STRIPE_SECRET_KEY` | [Stripe API keys](https://dashboard.stripe.com/test/apikeys) | Checkout + webhooks |
+| `STRIPE_WEBHOOK_SECRET` | Stripe → Webhooks → signing secret | Webhook verification |
+| `STRIPE_PRICE_STARTER_PACK` | Stripe Product catalog | One-time pack |
+| `STRIPE_PRICE_CASUAL_SUB` | Stripe Product catalog | Monthly subscription |
+| `SITE_URL` | `https://igiari.us` | Checkout return URLs |
 
-Missing any Supabase var → balance/sign-in API errors. Set spend cap: https://console.anthropic.com/settings/limits
+See [STRIPE_SETUP.md](STRIPE_SETUP.md) for product creation and webhook events.
 
 **Deploy:** Push to `master` → auto-redeploy. Logs: service → **Logs**. Free tier cold-starts (~30s) after sleep.
 
@@ -159,6 +165,19 @@ Resend does **not** send mail directly from our code — Supabase Auth sends via
 | **Model in code** | `claude-haiku-4-5-20251001` (`backend/server.py`) |
 
 Only Render holds `ANTHROPIC_API_KEY`. Set a monthly spend cap as a backstop below app rate limits.
+
+---
+
+## Stripe (payments)
+
+| | |
+|---|---|
+| **Dashboard (test)** | https://dashboard.stripe.com/test/dashboard |
+| **Setup guide** | [STRIPE_SETUP.md](STRIPE_SETUP.md) |
+| **Webhook URL** | `https://igiari-backend.onrender.com/api/webhooks/stripe` |
+| **Test card** | `4242 4242 4242 4242` |
+
+Checkout is hosted by Stripe (no card data in our UI). Credits grant on webhook with idempotency via `credit_transactions.stripe_event_id`.
 
 ---
 

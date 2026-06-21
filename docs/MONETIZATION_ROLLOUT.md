@@ -29,8 +29,8 @@ See [`STEP0_LAUNCH_READINESS.md`](STEP0_LAUNCH_READINESS.md) for the full checkl
 | Auth (magic link + OTP code) + 20 trial credits | ✅ [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md) · [INTEGRATIONS.md](INTEGRATIONS.md) |
 | Sign-in required to scan (no anonymous path in prod) | ✅ |
 | Custom domain + Resend SMTP | ✅ `igiari.us` |
-| Stripe Checkout + webhooks (test mode) | ⬜ |
-| Account UI (balance, buy, Billing Portal) | ⬜ |
+| Stripe Checkout + webhooks (test mode) | ⬜ Code shipped — [STRIPE_SETUP.md](STRIPE_SETUP.md) |
+| Account UI (balance, buy, Billing Portal) | ✅ Pricing panel + portal link |
 
 ### Step 2 — First revenue channel
 

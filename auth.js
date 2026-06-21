@@ -10,6 +10,8 @@ let supabaseClient = null;
 let currentSession = null;
 let ignoreAuthEvents = false;
 let authUiRequestId = 0;
+let billingProducts = [];
+let lastAccount = null;
 
 function authConfigured() {
     return Boolean(window.IGIARI_SUPABASE_URL && window.IGIARI_SUPABASE_ANON_KEY);
@@ -210,6 +212,10 @@ function bindAuthButtons() {
         event.preventDefault();
         void handleVerifyOtp();
     });
+    document.getElementById('billingPortalButton')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        void handleBillingPortal();
+    });
     document.getElementById('authOtp')?.addEventListener('keydown', (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
@@ -284,6 +290,8 @@ async function initAuth() {
     }
 
     prefillEmail();
+    handleCheckoutReturn();
+    void loadBillingProducts();
 }
 
 async function handleSignIn() {
@@ -406,6 +414,227 @@ async function handleSignOut() {
     void updateAuthUI();
 }
 
+async function fetchBillingProducts() {
+    try {
+        const response = await fetchWithTimeout(`${apiBase()}/api/billing/products`);
+        if (!response.ok) {
+            return [];
+        }
+        const data = await response.json();
+        return data.products || [];
+    } catch (_error) {
+        return [];
+    }
+}
+
+async function startCheckout(productKey) {
+    const statusEl = document.getElementById('pricingStatus');
+    const token = getAccessToken();
+    if (!token) {
+        if (statusEl) {
+            statusEl.textContent = 'Sign in to purchase scans.';
+        }
+        return;
+    }
+
+    if (statusEl) {
+        statusEl.textContent = 'Opening checkout…';
+    }
+
+    try {
+        const response = await fetchWithTimeout(`${apiBase()}/api/billing/checkout`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ product_key: productKey }),
+        });
+
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (_error) {
+            data = {};
+        }
+
+        if (!response.ok) {
+            const detail = data.detail || {};
+            const message = typeof detail === 'string'
+                ? detail
+                : (detail.message || 'Could not start checkout.');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+            return;
+        }
+
+        if (data.url) {
+            window.location.href = data.url;
+        }
+    } catch (error) {
+        if (statusEl) {
+            statusEl.textContent = error.name === 'AbortError'
+                ? 'Checkout timed out. Try again.'
+                : 'Could not reach the server.';
+        }
+    }
+}
+
+async function handleBillingPortal() {
+    const statusEl = document.getElementById('pricingStatus');
+    const token = getAccessToken();
+    if (!token) {
+        return;
+    }
+
+    if (statusEl) {
+        statusEl.textContent = 'Opening billing portal…';
+    }
+
+    try {
+        const response = await fetchWithTimeout(`${apiBase()}/api/billing/portal`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        let data = {};
+        try {
+            data = await response.json();
+        } catch (_error) {
+            data = {};
+        }
+
+        if (!response.ok) {
+            const detail = data.detail || {};
+            const message = typeof detail === 'string'
+                ? detail
+                : (detail.message || 'Could not open billing portal.');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+            return;
+        }
+
+        if (data.url) {
+            window.location.href = data.url;
+        }
+    } catch (error) {
+        if (statusEl) {
+            statusEl.textContent = 'Could not reach the server.';
+        }
+    }
+}
+
+function renderPricingProducts() {
+    const container = document.getElementById('pricingOptions');
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = '';
+
+    if (!billingProducts.length) {
+        container.innerHTML = '<p class="pricing-card-detail">Paid plans are not available yet.</p>';
+        return;
+    }
+
+    billingProducts.forEach((product) => {
+        const card = document.createElement('div');
+        card.className = 'pricing-card';
+
+        const buttonLabel = product.mode === 'subscription' ? 'Subscribe' : 'Buy';
+
+        card.innerHTML = `
+            <div class="pricing-card-name">${escapeHtml(product.name)} · ${escapeHtml(product.amount_display)}</div>
+            <div class="pricing-card-detail">${escapeHtml(product.description)}</div>
+            <button type="button" class="btn btn-secondary pricing-buy-btn">${buttonLabel}</button>
+        `;
+
+        card.querySelector('.pricing-buy-btn')?.addEventListener('click', () => {
+            void startCheckout(product.key);
+        });
+
+        container.appendChild(card);
+    });
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
+function updatePricingUI(account) {
+    const section = document.getElementById('pricingSection');
+    const portalBtn = document.getElementById('billingPortalButton');
+    const balanceEl = document.getElementById('creditBalance');
+
+    if (!section || !account) {
+        section?.classList.add('hidden');
+        return;
+    }
+
+    const showPricing = account.credit_balance <= 0 && account.payments_enabled;
+    section.classList.toggle('hidden', !showPricing);
+
+    if (balanceEl) {
+        balanceEl.classList.toggle('no-credits', account.credit_balance <= 0);
+    }
+
+    if (portalBtn) {
+        const showPortal = Boolean(
+            account.payments_enabled && account.stripe_customer_id,
+        );
+        portalBtn.classList.toggle('hidden', !showPortal);
+    }
+
+    if (showPricing && billingProducts.length === 0) {
+        void loadBillingProducts();
+    } else if (showPricing) {
+        renderPricingProducts();
+    }
+}
+
+async function loadBillingProducts() {
+    billingProducts = await fetchBillingProducts();
+    renderPricingProducts();
+}
+
+function showPricingPanel() {
+    const section = document.getElementById('pricingSection');
+    section?.classList.remove('hidden');
+    section?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (billingProducts.length === 0) {
+        void loadBillingProducts();
+    } else {
+        renderPricingProducts();
+    }
+}
+
+function handleCheckoutReturn() {
+    const url = new URL(window.location.href);
+    const checkout = url.searchParams.get('checkout');
+    if (!checkout) {
+        return;
+    }
+
+    url.searchParams.delete('checkout');
+    window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+
+    const statusEl = document.getElementById('pricingStatus');
+    if (checkout === 'success') {
+        if (statusEl) {
+            statusEl.textContent = 'Payment received. Credits may take a few seconds to appear.';
+        }
+        void updateAuthUI();
+    } else if (checkout === 'cancel' && statusEl) {
+        statusEl.textContent = 'Checkout canceled.';
+    }
+}
+
 async function fetchAccount() {
     const token = getAccessToken();
     if (!token) {
@@ -450,10 +679,13 @@ async function updateAuthUI() {
     const statusEl = document.getElementById('authStatus');
 
     if (!currentSession) {
+        lastAccount = null;
         signedOut?.classList.remove('hidden');
         signedIn?.classList.add('hidden');
+        document.getElementById('pricingSection')?.classList.add('hidden');
         if (balanceEl) {
             balanceEl.textContent = '';
+            balanceEl.classList.remove('no-credits');
         }
         refreshScanControls();
         return;
@@ -475,7 +707,9 @@ async function updateAuthUI() {
         return;
     }
     if (result.account && balanceEl) {
+        lastAccount = result.account;
         balanceEl.textContent = `${result.account.credit_balance} scans left`;
+        updatePricingUI(result.account);
         refreshScanControls();
         return;
     }
@@ -493,3 +727,5 @@ window.isSignedIn = isSignedIn;
 window.updateAuthUI = updateAuthUI;
 window.handleSignIn = handleSignIn;
 window.handleSignOut = handleSignOut;
+window.showPricingPanel = showPricingPanel;
+window.getAccountBalance = () => lastAccount?.credit_balance;
