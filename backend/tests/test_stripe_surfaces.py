@@ -136,3 +136,31 @@ def test_get_or_create_stripe_customer_recreates_stale_id(
     assert customer_id == "cus_live_new"
     mock_create.assert_called_once()
     mock_update.assert_called_once_with("acct-1", {"stripe_customer_id": "cus_live_new"})
+
+
+@patch("stripe_billing.stripe.Customer.create")
+@patch("stripe_billing.stripe.Customer.retrieve")
+def test_get_or_create_stripe_customer_does_not_recreate_on_transient_error(
+    mock_retrieve,
+    mock_create,
+    monkeypatch,
+):
+    import pytest
+    from fastapi import HTTPException
+
+    from stripe_billing import get_or_create_stripe_customer
+
+    monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_x")
+    mock_retrieve.side_effect = stripe.error.APIConnectionError("Network down")
+
+    with pytest.raises(HTTPException) as exc_info:
+        get_or_create_stripe_customer(
+            {
+                "id": "acct-1",
+                "email": "buyer@example.com",
+                "stripe_customer_id": "cus_existing",
+            }
+        )
+
+    assert exc_info.value.status_code == 502
+    mock_create.assert_not_called()

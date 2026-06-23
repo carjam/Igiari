@@ -100,6 +100,17 @@ def _stripe_http_error(exc: stripe.error.StripeError) -> HTTPException:
     )
 
 
+def _stripe_customer_not_found(exc: stripe.error.StripeError) -> bool:
+    """True only when Stripe confirms the stored customer ID does not exist."""
+    if not isinstance(exc, stripe.error.InvalidRequestError):
+        return False
+    if getattr(exc, "code", None) == "resource_missing":
+        return True
+    if getattr(exc, "param", None) == "id":
+        return True
+    return "no such customer" in str(exc).lower()
+
+
 def site_url() -> str:
     return os.getenv("SITE_URL", "https://igiari.us").rstrip("/")
 
@@ -187,8 +198,10 @@ def get_or_create_stripe_customer(account: Dict[str, Any]) -> str:
             stripe.Customer.retrieve(existing)
             return existing
         except stripe.error.StripeError as exc:
+            if not _stripe_customer_not_found(exc):
+                raise _stripe_http_error(exc) from exc
             print(
-                f"Stale or invalid Stripe customer {existing} "
+                f"Replacing missing Stripe customer {existing} "
                 f"for account {account_id}: {exc}"
             )
 
