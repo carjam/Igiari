@@ -5,3 +5,10 @@ __pycache__/
 venv/
 *.egg-info/
 test_api.py
+
+# pytest / coverage (local only — CI regenerates)
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml

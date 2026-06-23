@@ -118,6 +118,22 @@ def test_what_would_strengthen_this_specificity_rule_present():
     )
 
 
+def test_one_primary_label_rule_present():
+    """Prompt must discourage stacking cousin fallacy labels on the same move."""
+    template = load_prompt_template()
+    lower = template.lower()
+    assert "one primary label" in lower or "do not stack" in lower, (
+        "Prompt must include one-primary-label-per-reasoning-flaw guidance"
+    )
+
+
+def test_legitimate_expert_authority_guidance_present():
+    """Prompt must distinguish legitimate expert reasoning from Appeal to Authority."""
+    template = load_prompt_template()
+    lower = template.lower()
+    assert "legitimate expert" in lower or "not appeal to authority" in lower
+
+
 def test_injected_taxonomy_includes_pattern():
     """Runtime taxonomy must include pattern text so calibration rule 8 is satisfiable."""
     prompt = build_system_prompt("Sample argument text for taxonomy check.")

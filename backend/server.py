@@ -24,6 +24,7 @@ from billing import (
     load_account_from_token,
     require_credits,
 )
+from scan_observability import ApiCallStats, ScanTelemetry, log_scan_complete
 from stripe_billing import (
     create_checkout_session,
     create_portal_session,
@@ -79,8 +80,9 @@ async def handle_unhandled_exception(request: Request, exc: Exception):
 
 # Constants
 MAX_INPUT_LENGTH = 4000
-RATE_LIMIT_REQUESTS = 10
+RATE_LIMIT_REQUESTS = int(os.getenv("RATE_LIMIT_REQUESTS", "10"))
 RATE_LIMIT_WINDOW = 3600  # 1 hour in seconds
+RATE_LIMIT_DISABLED = os.getenv("IGIARI_DISABLE_RATE_LIMIT", "").lower() in ("1", "true", "yes")
 MODEL_NAME = "claude-haiku-4-5-20251001"
 CACHE_MAX_SIZE = 1000  # Max entries before LRU eviction
 
@@ -138,9 +140,12 @@ def load_taxonomy():
 
 def check_rate_limit(client_ip: str) -> bool:
     """
-    IP-based rate limiting: 10 requests per hour per IP.
+    IP-based rate limiting: RATE_LIMIT_REQUESTS per hour per IP (local dev when billing off).
+    Set IGIARI_DISABLE_RATE_LIMIT=1 or RATE_LIMIT_REQUESTS=0 to bypass (e.g. run_eval.py).
     Returns True if allowed, False if rate limited.
     """
+    if RATE_LIMIT_DISABLED or RATE_LIMIT_REQUESTS <= 0:
+        return True
     now = time.time()
     cutoff = now - RATE_LIMIT_WINDOW
     
@@ -206,7 +211,38 @@ def find_span_indices(text: str, span: str) -> Optional[tuple[int, int]]:
     return (start, start + len(span))
 
 
-async def call_anthropic_api(user_text: str) -> Dict:
+def process_raw_findings(text: str, raw_findings: list) -> tuple[list[Finding], int]:
+    """Validate model findings; return kept findings and dropped-span count."""
+    findings: list[Finding] = []
+    spans_dropped = 0
+
+    for finding in raw_findings:
+        span = finding.get("span", "")
+        indices = find_span_indices(text, span)
+
+        if indices is None:
+            spans_dropped += 1
+            continue
+
+        start_idx, end_idx = indices
+        findings.append(
+            Finding(
+                span=span,
+                start_index=start_idx,
+                end_index=end_idx,
+                fallacy=finding.get("fallacy", "Unknown"),
+                category=finding.get("category", "Unknown"),
+                subcategory=finding.get("subcategory", "Unknown"),
+                confidence=finding.get("confidence", "medium"),
+                explanation=finding.get("explanation", ""),
+                what_would_strengthen_this=finding.get("what_would_strengthen_this", "").strip(),
+            )
+        )
+
+    return findings, spans_dropped
+
+
+async def call_anthropic_api(user_text: str, stats: Optional[ApiCallStats] = None) -> Dict:
     """
     Call Anthropic API with the user text.
     Returns parsed JSON response.
@@ -217,6 +253,7 @@ async def call_anthropic_api(user_text: str) -> Dict:
     
     client = anthropic.Anthropic(api_key=api_key)
     system_prompt = build_system_prompt(user_text)
+    api_started = time.perf_counter()
     
     try:
         message = client.messages.create(
@@ -244,8 +281,12 @@ async def call_anthropic_api(user_text: str) -> Dict:
         # Parse JSON
         try:
             result = json.loads(response_text)
+            if stats is not None:
+                stats.latency_ms = int((time.perf_counter() - api_started) * 1000)
             return result
         except json.JSONDecodeError as e:
+            if stats is not None:
+                stats.parse_retries += 1
             # Retry once if JSON parsing fails
             print(f"JSON parse error on first attempt: {e}")
             print(f"Response text: {response_text[:500]}")
@@ -272,6 +313,8 @@ async def call_anthropic_api(user_text: str) -> Dict:
             response_text = response_text.strip()
             
             result = json.loads(response_text)
+            if stats is not None:
+                stats.latency_ms = int((time.perf_counter() - api_started) * 1000)
             return result
             
     except Exception as e:
@@ -442,6 +485,7 @@ async def scan_text(
     When billing is enabled: sign-in and credits required (no anonymous scans).
     When billing is disabled: anonymous IP rate limit (local dev only).
     """
+    scan_started = time.perf_counter()
     token = extract_bearer_token(authorization)
     account = None
     user_id = None
@@ -496,18 +540,31 @@ async def scan_text(
         print(f"Cache hit for hash: {cache_key[:16]}...")
         cached_response = response_cache[cache_key]
         credits_remaining = account["credit_balance"] if account else None
+        findings = [Finding(**f) for f in cached_response["findings"]]
+        log_scan_complete(
+            ScanTelemetry(
+                input_length=cached_response["input_length"],
+                finding_count=len(findings),
+                spans_dropped=0,
+                parse_retries=0,
+                latency_ms=int((time.perf_counter() - scan_started) * 1000),
+                cache_hit=True,
+                raw_finding_count=len(findings),
+            )
+        )
         return ScanResponse(
             input_length=cached_response["input_length"],
-            findings=[Finding(**f) for f in cached_response["findings"]],
+            findings=findings,
             credits_remaining=credits_remaining,
         )
     
     # Cache miss - proceed with API call
     print(f"Cache miss for hash: {cache_key[:16]}...")
+    api_stats = ApiCallStats()
     
     # Call Anthropic API
     try:
-        raw_result = await call_anthropic_api(text)
+        raw_result = await call_anthropic_api(text, stats=api_stats)
     except json.JSONDecodeError:
         raise HTTPException(
             status_code=502,
@@ -526,32 +583,8 @@ async def scan_text(
             }
         )
     
-    # Process findings
-    findings = []
-    for finding in raw_result.get("findings", []):
-        span = finding.get("span", "")
-        
-        # Find exact span in original text
-        indices = find_span_indices(text, span)
-        
-        if indices is None:
-            # Span not found exactly - skip this finding per spec
-            print(f"Warning: Could not locate span in text: {span[:50]}...")
-            continue
-        
-        start_idx, end_idx = indices
-        
-        findings.append(Finding(
-            span=span,
-            start_index=start_idx,
-            end_index=end_idx,
-            fallacy=finding.get("fallacy", "Unknown"),
-            category=finding.get("category", "Unknown"),
-            subcategory=finding.get("subcategory", "Unknown"),
-            confidence=finding.get("confidence", "medium"),
-            explanation=finding.get("explanation", ""),
-            what_would_strengthen_this=finding.get("what_would_strengthen_this", "").strip(),
-        ))
+    raw_findings = raw_result.get("findings", [])
+    findings, spans_dropped = process_raw_findings(text, raw_findings)
     
     # Store in cache (Phase 3.5)
     response_data = {
@@ -569,6 +602,19 @@ async def scan_text(
     credits_remaining = None
     if user_id:
         credits_remaining = debit_scan_credit(user_id)
+
+    log_scan_complete(
+        ScanTelemetry(
+            input_length=len(text),
+            finding_count=len(findings),
+            spans_dropped=spans_dropped,
+            parse_retries=api_stats.parse_retries,
+            latency_ms=int((time.perf_counter() - scan_started) * 1000),
+            cache_hit=False,
+            raw_finding_count=len(raw_findings),
+            model_latency_ms=api_stats.latency_ms,
+        )
+    )
 
     return ScanResponse(
         input_length=len(text),

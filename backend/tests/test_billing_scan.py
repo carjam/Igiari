@@ -35,7 +35,7 @@ def test_scan_rejects_zero_credits(client, enable_billing_env, monkeypatch):
 def test_scan_success_debits_credit_and_returns_balance(
     client, enable_billing_env, monkeypatch
 ):
-    async def fake_api(_user_text):
+    async def fake_api(_user_text, stats=None):
         return {"findings": []}
 
     debited = []

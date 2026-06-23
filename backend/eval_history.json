@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2026-06-19 19:34:32",
+    "label": "pre-pattern-inject-baseline",
+    "cases": 30,
+    "precision": 0.452,
+    "recall": 0.636,
+    "f1": 0.528,
+    "true_negative_accuracy": 0.889,
+    "notes": "Last scored run before pattern injection; from original eval_results.json"
+  },
+  {
+    "timestamp": "2026-06-23 16:04:58",
+    "label": "post-pattern-inject-40-cases",
+    "cases": 40,
+    "precision": 0.474,
+    "recall": 0.667,
+    "f1": 0.554,
+    "true_negative_accuracy": 0.786,
+    "format_compliance_rate": 1.0,
+    "span_fidelity_rate": 1.0,
+    "notes": "Pattern injection deployed; Phase 3 boundary cases added. Dominant failure: over-flagging + TN regressions on eval_011/029/036"
+  },
+  {
+    "timestamp": "2026-06-23",
+    "label": "phase5-calibration-v1",
+    "cases": 40,
+    "precision": 0.647,
+    "recall": 0.815,
+    "f1": 0.721,
+    "true_negative_accuracy": 1.0,
+    "format_compliance_rate": 1.0,
+    "span_fidelity_rate": 1.0,
+    "prompt_change": "Expanded rules 2, 8, 10; added rule 13 (one primary label per flaw). Disambiguation for post hoc/hasty/gambler's, ad hominem/tu quoque, appeal to pity, special pleading, circular reasoning, survivorship bias, legitimate expert authority, hyperbole.",
+    "remaining_fps": ["eval_004 Appeal to Fear", "eval_012 Hasty Generalization", "eval_014 Affirming the Consequent", "eval_020 False Dilemma", "eval_026 Argument from Ignorance", "eval_030 False Dilemma", "eval_033 Survivorship Bias"],
+    "remaining_fns": ["eval_008 Special Pleading", "eval_016 Appeal to Tradition", "eval_019 Hasty Generalization", "eval_022 Gambler's Fallacy", "eval_039 Ad Hominem"]
+  }
+]

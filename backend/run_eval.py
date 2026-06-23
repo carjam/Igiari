@@ -11,6 +11,11 @@ Usage:
     python run_eval.py
 
 Requires: backend server running (python server.py)
+
+For full eval runs (40 cases), disable the dev rate limit before starting the server:
+  set IGIARI_DISABLE_RATE_LIMIT=1   (Windows cmd)
+  $env:IGIARI_DISABLE_RATE_LIMIT="1"   (PowerShell)
+  export IGIARI_DISABLE_RATE_LIMIT=1   (bash)
 """
 import json
 import sys
@@ -18,30 +23,17 @@ import time
 from pathlib import Path
 import requests
 
+from eval_grading import (
+    assert_phase5_quality_gates,
+    compute_format_summary,
+    compute_span_fidelity_summary,
+    grade,
+    quality_gate_status,
+)
+
 HERE = Path(__file__).parent
 EVAL_SET_PATH = HERE / "fallacy_reference" / "eval_set.json"
-TAXONOMY_PATH = HERE / "fallacy_reference" / "fallacies.json"
 BACKEND_URL = "http://localhost:8000/api/scan"
-
-
-def load_alias_map():
-    """Build a lowercase name/alias -> canonical name map for fuzzy matching."""
-    with open(TAXONOMY_PATH) as f:
-        taxonomy = json.load(f)
-    alias_map = {}
-    for entry in taxonomy:
-        canonical = entry["name"]
-        alias_map[canonical.lower()] = canonical
-        for alias in entry.get("aliases", []):
-            alias_map[alias.lower()] = canonical
-    return alias_map
-
-
-def normalize(name, alias_map):
-    """Normalize fallacy name using alias map."""
-    return alias_map.get(name.strip().lower(), name.strip())
-
-
 def run_eval():
     """Run all eval cases through the backend and collect predictions."""
     with open(EVAL_SET_PATH) as f:
@@ -53,6 +45,16 @@ def run_eval():
     
     predictions = []
     errors = []
+    format_metrics = {
+        "total": len(eval_set),
+        "json_ok": 0,
+        "format_errors": 0,
+    }
+    span_metrics = {
+        "findings_returned": 0,
+        "spans_in_transcript": 0,
+        "spans_not_in_transcript": 0,
+    }
     
     for i, case in enumerate(eval_set, 1):
         case_id = case["id"]
@@ -68,8 +70,34 @@ def run_eval():
             )
             
             if response.status_code == 200:
-                result = response.json()
+                try:
+                    result = response.json()
+                except json.JSONDecodeError:
+                    format_metrics["format_errors"] += 1
+                    error_msg = "HTTP 200 but response body is not valid JSON"
+                    errors.append({"id": case_id, "error": error_msg, "type": "format_violation"})
+                    print(f"ERROR: {error_msg}")
+                    predictions.append({"id": case_id, "predictions": []})
+                    continue
+
+                if "findings" not in result or not isinstance(result["findings"], list):
+                    format_metrics["format_errors"] += 1
+                    error_msg = "Response missing findings array"
+                    errors.append({"id": case_id, "error": error_msg, "type": "format_violation"})
+                    print(f"ERROR: {error_msg}")
+                    predictions.append({"id": case_id, "predictions": []})
+                    continue
+
+                format_metrics["json_ok"] += 1
                 findings = result.get("findings", [])
+                
+                for finding in findings:
+                    span = finding.get("span", "")
+                    span_metrics["findings_returned"] += 1
+                    if span and span in text:
+                        span_metrics["spans_in_transcript"] += 1
+                    elif span:
+                        span_metrics["spans_not_in_transcript"] += 1
                 
                 # Convert to grader format
                 predictions.append({
@@ -85,99 +113,31 @@ def run_eval():
                 })
                 
                 print(f"OK ({len(findings)} findings)")
+            elif response.status_code == 502:
+                format_metrics["format_errors"] += 1
+                error_msg = f"HTTP 502 (model JSON parse failure): {response.text[:100]}"
+                errors.append({"id": case_id, "error": error_msg, "type": "format_violation"})
+                print(f"ERROR: {error_msg}")
+                predictions.append({"id": case_id, "predictions": []})
             else:
                 error_msg = f"HTTP {response.status_code}: {response.text[:100]}"
-                errors.append({"id": case_id, "error": error_msg})
+                errors.append({"id": case_id, "error": error_msg, "type": "api_error"})
                 print(f"ERROR: {error_msg}")
                 predictions.append({"id": case_id, "predictions": []})
         
         except requests.exceptions.RequestException as e:
             error_msg = f"Request failed: {str(e)[:100]}"
-            errors.append({"id": case_id, "error": error_msg})
+            errors.append({"id": case_id, "error": error_msg, "type": "request_error"})
             print(f"ERROR: {error_msg}")
             predictions.append({"id": case_id, "predictions": []})
         
         # Small delay to avoid overwhelming the backend
         time.sleep(0.1)
     
-    return predictions, errors
+    return predictions, errors, format_metrics, span_metrics
 
 
-def grade(predictions):
-    """Grade predictions against ground truth (adapted from grade_eval.py)."""
-    with open(EVAL_SET_PATH) as f:
-        eval_set = {case["id"]: case for case in json.load(f)}
-    
-    predictions_dict = {p["id"]: p for p in predictions}
-    alias_map = load_alias_map()
-    
-    results = []
-    tp = fp = fn = 0
-    tn_correct = tn_total = 0
-    
-    for case_id, case in eval_set.items():
-        gt_fallacies = {normalize(g["fallacy"], alias_map) for g in case["ground_truth"]}
-        pred = predictions_dict.get(case_id)
-        pred_fallacies = set()
-        if pred:
-            pred_fallacies = {normalize(p["fallacy"], alias_map) for p in pred.get("predictions", [])}
-        
-        is_true_negative_case = len(gt_fallacies) == 0
-        
-        if is_true_negative_case:
-            tn_total += 1
-            correct = len(pred_fallacies) == 0
-            if correct:
-                tn_correct += 1
-            results.append({
-                "id": case_id,
-                "type": "true_negative",
-                "correct": correct,
-                "ground_truth": [],
-                "predicted": sorted(pred_fallacies),
-            })
-        else:
-            matched = gt_fallacies & pred_fallacies
-            missed = gt_fallacies - pred_fallacies
-            extra = pred_fallacies - gt_fallacies
-            tp += len(matched)
-            fn += len(missed)
-            fp += len(extra)
-            results.append({
-                "id": case_id,
-                "type": "positive",
-                "ground_truth": sorted(gt_fallacies),
-                "predicted": sorted(pred_fallacies),
-                "matched": sorted(matched),
-                "missed": sorted(missed),
-                "extra_unjustified": sorted(extra),
-            })
-    
-    precision = tp / (tp + fp) if (tp + fp) else float("nan")
-    recall = tp / (tp + fn) if (tp + fn) else float("nan")
-    f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else float("nan")
-    tn_accuracy = tn_correct / tn_total if tn_total else float("nan")
-    
-    summary = {
-        "positive_cases": {
-            "true_positives": tp,
-            "false_positives": fp,
-            "false_negatives": fn,
-            "precision": round(precision, 3) if not isinstance(precision, float) or not (precision != precision) else None,
-            "recall": round(recall, 3) if not isinstance(recall, float) or not (recall != recall) else None,
-            "f1": round(f1, 3) if not isinstance(f1, float) or not (f1 != f1) else None,
-        },
-        "true_negative_cases": {
-            "total": tn_total,
-            "correctly_flagged_clean": tn_correct,
-            "accuracy": round(tn_accuracy, 3) if not isinstance(tn_accuracy, float) or not (tn_accuracy != tn_accuracy) else None,
-        },
-    }
-    
-    return summary, results
-
-
-def print_results(summary, results, errors):
+def print_results(summary, results, errors, format_summary, span_summary):
     """Print evaluation results."""
     print("\n" + "=" * 60)
     print("=== EVALUATION SUMMARY ===")
@@ -197,13 +157,41 @@ def print_results(summary, results, errors):
     print(f"  Total: {tn['total']}")
     print(f"  Correctly identified as clean: {tn['correctly_flagged_clean']}")
     print(f"  Accuracy: {tn['accuracy']}")
+
+    print("\n[FORMAT COMPLIANCE]:")
+    print(f"  JSON OK: {format_summary['json_ok']}/{format_summary['total_cases']}")
+    print(f"  Format errors: {format_summary['format_errors']}")
+    print(f"  Compliance rate: {format_summary['format_compliance_rate']}")
+
+    print("\n[SPAN FIDELITY] (returned findings only):")
+    print(f"  Findings returned: {span_summary['findings_returned']}")
+    print(f"  Spans in transcript: {span_summary['spans_in_transcript']}")
+    print(f"  Spans not in transcript: {span_summary['spans_not_in_transcript']}")
+    print(f"  Fidelity rate: {span_summary['span_fidelity_rate']}")
+    if span_summary["spans_not_in_transcript"]:
+        print("  Note: backend drops invalid spans before responding; non-zero here indicates a bug.")
     
-    # Phase 2 quality gate check
+    # Phase 5 quality gate check
     print("\n" + "=" * 60)
-    print("=== PHASE 2 QUALITY GATE ===")
+    print("=== PHASE 5 QUALITY GATE ===")
     print("=" * 60)
-    
+
+    gate = quality_gate_status(summary)
+    print(f"  F1 >= 0.75:              {'PASS' if gate['f1'] else 'FAIL'} ({pos['f1']})")
+    print(f"  Precision >= 0.65:       {'PASS' if gate['precision'] else 'FAIL'} ({pos['precision']})")
+    print(f"  Recall >= 0.80:          {'PASS' if gate['recall'] else 'FAIL'} ({pos['recall']})")
+    print(f"  TN accuracy >= 1.0:      {'PASS' if gate['true_negative_accuracy'] else 'FAIL'} ({tn['accuracy']})")
+
     issues = []
+
+    if not gate["f1"]:
+        issues.append(f"CRITICAL: F1 ({pos['f1']}) below Phase 5 minimum (0.75)")
+    if not gate["precision"]:
+        issues.append(f"CRITICAL: PRECISION ({pos['precision']}) below Phase 5 minimum (0.65)")
+    if not gate["recall"]:
+        issues.append(f"WARNING: RECALL ({pos['recall']}) below minimum (0.80)")
+    if not gate["true_negative_accuracy"]:
+        issues.append(f"CRITICAL: TRUE NEGATIVE ACCURACY ({tn['accuracy']}) below minimum (1.0)")
     
     if pos['recall'] is not None and pos['recall'] < 0.3:
         issues.append(f"WARNING: LOW RECALL ({pos['recall']}) - Missing most fallacies")
@@ -216,19 +204,22 @@ def print_results(summary, results, errors):
         issues.append("   This violates the 'no dark patterns' requirement (spec 01)")
     
     if errors:
-        issues.append(f"WARNING: {len(errors)} API ERRORS occurred during evaluation")
+        format_err_count = sum(1 for e in errors if e.get("type") == "format_violation")
+        if format_err_count:
+            issues.append(f"WARNING: {format_err_count} FORMAT VIOLATIONS (non-JSON or invalid schema)")
+
+        other_errors = len(errors) - format_err_count
+        if other_errors:
+            issues.append(f"WARNING: {other_errors} API/REQUEST ERRORS occurred during evaluation")
     
     if issues:
         print("\n[QUALITY ISSUES DETECTED]\n")
         for issue in issues:
             print(issue)
-        print("\n[RECOMMENDATION] STOP: Fix prompt/calibration before proceeding to Phase 3")
-        print("   (Per spec 04: 'Building a frontend on top of a backend that doesn't")
-        print("    work is wasted effort')")
+        print("\n[RECOMMENDATION] Fix prompt/calibration before deploying.")
     else:
-        print("\n[QUALITY GATE PASSED]")
-        print("   Backend quality is acceptable for MVP demand-test")
-        print("   Ready to proceed to Phase 3 (Frontend build)")
+        print("\n[PHASE 5 QUALITY GATE PASSED]")
+        print("   Detection quality meets regression thresholds.")
     
     # Detailed per-case results
     print("\n" + "=" * 60)
@@ -280,18 +271,22 @@ def main():
         sys.exit(1)
     
     # Run evaluation
-    predictions, errors = run_eval()
+    predictions, errors, format_metrics, span_metrics = run_eval()
     
     # Grade results
     print("\nGrading predictions...")
     summary, results = grade(predictions)
+    format_summary = compute_format_summary(format_metrics)
+    span_summary = compute_span_fidelity_summary(span_metrics)
     
     # Print results
-    print_results(summary, results, errors)
+    print_results(summary, results, errors, format_summary, span_summary)
     
     # Save results to file
     output = {
         "summary": summary,
+        "format_compliance": format_summary,
+        "span_fidelity": span_summary,
         "results": results,
         "errors": errors,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -302,6 +297,12 @@ def main():
         json.dump(output, f, indent=2)
     
     print(f"\n[SAVED] Full results saved to: {output_path}")
+
+    try:
+        assert_phase5_quality_gates(summary)
+    except AssertionError as exc:
+        print(f"\n[PHASE 5 GATE FAILED] {exc}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

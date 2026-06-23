@@ -1,4 +1,6 @@
 """Scan response shape and finding field handling."""
+import json
+
 import server
 from server import Finding
 
@@ -36,7 +38,7 @@ def test_finding_serializes_strengthen_field():
 def test_scan_returns_what_would_strengthen_this(client, monkeypatch):
     sample = "everyone agrees this policy is correct"
 
-    async def fake_api(_user_text):
+    async def fake_api(_user_text, stats=None):
         return {
             "findings": [
                 {
@@ -91,7 +93,7 @@ def test_scan_cache_legacy_findings_default_strengthen(client):
 
 
 def test_scan_drops_findings_with_unlocatable_span(client, monkeypatch):
-    async def fake_api(_user_text):
+    async def fake_api(_user_text, stats=None):
         return {
             "findings": [
                 {
@@ -113,10 +115,44 @@ def test_scan_drops_findings_with_unlocatable_span(client, monkeypatch):
     assert response.json()["findings"] == []
 
 
+def test_scan_emits_telemetry_log(client, monkeypatch, capsys):
+    sample = "everyone agrees this policy is correct"
+
+    async def fake_api(_user_text, stats=None):
+        if stats is not None:
+            stats.latency_ms = 123
+        return {
+            "findings": [
+                {
+                    "span": sample,
+                    "fallacy": "Bandwagon",
+                    "category": "Informal",
+                    "subcategory": "Appeal to Popularity",
+                    "confidence": "high",
+                    "explanation": "Agreement treated as proof.",
+                    "what_would_strengthen_this": "Independent evidence needed.",
+                }
+            ]
+        }
+
+    monkeypatch.setattr(server, "call_anthropic_api", fake_api)
+
+    response = client.post("/api/scan", json={"text": sample})
+    assert response.status_code == 200
+
+    lines = [line for line in capsys.readouterr().out.splitlines() if '"scan_complete"' in line or '"event": "scan_complete"' in line]
+    assert lines, "expected scan_complete telemetry log line"
+    payload = json.loads(lines[-1])
+    assert payload["finding_count"] == 1
+    assert payload["spans_dropped"] == 0
+    assert payload["cache_hit"] is False
+    assert payload["model_latency_ms"] == 123
+
+
 def test_scan_ignores_bearer_token_when_billing_disabled(client, monkeypatch):
     """Local dev: signed-in browser + backend without Supabase should still scan."""
 
-    async def fake_api(_user_text):
+    async def fake_api(_user_text, stats=None):
         return {"findings": []}
 
     monkeypatch.setattr(server, "call_anthropic_api", fake_api)

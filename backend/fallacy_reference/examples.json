@@ -1,0 +1,76 @@
+[
+  {
+    "id": "example_001",
+    "purpose": "clear_positive",
+    "title": "Straw Man — high confidence",
+    "input": "COUNCILMEMBER A: I think we should pilot a four-day work week for city staff, just for six months, to see the data.\nCOUNCILMEMBER B: So you want to dismantle the entire structure of public service and let government grind to a halt?",
+    "output": {
+      "findings": [
+        {
+          "span": "So you want to dismantle the entire structure of public service and let government grind to a halt?",
+          "fallacy": "Straw Man",
+          "category": "Informal",
+          "subcategory": "Other Informal Fallacy",
+          "confidence": "high",
+          "explanation": "Councilmember B recasts a limited six-month pilot as total dismantling of public service — a much stronger position than A proposed, then attacks that distortion.",
+          "what_would_strengthen_this": "A direct response would need to address whether a time-limited pilot can be evaluated without permanently restructuring service — the reply instead argues against a position A did not take."
+        }
+      ]
+    },
+    "notes": "Canonical high-confidence positive: distortion is explicit across two speaker turns."
+  },
+  {
+    "id": "example_002",
+    "purpose": "true_negative",
+    "title": "Hedged empirical claim — empty findings",
+    "input": "HOST: Does the new study settle the debate on saturated fat?\nGUEST: Not really — it's one cohort study, fairly large, but observational, so it shows an association, not causation. We'd want a few replications and ideally an RCT before treating this as settled.",
+    "output": {
+      "findings": []
+    },
+    "notes": "Clean reasoning: names design limits, avoids causal leap, states what evidence would still be needed. Correct output is empty findings."
+  },
+  {
+    "id": "example_003",
+    "purpose": "borderline_low_confidence",
+    "title": "Appeal to Tradition vs anecdote — low confidence",
+    "input": "HOST: Some pediatricians recommend limiting screen time to one hour on weekdays.\nGUEST: I get why people say that, but my grandparents didn't have screens at all and they turned out fine, so I don't think an hour a day is going to hurt anyone.",
+    "output": {
+      "findings": [
+        {
+          "span": "my grandparents didn't have screens at all and they turned out fine, so I don't think an hour a day is going to hurt anyone",
+          "fallacy": "Appeal to Tradition",
+          "category": "Informal",
+          "subcategory": "Appeal to Tradition/Authority Bias",
+          "confidence": "low",
+          "explanation": "The guest leans on how things were done in a prior generation as a reason to dismiss current guidance. A hasty-generalization read (one family's anecdote) is also plausible, but the 'didn't have screens / turned out fine' framing tracks appeal to tradition more closely.",
+          "what_would_strengthen_this": "Pediatric outcome data comparing screen-time thresholds to developmental or health markers would be needed — generational anecdote alone does not establish that an hour a day is harmless."
+        }
+      ]
+    },
+    "notes": "Borderline case: one primary label at low confidence; explanation acknowledges the alternate read without stacking a second finding."
+  },
+  {
+    "id": "example_004",
+    "purpose": "strengthen_anti_pattern",
+    "title": "what_would_strengthen_this — gap diagnosis, not a rewrite",
+    "input": "HOST: So critics say the supplement industry isn't well regulated.\nGUEST: Look, I've been taking this stuff for three years and I feel incredible. My energy's up, my focus is up. That's all the proof I need.",
+    "output": {
+      "findings": [
+        {
+          "span": "I've been taking this stuff for three years and I feel incredible. My energy's up, my focus is up. That's all the proof I need.",
+          "fallacy": "Argument from Anecdote",
+          "category": "Informal",
+          "subcategory": "Faulty Generalization",
+          "confidence": "high",
+          "explanation": "The guest treats personal experience over three years as sufficient proof for a general claim about the product, dismissing the need for broader evidence.",
+          "what_would_strengthen_this": "Controlled studies or population-level outcome data would be needed — personal experience alone cannot establish general efficacy or regulatory adequacy."
+        }
+      ]
+    },
+    "anti_pattern": {
+      "what_would_strengthen_this": "Try: 'In a randomized trial of 200 participants, 68% reported improved energy after twelve weeks, compared with 41% on placebo.'",
+      "why_wrong": "This drafts replacement prose the user could paste into the document. The field must name the missing evidence type, not supply the sentence."
+    },
+    "notes": "Same finding as example output; anti_pattern shows the common failure mode for what_would_strengthen_this."
+  }
+]

@@ -5,11 +5,13 @@ Canonical sources (igiari/backend):
   - prompt_template.txt
   - fallacy_reference/fallacies.json
   - fallacy_reference/eval_set.json
+  - fallacy_reference/examples.json
 
 Skill targets (logical-fallacy-detection skill):
   - reference/prompt.txt
   - reference/taxonomy.md
   - reference/eval_set.json
+  - reference/examples.md
 
 Usage:
   python scripts/sync_cursor_skill.py
@@ -34,6 +36,7 @@ DEFAULT_SKILL_ROOT = (
 )
 
 sys.path.insert(0, str(BACKEND_ROOT))
+from examples_format import format_examples_text  # noqa: E402
 from taxonomy_format import format_taxonomy_text  # noqa: E402
 
 
@@ -56,6 +59,12 @@ def sync(skill_root: Path) -> None:
     eval_dst = ref_dir / "eval_set.json"
     shutil.copy2(eval_src, eval_dst)
     print(f"Copied eval set -> {eval_dst}")
+
+    examples_path = BACKEND_ROOT / "fallacy_reference" / "examples.json"
+    examples = json.loads(examples_path.read_text(encoding="utf-8"))
+    examples_dst = ref_dir / "examples.md"
+    examples_dst.write_text(format_examples_text(examples), encoding="utf-8")
+    print(f"Wrote {len(examples)} examples -> {examples_dst}")
 
 
 def main() -> None:

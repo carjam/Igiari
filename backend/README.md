@@ -69,15 +69,35 @@ This will:
 - ✅ True-negative accuracy > 60% (don't hallucinate fallacies in clean text)
 - ✅ Results reviewed by human before proceeding to Phase 3
 
+## Observability
+
+Each `/api/scan` emits a structured JSON log line (`event: scan_complete`) with finding count, spans dropped, parse retries, latency, and cache hit status. See `docs/DETECTION_RELEASE_CHECKLIST.md` for field definitions.
+
+## Release workflow
+
+See [`docs/DETECTION_RELEASE_CHECKLIST.md`](../docs/DETECTION_RELEASE_CHECKLIST.md) for the full edit → test → sync → eval → commit checklist.
+
 ### Unit tests
 
 ```bash
 cd backend
+python -m venv venv
+# Windows: .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-python -m pytest tests/ -v
+python -m pytest tests/ -v --cov=. --cov-config=.coveragerc --cov-fail-under=100
 ```
 
 CI runs the same suite on every push to `master` / `main` (`.github/workflows/backend-tests.yml`).
+
+**Phase 5 quality gate (offline, no API key):** `tests/test_eval_quality_gate.py` grades the frozen baseline in `fallacy_reference/eval_baseline_predictions.json` and fails if F1 &lt; 0.75, precision &lt; 0.65, recall &lt; 0.80, or true-negative accuracy &lt; 1.0.
+
+After an intentional prompt improvement via live eval:
+
+```bash
+python run_eval.py          # requires server + ANTHROPIC_API_KEY
+python scripts/export_eval_baseline.py
+python -m pytest tests/test_eval_quality_gate.py -v
+```
 
 ## Rate Limiting
 

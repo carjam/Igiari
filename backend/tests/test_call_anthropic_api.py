@@ -115,6 +115,17 @@ def test_call_anthropic_api_raises_when_retry_also_invalid_json(anthropic_mock):
         _run(call_anthropic_api("sample"))
 
 
+def test_call_anthropic_api_records_parse_retry_in_stats(anthropic_mock):
+    anthropic_mock.messages.responses.extend(["not json", '{"findings": []}'])
+    stats = server.ApiCallStats()
+
+    result = _run(call_anthropic_api("sample", stats=stats))
+
+    assert result == {"findings": []}
+    assert stats.parse_retries == 1
+    assert stats.latency_ms >= 0
+
+
 def test_scan_returns_502_when_model_json_unrecoverable(client, anthropic_mock):
     anthropic_mock.messages.responses.extend(["not json", "still not json"])
 

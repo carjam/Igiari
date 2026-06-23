@@ -1,0 +1,19 @@
+[run]
+source = .
+omit =
+    venv/*
+    tests/*
+    test_api.py
+    run_eval.py
+    scripts/export_eval_baseline.py
+
+[report]
+precision = 2
+fail_under = 100
+include =
+    eval_grading.py
+    examples_format.py
+    taxonomy_format.py
+    scan_observability.py
+show_missing = True
+skip_empty = True

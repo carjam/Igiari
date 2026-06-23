@@ -1,0 +1,309 @@
+{
+  "label": "phase5-calibration-v1",
+  "source_timestamp": "2026-06-23 16:17:36",
+  "summary": {
+    "positive_cases": {
+      "true_positives": 23,
+      "false_positives": 11,
+      "false_negatives": 4,
+      "precision": 0.676,
+      "recall": 0.852,
+      "f1": 0.754
+    },
+    "true_negative_cases": {
+      "total": 14,
+      "correctly_flagged_clean": 14,
+      "accuracy": 1.0
+    }
+  },
+  "predictions": [
+    {
+      "id": "eval_001",
+      "predictions": [
+        {
+          "fallacy": "Argument from Anecdote"
+        }
+      ]
+    },
+    {
+      "id": "eval_002",
+      "predictions": [
+        {
+          "fallacy": "Straw Man"
+        }
+      ]
+    },
+    {
+      "id": "eval_003",
+      "predictions": [
+        {
+          "fallacy": "Ad Hominem"
+        }
+      ]
+    },
+    {
+      "id": "eval_004",
+      "predictions": [
+        {
+          "fallacy": "Appeal to Fear"
+        },
+        {
+          "fallacy": "Argumentum ad Populum"
+        }
+      ]
+    },
+    {
+      "id": "eval_005",
+      "predictions": [
+        {
+          "fallacy": "Hasty Generalization"
+        },
+        {
+          "fallacy": "Post Hoc Ergo Propter Hoc"
+        }
+      ]
+    },
+    {
+      "id": "eval_006",
+      "predictions": [
+        {
+          "fallacy": "Appeal to Pity"
+        }
+      ]
+    },
+    {
+      "id": "eval_007",
+      "predictions": [
+        {
+          "fallacy": "Argument from Ignorance"
+        }
+      ]
+    },
+    {
+      "id": "eval_008",
+      "predictions": [
+        {
+          "fallacy": "Special Pleading"
+        }
+      ]
+    },
+    {
+      "id": "eval_009",
+      "predictions": []
+    },
+    {
+      "id": "eval_010",
+      "predictions": []
+    },
+    {
+      "id": "eval_011",
+      "predictions": []
+    },
+    {
+      "id": "eval_012",
+      "predictions": [
+        {
+          "fallacy": "Slippery Slope"
+        }
+      ]
+    },
+    {
+      "id": "eval_013",
+      "predictions": [
+        {
+          "fallacy": "Ipse Dixit"
+        },
+        {
+          "fallacy": "Pooh-Pooh"
+        }
+      ]
+    },
+    {
+      "id": "eval_014",
+      "predictions": [
+        {
+          "fallacy": "Circular Reasoning"
+        },
+        {
+          "fallacy": "Ipse Dixit"
+        }
+      ]
+    },
+    {
+      "id": "eval_015",
+      "predictions": []
+    },
+    {
+      "id": "eval_016",
+      "predictions": [
+        {
+          "fallacy": "Argument from Anecdote"
+        }
+      ]
+    },
+    {
+      "id": "eval_017",
+      "predictions": [
+        {
+          "fallacy": "Slippery Slope"
+        }
+      ]
+    },
+    {
+      "id": "eval_018",
+      "predictions": []
+    },
+    {
+      "id": "eval_019",
+      "predictions": [
+        {
+          "fallacy": "Argument from Anecdote"
+        }
+      ]
+    },
+    {
+      "id": "eval_020",
+      "predictions": [
+        {
+          "fallacy": "Argument from Anecdote"
+        },
+        {
+          "fallacy": "False Equivalence"
+        }
+      ]
+    },
+    {
+      "id": "eval_021",
+      "predictions": []
+    },
+    {
+      "id": "eval_022",
+      "predictions": [
+        {
+          "fallacy": "Post Hoc Ergo Propter Hoc"
+        }
+      ]
+    },
+    {
+      "id": "eval_023",
+      "predictions": [
+        {
+          "fallacy": "Tu Quoque"
+        }
+      ]
+    },
+    {
+      "id": "eval_024",
+      "predictions": [
+        {
+          "fallacy": "Hasty Generalization"
+        }
+      ]
+    },
+    {
+      "id": "eval_025",
+      "predictions": []
+    },
+    {
+      "id": "eval_026",
+      "predictions": [
+        {
+          "fallacy": "Begging the Question"
+        }
+      ]
+    },
+    {
+      "id": "eval_027",
+      "predictions": []
+    },
+    {
+      "id": "eval_028",
+      "predictions": [
+        {
+          "fallacy": "Appeal to Authority"
+        }
+      ]
+    },
+    {
+      "id": "eval_029",
+      "predictions": []
+    },
+    {
+      "id": "eval_030",
+      "predictions": [
+        {
+          "fallacy": "False Dilemma"
+        },
+        {
+          "fallacy": "Survivorship Bias"
+        }
+      ]
+    },
+    {
+      "id": "eval_031",
+      "predictions": []
+    },
+    {
+      "id": "eval_032",
+      "predictions": [
+        {
+          "fallacy": "Straw Man"
+        }
+      ]
+    },
+    {
+      "id": "eval_033",
+      "predictions": [
+        {
+          "fallacy": "Hasty Generalization"
+        },
+        {
+          "fallacy": "Survivorship Bias"
+        }
+      ]
+    },
+    {
+      "id": "eval_034",
+      "predictions": []
+    },
+    {
+      "id": "eval_035",
+      "predictions": []
+    },
+    {
+      "id": "eval_036",
+      "predictions": []
+    },
+    {
+      "id": "eval_037",
+      "predictions": [
+        {
+          "fallacy": "Slippery Slope"
+        }
+      ]
+    },
+    {
+      "id": "eval_038",
+      "predictions": [
+        {
+          "fallacy": "Straw Man"
+        }
+      ]
+    },
+    {
+      "id": "eval_039",
+      "predictions": [
+        {
+          "fallacy": "Fallacy of the Single Cause"
+        },
+        {
+          "fallacy": "Furtive Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_040",
+      "predictions": []
+    }
+  ]
+}
