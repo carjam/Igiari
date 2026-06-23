@@ -228,7 +228,7 @@ async def call_anthropic_api(user_text: str) -> Dict:
                 max_tokens=4096,
                 system=retry_prompt,
                 messages=[
-                    {"role": "user", "content": user_text}
+                    {"role": "user", "content": "Analyze the text in <user_text> and return JSON only."}
                 ]
             )
             response_text = message.content[0].text.strip()
