@@ -12,9 +12,11 @@ from collections import defaultdict
 
 from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import anthropic
+import stripe
 
 from billing import (
     billing_enabled,
@@ -45,6 +47,35 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(stripe.error.StripeError)
+async def handle_stripe_error(request: Request, exc: stripe.error.StripeError):
+    user_message = getattr(exc, "user_message", None) or str(exc)
+    print(f"Unhandled Stripe error on {request.url.path}: {user_message}")
+    return JSONResponse(
+        status_code=502,
+        content={
+            "detail": {
+                "code": "STRIPE_ERROR",
+                "message": "Could not connect to the payment provider. Please try again.",
+            }
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def handle_unhandled_exception(request: Request, exc: Exception):
+    print(f"Unhandled error on {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": {
+                "code": "INTERNAL_ERROR",
+                "message": "An unexpected error occurred. Please try again later.",
+            }
+        },
+    )
 
 # Constants
 MAX_INPUT_LENGTH = 4000
@@ -316,11 +347,13 @@ async def get_account_me(
 
 
 @app.get("/api/billing/products")
+@app.get("/api/payments/products")
 async def get_billing_products(surface: str = "consumer"):
     return list_public_products(surface)
 
 
 @app.post("/api/billing/checkout", response_model=CheckoutResponse)
+@app.post("/api/payments/checkout", response_model=CheckoutResponse)
 async def post_billing_checkout(
     body: CheckoutRequest,
     authorization: Optional[str] = Header(default=None),
@@ -359,6 +392,7 @@ async def post_billing_checkout(
 
 
 @app.post("/api/billing/portal", response_model=PortalResponse)
+@app.post("/api/payments/portal", response_model=PortalResponse)
 async def post_billing_portal(
     authorization: Optional[str] = Header(default=None),
     x_igiari_surface: Optional[str] = Header(default=None),

@@ -1,5 +1,7 @@
 // Magic-link sign-in via Supabase. Requires site-config.js values.
 const FETCH_TIMEOUT_MS = 15000;
+const ACCOUNT_FETCH_TIMEOUT_MS = 45000;
+const BILLING_FETCH_TIMEOUT_MS = 45000;
 const LAST_EMAIL_KEY = 'igiari_last_email';
 
 const SURFACE_KEY = 'igiari_surface';
@@ -25,6 +27,31 @@ function apiHeaders(extra = {}) {
 
 function apiBase() {
     return window.API_BASE || 'https://igiari-backend.onrender.com';
+}
+
+function paymentsUrl(path) {
+    return `${apiBase()}/api/payments/${path}`;
+}
+
+function formatBillingNetworkError(error) {
+    if (error?.name === 'AbortError') {
+        return 'Request timed out. The server may be waking up — try again.';
+    }
+    return (
+        'Could not reach the server. If you use an ad blocker or privacy extension, '
+        + 'allow this site and try again.'
+    );
+}
+
+function formatBillingHttpError(response, data, fallback) {
+    const detail = data.detail || {};
+    if (typeof detail === 'string') {
+        return detail;
+    }
+    if (detail.message) {
+        return detail.message;
+    }
+    return `${fallback} (HTTP ${response.status})`;
 }
 
 let supabaseClient = null;
@@ -449,7 +476,7 @@ async function fetchBillingProducts() {
     try {
         const surface = getSurface();
         const response = await fetchWithTimeout(
-            `${apiBase()}/api/billing/products?surface=${encodeURIComponent(surface)}`,
+            `${paymentsUrl('products')}?surface=${encodeURIComponent(surface)}`,
             { headers: apiHeaders() },
         );
         if (!response.ok) {
@@ -480,7 +507,7 @@ async function startCheckout(productKey) {
     }
 
     try {
-        const response = await fetchWithTimeout(`${apiBase()}/api/billing/checkout`, {
+        const response = await fetchWithTimeout(paymentsUrl('checkout'), {
             method: 'POST',
             headers: apiHeaders({
                 'Content-Type': 'application/json',
@@ -490,7 +517,7 @@ async function startCheckout(productKey) {
                 product_key: productKey,
                 surface: getSurface(),
             }),
-        });
+        }, BILLING_FETCH_TIMEOUT_MS);
 
         let data = {};
         try {
@@ -500,12 +527,12 @@ async function startCheckout(productKey) {
         }
 
         if (!response.ok) {
-            const detail = data.detail || {};
-            const message = typeof detail === 'string'
-                ? detail
-                : (detail.message || 'Could not start checkout.');
             if (statusEl) {
-                statusEl.textContent = message;
+                statusEl.textContent = formatBillingHttpError(
+                    response,
+                    data,
+                    'Could not start checkout.',
+                );
             }
             return;
         }
@@ -514,10 +541,9 @@ async function startCheckout(productKey) {
             window.location.href = data.url;
         }
     } catch (error) {
+        console.error('Checkout request failed:', error);
         if (statusEl) {
-            statusEl.textContent = error.name === 'AbortError'
-                ? 'Checkout timed out. Try again.'
-                : 'Could not reach the server.';
+            statusEl.textContent = formatBillingNetworkError(error);
         }
     }
 }
@@ -534,12 +560,12 @@ async function handleBillingPortal() {
     }
 
     try {
-        const response = await fetchWithTimeout(`${apiBase()}/api/billing/portal`, {
+        const response = await fetchWithTimeout(paymentsUrl('portal'), {
             method: 'POST',
             headers: apiHeaders({
                 Authorization: `Bearer ${token}`,
             }),
-        });
+        }, BILLING_FETCH_TIMEOUT_MS);
 
         let data = {};
         try {
@@ -549,12 +575,12 @@ async function handleBillingPortal() {
         }
 
         if (!response.ok) {
-            const detail = data.detail || {};
-            const message = typeof detail === 'string'
-                ? detail
-                : (detail.message || 'Could not open billing portal.');
             if (statusEl) {
-                statusEl.textContent = message;
+                statusEl.textContent = formatBillingHttpError(
+                    response,
+                    data,
+                    'Could not open billing portal.',
+                );
             }
             return;
         }
@@ -563,8 +589,9 @@ async function handleBillingPortal() {
             window.location.href = data.url;
         }
     } catch (error) {
+        console.error('Billing portal request failed:', error);
         if (statusEl) {
-            statusEl.textContent = 'Could not reach the server.';
+            statusEl.textContent = formatBillingNetworkError(error);
         }
     }
 }
@@ -698,35 +725,42 @@ async function fetchAccount() {
         return { error: 'Not signed in.' };
     }
 
-    try {
-        const response = await fetchWithTimeout(`${apiBase()}/api/account/me`, {
-            headers: apiHeaders({
-                Authorization: `Bearer ${token}`,
-            }),
-        });
-
-        let data = {};
+    for (let attempt = 0; attempt < 2; attempt += 1) {
         try {
-            data = await response.json();
-        } catch (_error) {
-            return { error: 'Could not read account response from server.' };
-        }
+            const response = await fetchWithTimeout(`${apiBase()}/api/account/me`, {
+                headers: apiHeaders({
+                    Authorization: `Bearer ${token}`,
+                }),
+            }, ACCOUNT_FETCH_TIMEOUT_MS);
 
-        if (!response.ok) {
-            const detail = data.detail || {};
-            const message = typeof detail === 'string'
-                ? detail
-                : (detail.message || `Server error (${response.status}).`);
-            return { error: message };
-        }
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (_error) {
+                return { error: 'Could not read account response from server.' };
+            }
 
-        return { account: data };
-    } catch (error) {
-        if (error.name === 'AbortError') {
-            return { error: 'Loading account timed out. Try again in a moment.' };
+            if (!response.ok) {
+                const detail = data.detail || {};
+                const message = typeof detail === 'string'
+                    ? detail
+                    : (detail.message || `Server error (${response.status}).`);
+                return { error: message };
+            }
+
+            return { account: data };
+        } catch (error) {
+            if (error.name === 'AbortError' && attempt === 0) {
+                continue;
+            }
+            if (error.name === 'AbortError') {
+                return { error: 'Loading account timed out. Try again in a moment.' };
+            }
+            return { error: 'Could not reach the server.' };
         }
-        return { error: 'Could not reach the server.' };
     }
+
+    return { error: 'Loading account timed out. Try again in a moment.' };
 }
 
 async function updateAuthUI() {

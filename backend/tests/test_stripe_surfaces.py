@@ -1,6 +1,8 @@
 """Legal vs consumer billing surface behavior."""
 from unittest.mock import MagicMock, patch
 
+import stripe
+
 from stripe_billing import (
     create_checkout_session,
     create_portal_session,
@@ -63,8 +65,9 @@ def test_create_checkout_session_legal_urls(mock_customer, mock_create, monkeypa
     assert params["metadata"]["surface"] == "legal"
 
 
+@patch("stripe_billing.get_or_create_stripe_customer", return_value="cus_test")
 @patch("stripe_billing.stripe.billing_portal.Session.create")
-def test_create_portal_session_legal_return_url(mock_create, monkeypatch):
+def test_create_portal_session_legal_return_url(mock_create, mock_customer, monkeypatch):
     monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_x")
     monkeypatch.setenv("SITE_URL", "https://igiari.us")
     mock_create.return_value = MagicMock(url="https://billing.stripe.test/portal")
@@ -102,3 +105,34 @@ def test_checkout_completed_tags_legal_account(mock_update, mock_grant):
     mock_grant.assert_called_once_with(
         "acct-legal", 25, "pack_purchase", "evt_checkout_1"
     )
+
+
+@patch("stripe_billing.update_account_fields")
+@patch("stripe_billing.stripe.Customer.create")
+@patch("stripe_billing.stripe.Customer.retrieve")
+def test_get_or_create_stripe_customer_recreates_stale_id(
+    mock_retrieve,
+    mock_create,
+    mock_update,
+    monkeypatch,
+):
+    from stripe_billing import get_or_create_stripe_customer
+
+    monkeypatch.setenv("STRIPE_SECRET_KEY", "sk_test_x")
+    mock_retrieve.side_effect = stripe.error.InvalidRequestError(
+        "No such customer: 'cus_test_stale'",
+        param="id",
+    )
+    mock_create.return_value = MagicMock(id="cus_live_new")
+
+    customer_id = get_or_create_stripe_customer(
+        {
+            "id": "acct-1",
+            "email": "buyer@example.com",
+            "stripe_customer_id": "cus_test_stale",
+        }
+    )
+
+    assert customer_id == "cus_live_new"
+    mock_create.assert_called_once()
+    mock_update.assert_called_once_with("acct-1", {"stripe_customer_id": "cus_live_new"})

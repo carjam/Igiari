@@ -85,6 +85,19 @@ def _stripe() -> None:
             },
         )
     stripe.api_key = key
+    stripe.max_network_retries = 1
+
+
+def _stripe_http_error(exc: stripe.error.StripeError) -> HTTPException:
+    user_message = getattr(exc, "user_message", None) or str(exc)
+    print(f"Stripe API error [{exc.__class__.__name__}]: {user_message}")
+    return HTTPException(
+        status_code=502,
+        detail={
+            "code": "STRIPE_ERROR",
+            "message": "Could not connect to the payment provider. Please try again.",
+        },
+    )
 
 
 def site_url() -> str:
@@ -167,15 +180,26 @@ def list_public_products(surface: str = "consumer") -> Dict[str, Any]:
 
 def get_or_create_stripe_customer(account: Dict[str, Any]) -> str:
     _stripe()
+    account_id = account["id"]
     existing = account.get("stripe_customer_id")
     if existing:
-        return existing
+        try:
+            stripe.Customer.retrieve(existing)
+            return existing
+        except stripe.error.StripeError as exc:
+            print(
+                f"Stale or invalid Stripe customer {existing} "
+                f"for account {account_id}: {exc}"
+            )
 
-    customer = stripe.Customer.create(
-        email=account.get("email") or None,
-        metadata={"account_id": account["id"]},
-    )
-    update_account_fields(account["id"], {"stripe_customer_id": customer.id})
+    try:
+        customer = stripe.Customer.create(
+            email=account.get("email") or None,
+            metadata={"account_id": account_id},
+        )
+    except stripe.error.StripeError as exc:
+        raise _stripe_http_error(exc) from exc
+    update_account_fields(account_id, {"stripe_customer_id": customer.id})
     return customer.id
 
 
@@ -238,7 +262,10 @@ def create_checkout_session(
             },
         }
 
-    session = stripe.checkout.Session.create(**params)
+    try:
+        session = stripe.checkout.Session.create(**params)
+    except stripe.error.StripeError as exc:
+        raise _stripe_http_error(exc) from exc
     if not session.url:
         raise HTTPException(
             status_code=500,
@@ -252,8 +279,10 @@ def create_checkout_session(
 
 def create_portal_session(account: Dict[str, Any], surface: str = "consumer") -> str:
     _stripe()
-    customer_id = account.get("stripe_customer_id")
-    if not customer_id:
+    has_billing = bool(account.get("stripe_customer_id")) or (
+        account.get("subscription_status") == "active"
+    )
+    if not has_billing:
         raise HTTPException(
             status_code=400,
             detail={
@@ -262,14 +291,18 @@ def create_portal_session(account: Dict[str, Any], surface: str = "consumer") ->
             },
         )
 
+    customer_id = get_or_create_stripe_customer(account)
     return_url = site_url()
     if normalize_surface(surface) == "legal":
         return_url = f"{return_url}/legal/"
 
-    session = stripe.billing_portal.Session.create(
-        customer=customer_id,
-        return_url=return_url,
-    )
+    try:
+        session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=return_url,
+        )
+    except stripe.error.StripeError as exc:
+        raise _stripe_http_error(exc) from exc
     return session.url
 
 
