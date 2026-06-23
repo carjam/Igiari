@@ -116,3 +116,13 @@ def test_what_would_strengthen_this_specificity_rule_present():
     assert "generic" in lower or "specific" in lower, (
         "Prompt must require specific rather than generic what_would_strengthen_this content"
     )
+
+
+def test_injected_taxonomy_includes_pattern():
+    """Runtime taxonomy must include pattern text so calibration rule 8 is satisfiable."""
+    prompt = build_system_prompt("Sample argument text for taxonomy check.")
+    assert "Pattern:" in prompt
+    assert (
+        "P argues X; misrepresent X as X' (weaker/distorted); refute X' as if it refuted X."
+        in prompt
+    )

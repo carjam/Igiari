@@ -181,11 +181,9 @@ def build_system_prompt(user_text: str) -> str:
     Construct system prompt with taxonomy, user text, and calibration guidance.
     Using full taxonomy (option a) per spec 03_architecture.md.
     """
-    # Create condensed taxonomy entries
-    taxonomy_text = "\n".join([
-        f"- **{f['name']}** ({f['category']}, {f['subcategory']}): {f['definition']}"
-        for f in fallacy_taxonomy
-    ])
+    from taxonomy_format import format_taxonomy_text
+
+    taxonomy_text = format_taxonomy_text(fallacy_taxonomy)
     
     # Load template and inject taxonomy + scanned text (prompt-injection boundary)
     template = load_prompt_template()
