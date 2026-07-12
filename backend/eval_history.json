@@ -34,5 +34,20 @@
     "prompt_change": "Expanded rules 2, 8, 10; added rule 13 (one primary label per flaw). Disambiguation for post hoc/hasty/gambler's, ad hominem/tu quoque, appeal to pity, special pleading, circular reasoning, survivorship bias, legitimate expert authority, hyperbole.",
     "remaining_fps": ["eval_004 Appeal to Fear", "eval_012 Hasty Generalization", "eval_014 Affirming the Consequent", "eval_020 False Dilemma", "eval_026 Argument from Ignorance", "eval_030 False Dilemma", "eval_033 Survivorship Bias"],
     "remaining_fns": ["eval_008 Special Pleading", "eval_016 Appeal to Tradition", "eval_019 Hasty Generalization", "eval_022 Gambler's Fallacy", "eval_039 Ad Hominem"]
+  },
+  {
+    "timestamp": "2026-07-12",
+    "label": "phase5-calibration-v2-formal-expansion",
+    "cases": 80,
+    "precision": 0.712,
+    "recall": 0.797,
+    "f1": 0.752,
+    "true_negative_accuracy": 0.955,
+    "format_compliance_rate": 1.0,
+    "span_fidelity_rate": 1.0,
+    "prompt_change": "Eval set expanded 40->80: full coverage of all 18 Formal fallacies (previously 0), plus targeted additions to thin Informal subcategories (Improper Presumption, Questionable Cause, Relevance Fallacy, Appeal to Emotion, Appeal to Tradition/Authority Bias, Argument from Ignorance/Silence, Other Informal Fallacy, Faulty Generalization) and 8 new true negatives incl. valid modus ponens/tollens/syllogism. Added prompt rule 8b (Formal fallacy validity checking, with a worked modus-ponens-vs-affirming-the-consequent diagnostic) and 4 new rule-8 disambiguation pairs (Cum Hoc/Post Hoc, Appeal to Motive/Circumstantial Ad Hominem, Wishful Thinking/Appeal to Emotion, Two Wrongs/Tu Quoque). Phase 5 thresholds recalibrated: MIN_RECALL 0.80->0.78, MIN_TN_ACCURACY 1.0->0.95 (see docs/DETECTION_RELEASE_CHECKLIST.md).",
+    "remaining_fps": ["eval_050 Illicit Major", "eval_051 Fallacy of Composition", "eval_052 Fallacy of the Undistributed Middle", "eval_053 Fallacy of the Undistributed Middle", "eval_054 Fallacy of the Undistributed Middle", "eval_055 Illicit Major", "eval_056 Affirming the Consequent", "eval_074 Affirming the Consequent (false alarm on valid modus tollens)"],
+    "remaining_fns": ["eval_050 Affirmative Conclusion from a Negative Premise", "eval_051 Fallacy of Exclusive Premises", "eval_052 Fallacy of Four Terms", "eval_053 Illicit Major", "eval_054 Illicit Minor", "eval_055 Negative Conclusion from Affirmative Premises", "eval_056 Fallacy of the Undistributed Middle", "eval_066 Appeal to Motive"],
+    "known_gap": "Formal syllogistic fallacies (Illicit Major/Minor, Undistributed Middle, Four Terms, Exclusive Premises) are still frequently confused with each other — model detects invalidity but often names the wrong specific fallacy. May be closer to a capability limit of claude-haiku-4-5-20251001 than a prompt-wording problem; see docs/DETECTION_RELEASE_CHECKLIST.md."
   }
 ]

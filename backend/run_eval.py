@@ -12,7 +12,7 @@ Usage:
 
 Requires: backend server running (python server.py)
 
-For full eval runs (40 cases), disable the dev rate limit before starting the server:
+For full eval runs (80 cases), disable the dev rate limit before starting the server:
   set IGIARI_DISABLE_RATE_LIMIT=1   (Windows cmd)
   $env:IGIARI_DISABLE_RATE_LIMIT="1"   (PowerShell)
   export IGIARI_DISABLE_RATE_LIMIT=1   (bash)
@@ -24,8 +24,13 @@ from pathlib import Path
 import requests
 
 from eval_grading import (
+    MIN_F1,
+    MIN_PRECISION,
+    MIN_RECALL,
+    MIN_TN_ACCURACY,
     assert_phase5_quality_gates,
     compute_format_summary,
+    compute_slice_metrics,
     compute_span_fidelity_summary,
     grade,
     quality_gate_status,
@@ -137,6 +142,23 @@ def run_eval():
     return predictions, errors, format_metrics, span_metrics
 
 
+def print_slice_metrics(slices):
+    """Print per-category and per-subcategory precision/recall/F1 breakdown."""
+    print("\n" + "=" * 60)
+    print("=== SLICE METRICS (by fallacy category/subcategory) ===")
+    print("=" * 60)
+
+    print("\n[BY CATEGORY]")
+    for key, m in slices["by_category"].items():
+        print(f"  {key}: P={m['precision']} R={m['recall']} F1={m['f1']} "
+              f"(tp={m['true_positives']} fp={m['false_positives']} fn={m['false_negatives']})")
+
+    print("\n[BY SUBCATEGORY]")
+    for key, m in slices["by_subcategory"].items():
+        print(f"  {key}: P={m['precision']} R={m['recall']} F1={m['f1']} "
+              f"(tp={m['true_positives']} fp={m['false_positives']} fn={m['false_negatives']})")
+
+
 def print_results(summary, results, errors, format_summary, span_summary):
     """Print evaluation results."""
     print("\n" + "=" * 60)
@@ -177,21 +199,21 @@ def print_results(summary, results, errors, format_summary, span_summary):
     print("=" * 60)
 
     gate = quality_gate_status(summary)
-    print(f"  F1 >= 0.75:              {'PASS' if gate['f1'] else 'FAIL'} ({pos['f1']})")
-    print(f"  Precision >= 0.65:       {'PASS' if gate['precision'] else 'FAIL'} ({pos['precision']})")
-    print(f"  Recall >= 0.80:          {'PASS' if gate['recall'] else 'FAIL'} ({pos['recall']})")
-    print(f"  TN accuracy >= 1.0:      {'PASS' if gate['true_negative_accuracy'] else 'FAIL'} ({tn['accuracy']})")
+    print(f"  F1 >= {MIN_F1}:              {'PASS' if gate['f1'] else 'FAIL'} ({pos['f1']})")
+    print(f"  Precision >= {MIN_PRECISION}:       {'PASS' if gate['precision'] else 'FAIL'} ({pos['precision']})")
+    print(f"  Recall >= {MIN_RECALL}:          {'PASS' if gate['recall'] else 'FAIL'} ({pos['recall']})")
+    print(f"  TN accuracy >= {MIN_TN_ACCURACY}:      {'PASS' if gate['true_negative_accuracy'] else 'FAIL'} ({tn['accuracy']})")
 
     issues = []
 
     if not gate["f1"]:
-        issues.append(f"CRITICAL: F1 ({pos['f1']}) below Phase 5 minimum (0.75)")
+        issues.append(f"CRITICAL: F1 ({pos['f1']}) below Phase 5 minimum ({MIN_F1})")
     if not gate["precision"]:
-        issues.append(f"CRITICAL: PRECISION ({pos['precision']}) below Phase 5 minimum (0.65)")
+        issues.append(f"CRITICAL: PRECISION ({pos['precision']}) below Phase 5 minimum ({MIN_PRECISION})")
     if not gate["recall"]:
-        issues.append(f"WARNING: RECALL ({pos['recall']}) below minimum (0.80)")
+        issues.append(f"WARNING: RECALL ({pos['recall']}) below minimum ({MIN_RECALL})")
     if not gate["true_negative_accuracy"]:
-        issues.append(f"CRITICAL: TRUE NEGATIVE ACCURACY ({tn['accuracy']}) below minimum (1.0)")
+        issues.append(f"CRITICAL: TRUE NEGATIVE ACCURACY ({tn['accuracy']}) below minimum ({MIN_TN_ACCURACY})")
     
     if pos['recall'] is not None and pos['recall'] < 0.3:
         issues.append(f"WARNING: LOW RECALL ({pos['recall']}) - Missing most fallacies")
@@ -278,15 +300,18 @@ def main():
     summary, results = grade(predictions)
     format_summary = compute_format_summary(format_metrics)
     span_summary = compute_span_fidelity_summary(span_metrics)
-    
+    slice_metrics = compute_slice_metrics(predictions)
+
     # Print results
     print_results(summary, results, errors, format_summary, span_summary)
-    
+    print_slice_metrics(slice_metrics)
+
     # Save results to file
     output = {
         "summary": summary,
         "format_compliance": format_summary,
         "span_fidelity": span_summary,
+        "slice_metrics": slice_metrics,
         "results": results,
         "errors": errors,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")

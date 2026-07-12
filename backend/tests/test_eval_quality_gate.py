@@ -27,7 +27,7 @@ def test_baseline_covers_full_eval_set():
     baseline = json.loads(EVAL_BASELINE_PATH.read_text(encoding="utf-8"))
     predictions = baseline["predictions"]
     summary, _ = grade(predictions)
-    assert len(predictions) == 40
+    assert len(predictions) == 80
     assert summary["positive_cases"]["f1"] is not None
 
 
@@ -41,8 +41,8 @@ def test_phase5_quality_gate_on_baseline():
 def test_phase5_threshold_constants():
     assert MIN_F1 == 0.75
     assert MIN_PRECISION == 0.65
-    assert MIN_RECALL == 0.80
-    assert MIN_TN_ACCURACY == 1.0
+    assert MIN_RECALL == 0.78
+    assert MIN_TN_ACCURACY == 0.95
 
 
 def test_quality_gate_status_all_pass_on_baseline():

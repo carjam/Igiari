@@ -1,28 +1,28 @@
 {
   "summary": {
     "positive_cases": {
-      "true_positives": 23,
-      "false_positives": 11,
-      "false_negatives": 4,
-      "precision": 0.676,
-      "recall": 0.852,
-      "f1": 0.754
+      "true_positives": 47,
+      "false_positives": 19,
+      "false_negatives": 12,
+      "precision": 0.712,
+      "recall": 0.797,
+      "f1": 0.752
     },
     "true_negative_cases": {
-      "total": 14,
-      "correctly_flagged_clean": 14,
-      "accuracy": 1.0
+      "total": 22,
+      "correctly_flagged_clean": 21,
+      "accuracy": 0.955
     }
   },
   "format_compliance": {
-    "total_cases": 40,
-    "json_ok": 40,
+    "total_cases": 80,
+    "json_ok": 80,
     "format_errors": 0,
     "format_compliance_rate": 1.0
   },
   "span_fidelity": {
-    "findings_returned": 34,
-    "spans_in_transcript": 34,
+    "findings_returned": 67,
+    "spans_in_transcript": 67,
     "spans_not_in_transcript": 0,
     "span_fidelity_rate": 1.0
   },
@@ -97,16 +97,13 @@
         "Post Hoc Ergo Propter Hoc"
       ],
       "predicted": [
-        "Hasty Generalization",
         "Post Hoc Ergo Propter Hoc"
       ],
       "matched": [
         "Post Hoc Ergo Propter Hoc"
       ],
       "missed": [],
-      "extra_unjustified": [
-        "Hasty Generalization"
-      ]
+      "extra_unjustified": []
     },
     {
       "id": "eval_006",
@@ -214,16 +211,13 @@
         "Circular Reasoning"
       ],
       "predicted": [
-        "Circular Reasoning",
-        "Ipse Dixit"
+        "Circular Reasoning"
       ],
       "matched": [
         "Circular Reasoning"
       ],
       "missed": [],
-      "extra_unjustified": [
-        "Ipse Dixit"
-      ]
+      "extra_unjustified": []
     },
     {
       "id": "eval_015",
@@ -278,14 +272,16 @@
         "Hasty Generalization"
       ],
       "predicted": [
-        "Argument from Anecdote"
+        "Appeal to Authority",
+        "Post Hoc Ergo Propter Hoc"
       ],
       "matched": [],
       "missed": [
         "Hasty Generalization"
       ],
       "extra_unjustified": [
-        "Argument from Anecdote"
+        "Appeal to Authority",
+        "Post Hoc Ergo Propter Hoc"
       ]
     },
     {
@@ -295,15 +291,15 @@
         "Argument from Anecdote"
       ],
       "predicted": [
-        "Argument from Anecdote",
-        "False Equivalence"
+        "Appeal to Accomplishment",
+        "Argument from Anecdote"
       ],
       "matched": [
         "Argument from Anecdote"
       ],
       "missed": [],
       "extra_unjustified": [
-        "False Equivalence"
+        "Appeal to Accomplishment"
       ]
     },
     {
@@ -418,7 +414,7 @@
         "Survivorship Bias"
       ],
       "predicted": [
-        "False Dilemma",
+        "Affirming the Consequent",
         "Survivorship Bias"
       ],
       "matched": [
@@ -426,7 +422,7 @@
       ],
       "missed": [],
       "extra_unjustified": [
-        "False Dilemma"
+        "Affirming the Consequent"
       ]
     },
     {
@@ -527,7 +523,7 @@
         "Ad Hominem"
       ],
       "predicted": [
-        "Fallacy of the Single Cause",
+        "False Dilemma",
         "Furtive Fallacy"
       ],
       "matched": [],
@@ -535,7 +531,7 @@
         "Ad Hominem"
       ],
       "extra_unjustified": [
-        "Fallacy of the Single Cause",
+        "False Dilemma",
         "Furtive Fallacy"
       ]
     },
@@ -545,8 +541,565 @@
       "correct": true,
       "ground_truth": [],
       "predicted": []
+    },
+    {
+      "id": "eval_041",
+      "type": "positive",
+      "ground_truth": [
+        "Appeal to Probability"
+      ],
+      "predicted": [
+        "Appeal to Probability"
+      ],
+      "matched": [
+        "Appeal to Probability"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_042",
+      "type": "positive",
+      "ground_truth": [
+        "Argument from Fallacy"
+      ],
+      "predicted": [
+        "Argument from Fallacy"
+      ],
+      "matched": [
+        "Argument from Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_043",
+      "type": "positive",
+      "ground_truth": [
+        "Base Rate Fallacy"
+      ],
+      "predicted": [
+        "Base Rate Fallacy"
+      ],
+      "matched": [
+        "Base Rate Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_044",
+      "type": "positive",
+      "ground_truth": [
+        "Conjunction Fallacy"
+      ],
+      "predicted": [
+        "Conjunction Fallacy"
+      ],
+      "matched": [
+        "Conjunction Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_045",
+      "type": "positive",
+      "ground_truth": [
+        "Masked-Man Fallacy"
+      ],
+      "predicted": [
+        "Masked-Man Fallacy"
+      ],
+      "matched": [
+        "Masked-Man Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_046",
+      "type": "positive",
+      "ground_truth": [
+        "Affirming a Disjunct"
+      ],
+      "predicted": [
+        "Affirming a Disjunct"
+      ],
+      "matched": [
+        "Affirming a Disjunct"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_047",
+      "type": "positive",
+      "ground_truth": [
+        "Affirming the Consequent"
+      ],
+      "predicted": [
+        "Affirming the Consequent"
+      ],
+      "matched": [
+        "Affirming the Consequent"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_048",
+      "type": "positive",
+      "ground_truth": [
+        "Denying the Antecedent"
+      ],
+      "predicted": [
+        "Denying the Antecedent"
+      ],
+      "matched": [
+        "Denying the Antecedent"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_049",
+      "type": "positive",
+      "ground_truth": [
+        "Existential Fallacy"
+      ],
+      "predicted": [
+        "Existential Fallacy"
+      ],
+      "matched": [
+        "Existential Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_050",
+      "type": "positive",
+      "ground_truth": [
+        "Affirmative Conclusion from a Negative Premise"
+      ],
+      "predicted": [
+        "Illicit Major"
+      ],
+      "matched": [],
+      "missed": [
+        "Affirmative Conclusion from a Negative Premise"
+      ],
+      "extra_unjustified": [
+        "Illicit Major"
+      ]
+    },
+    {
+      "id": "eval_051",
+      "type": "positive",
+      "ground_truth": [
+        "Fallacy of Exclusive Premises"
+      ],
+      "predicted": [
+        "Fallacy of Composition"
+      ],
+      "matched": [],
+      "missed": [
+        "Fallacy of Exclusive Premises"
+      ],
+      "extra_unjustified": [
+        "Fallacy of Composition"
+      ]
+    },
+    {
+      "id": "eval_052",
+      "type": "positive",
+      "ground_truth": [
+        "Fallacy of Four Terms"
+      ],
+      "predicted": [
+        "Fallacy of the Undistributed Middle"
+      ],
+      "matched": [],
+      "missed": [
+        "Fallacy of Four Terms"
+      ],
+      "extra_unjustified": [
+        "Fallacy of the Undistributed Middle"
+      ]
+    },
+    {
+      "id": "eval_053",
+      "type": "positive",
+      "ground_truth": [
+        "Illicit Major"
+      ],
+      "predicted": [
+        "Fallacy of the Undistributed Middle"
+      ],
+      "matched": [],
+      "missed": [
+        "Illicit Major"
+      ],
+      "extra_unjustified": [
+        "Fallacy of the Undistributed Middle"
+      ]
+    },
+    {
+      "id": "eval_054",
+      "type": "positive",
+      "ground_truth": [
+        "Illicit Minor"
+      ],
+      "predicted": [
+        "Fallacy of the Undistributed Middle"
+      ],
+      "matched": [],
+      "missed": [
+        "Illicit Minor"
+      ],
+      "extra_unjustified": [
+        "Fallacy of the Undistributed Middle"
+      ]
+    },
+    {
+      "id": "eval_055",
+      "type": "positive",
+      "ground_truth": [
+        "Negative Conclusion from Affirmative Premises"
+      ],
+      "predicted": [
+        "Illicit Major"
+      ],
+      "matched": [],
+      "missed": [
+        "Negative Conclusion from Affirmative Premises"
+      ],
+      "extra_unjustified": [
+        "Illicit Major"
+      ]
+    },
+    {
+      "id": "eval_056",
+      "type": "positive",
+      "ground_truth": [
+        "Fallacy of the Undistributed Middle"
+      ],
+      "predicted": [
+        "Affirming the Consequent"
+      ],
+      "matched": [],
+      "missed": [
+        "Fallacy of the Undistributed Middle"
+      ],
+      "extra_unjustified": [
+        "Affirming the Consequent"
+      ]
+    },
+    {
+      "id": "eval_057",
+      "type": "positive",
+      "ground_truth": [
+        "Modal Fallacy"
+      ],
+      "predicted": [
+        "Modal Fallacy"
+      ],
+      "matched": [
+        "Modal Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_058",
+      "type": "positive",
+      "ground_truth": [
+        "Modal Scope Fallacy"
+      ],
+      "predicted": [
+        "Appeal to Probability",
+        "Modal Scope Fallacy"
+      ],
+      "matched": [
+        "Modal Scope Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": [
+        "Appeal to Probability"
+      ]
+    },
+    {
+      "id": "eval_059",
+      "type": "positive",
+      "ground_truth": [
+        "False Dilemma"
+      ],
+      "predicted": [
+        "False Dilemma"
+      ],
+      "matched": [
+        "False Dilemma"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_060",
+      "type": "positive",
+      "ground_truth": [
+        "Equivocation"
+      ],
+      "predicted": [
+        "Equivocation"
+      ],
+      "matched": [
+        "Equivocation"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_061",
+      "type": "positive",
+      "ground_truth": [
+        "Moving the Goalposts"
+      ],
+      "predicted": [
+        "Moving the Goalposts"
+      ],
+      "matched": [
+        "Moving the Goalposts"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_062",
+      "type": "positive",
+      "ground_truth": [
+        "Fallacy of Composition"
+      ],
+      "predicted": [
+        "Fallacy of Composition"
+      ],
+      "matched": [
+        "Fallacy of Composition"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_063",
+      "type": "positive",
+      "ground_truth": [
+        "Cum Hoc Ergo Propter Hoc"
+      ],
+      "predicted": [
+        "Cum Hoc Ergo Propter Hoc"
+      ],
+      "matched": [
+        "Cum Hoc Ergo Propter Hoc"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_064",
+      "type": "positive",
+      "ground_truth": [
+        "Sunk Costs Fallacy"
+      ],
+      "predicted": [
+        "Sunk Costs Fallacy"
+      ],
+      "matched": [
+        "Sunk Costs Fallacy"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_065",
+      "type": "positive",
+      "ground_truth": [
+        "Red Herring"
+      ],
+      "predicted": [
+        "Red Herring"
+      ],
+      "matched": [
+        "Red Herring"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_066",
+      "type": "positive",
+      "ground_truth": [
+        "Appeal to Motive"
+      ],
+      "predicted": [
+        "Circumstantial Ad Hominem"
+      ],
+      "matched": [],
+      "missed": [
+        "Appeal to Motive"
+      ],
+      "extra_unjustified": [
+        "Circumstantial Ad Hominem"
+      ]
+    },
+    {
+      "id": "eval_067",
+      "type": "positive",
+      "ground_truth": [
+        "Appeal to Fear"
+      ],
+      "predicted": [
+        "Appeal to Fear"
+      ],
+      "matched": [
+        "Appeal to Fear"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_068",
+      "type": "positive",
+      "ground_truth": [
+        "Wishful Thinking"
+      ],
+      "predicted": [
+        "Wishful Thinking"
+      ],
+      "matched": [
+        "Wishful Thinking"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_069",
+      "type": "positive",
+      "ground_truth": [
+        "Appeal to Nature"
+      ],
+      "predicted": [
+        "Appeal to Nature"
+      ],
+      "matched": [
+        "Appeal to Nature"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_070",
+      "type": "positive",
+      "ground_truth": [
+        "Argument from Silence"
+      ],
+      "predicted": [
+        "Argument from Silence"
+      ],
+      "matched": [
+        "Argument from Silence"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_071",
+      "type": "positive",
+      "ground_truth": [
+        "Two Wrongs Make a Right"
+      ],
+      "predicted": [
+        "Two Wrongs Make a Right"
+      ],
+      "matched": [
+        "Two Wrongs Make a Right"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_072",
+      "type": "positive",
+      "ground_truth": [
+        "Cherry Picking"
+      ],
+      "predicted": [
+        "Cherry Picking"
+      ],
+      "matched": [
+        "Cherry Picking"
+      ],
+      "missed": [],
+      "extra_unjustified": []
+    },
+    {
+      "id": "eval_073",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_074",
+      "type": "true_negative",
+      "correct": false,
+      "ground_truth": [],
+      "predicted": [
+        "Affirming the Consequent"
+      ]
+    },
+    {
+      "id": "eval_075",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_076",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_077",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_078",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_079",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
+    },
+    {
+      "id": "eval_080",
+      "type": "true_negative",
+      "correct": true,
+      "ground_truth": [],
+      "predicted": []
     }
   ],
   "errors": [],
-  "timestamp": "2026-06-23 16:17:36"
+  "timestamp": "2026-07-12 12:38:25"
 }

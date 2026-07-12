@@ -1,4 +1,6 @@
 """Unit tests for eval_grading module."""
+import json
+
 import pytest
 
 from eval_grading import (
@@ -8,11 +10,18 @@ from eval_grading import (
     MIN_TN_ACCURACY,
     assert_phase5_quality_gates,
     compute_format_summary,
+    compute_slice_metrics,
     compute_span_fidelity_summary,
     grade,
     load_alias_map,
     normalize,
 )
+
+
+def _write_mini_eval_set(tmp_path, cases: list[dict]) -> "object":
+    path = tmp_path / "mini_eval_set.json"
+    path.write_text(json.dumps(cases), encoding="utf-8")
+    return path
 
 
 def test_normalize_uses_alias_map():
@@ -87,8 +96,94 @@ def test_compute_span_fidelity_summary_empty():
 
 def test_grade_missing_case_treated_as_empty_prediction():
     summary, results = grade([])
-    assert len(results) == 40
+    assert len(results) == 80
     assert summary["positive_cases"]["false_negatives"] > 0
+
+
+def test_slice_metrics_true_positive_by_category_and_subcategory(tmp_path):
+    mini_set = _write_mini_eval_set(
+        tmp_path,
+        [
+            {
+                "id": "case_1",
+                "transcript": "x",
+                "ground_truth": [
+                    {"fallacy": "Appeal to Probability", "span": "x", "category": "Formal", "subcategory": "Formal Fallacy"}
+                ],
+            }
+        ],
+    )
+    predictions = [{"id": "case_1", "predictions": [{"fallacy": "Appeal to Probability"}]}]
+    slices = compute_slice_metrics(predictions, eval_set_path=mini_set)
+    assert slices["by_category"]["Formal"]["true_positives"] == 1
+    assert slices["by_subcategory"]["Formal Fallacy"]["true_positives"] == 1
+
+
+def test_slice_metrics_false_negative_when_missed(tmp_path):
+    mini_set = _write_mini_eval_set(
+        tmp_path,
+        [
+            {
+                "id": "case_1",
+                "transcript": "x",
+                "ground_truth": [
+                    {"fallacy": "Appeal to Probability", "span": "x", "category": "Formal", "subcategory": "Formal Fallacy"}
+                ],
+            }
+        ],
+    )
+    slices = compute_slice_metrics([{"id": "case_1", "predictions": []}], eval_set_path=mini_set)
+    assert slices["by_category"]["Formal"]["false_negatives"] == 1
+    assert slices["by_category"]["Formal"]["recall"] == 0.0
+
+
+def test_slice_metrics_false_positive_attributed_to_predicted_fallacy(tmp_path):
+    mini_set = _write_mini_eval_set(
+        tmp_path,
+        [
+            {
+                "id": "case_1",
+                "transcript": "x",
+                "ground_truth": [
+                    {"fallacy": "Straw Man", "span": "x", "category": "Informal", "subcategory": "Other Informal Fallacy"}
+                ],
+            }
+        ],
+    )
+    predictions = [{"id": "case_1", "predictions": [{"fallacy": "Affirming the Consequent"}]}]
+    slices = compute_slice_metrics(predictions, eval_set_path=mini_set)
+    # Ground truth (Straw Man) is missed, and the hallucinated "Affirming the
+    # Consequent" (Formal/Propositional Fallacy) is a false positive.
+    assert slices["by_subcategory"]["Propositional Fallacy"]["false_positives"] == 1
+    assert slices["by_subcategory"]["Other Informal Fallacy"]["false_negatives"] == 1
+
+
+def test_slice_metrics_ignores_true_negative_cases(tmp_path):
+    mini_set = _write_mini_eval_set(
+        tmp_path,
+        [{"id": "case_1", "transcript": "x", "ground_truth": []}],
+    )
+    slices = compute_slice_metrics([{"id": "case_1", "predictions": []}], eval_set_path=mini_set)
+    assert slices["by_category"] == {}
+    assert slices["by_subcategory"] == {}
+
+
+def test_slice_metrics_perfect_precision_when_no_false_positives(tmp_path):
+    mini_set = _write_mini_eval_set(
+        tmp_path,
+        [
+            {
+                "id": "case_1",
+                "transcript": "x",
+                "ground_truth": [
+                    {"fallacy": "Appeal to Probability", "span": "x", "category": "Formal", "subcategory": "Formal Fallacy"}
+                ],
+            }
+        ],
+    )
+    predictions = [{"id": "case_1", "predictions": [{"fallacy": "Appeal to Probability"}]}]
+    slices = compute_slice_metrics(predictions, eval_set_path=mini_set)
+    assert slices["by_category"]["Formal"]["precision"] == 1.0
 
 
 def test_assert_phase5_reports_each_failed_metric():

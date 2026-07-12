@@ -20,6 +20,6 @@ def test_sync_writes_all_reference_files(tmp_path):
     assert (ref / "examples.md").is_file()
 
     eval_set = json.loads((ref / "eval_set.json").read_text(encoding="utf-8"))
-    assert len(eval_set) == 40
+    assert len(eval_set) == 80
     assert "Pattern:" in (ref / "taxonomy.md").read_text(encoding="utf-8")
     assert "Golden Examples" in (ref / "examples.md").read_text(encoding="utf-8")

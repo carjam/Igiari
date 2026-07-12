@@ -1,6 +1,13 @@
 """Shared fixtures for backend unit tests."""
 import os
 
+# Must run before any test module imports `server`. server.py calls load_dotenv()
+# at import time, which would otherwise repopulate SENTRY_DSN from a developer's
+# local .env (load_dotenv doesn't override already-set keys, so setting it to ""
+# here — rather than deleting it — is what actually blocks that repopulation).
+# Without this, running the test suite would send real events to production Sentry.
+os.environ["SENTRY_DSN"] = ""
+
 import pytest
 
 

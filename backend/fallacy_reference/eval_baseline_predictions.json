@@ -1,19 +1,19 @@
 {
   "label": "phase5-calibration-v1",
-  "source_timestamp": "2026-06-23 16:17:36",
+  "source_timestamp": "2026-07-12 12:38:25",
   "summary": {
     "positive_cases": {
-      "true_positives": 23,
-      "false_positives": 11,
-      "false_negatives": 4,
-      "precision": 0.676,
-      "recall": 0.852,
-      "f1": 0.754
+      "true_positives": 47,
+      "false_positives": 19,
+      "false_negatives": 12,
+      "precision": 0.712,
+      "recall": 0.797,
+      "f1": 0.752
     },
     "true_negative_cases": {
-      "total": 14,
-      "correctly_flagged_clean": 14,
-      "accuracy": 1.0
+      "total": 22,
+      "correctly_flagged_clean": 21,
+      "accuracy": 0.955
     }
   },
   "predictions": [
@@ -55,9 +55,6 @@
     {
       "id": "eval_005",
       "predictions": [
-        {
-          "fallacy": "Hasty Generalization"
-        },
         {
           "fallacy": "Post Hoc Ergo Propter Hoc"
         }
@@ -123,9 +120,6 @@
       "predictions": [
         {
           "fallacy": "Circular Reasoning"
-        },
-        {
-          "fallacy": "Ipse Dixit"
         }
       ]
     },
@@ -157,7 +151,10 @@
       "id": "eval_019",
       "predictions": [
         {
-          "fallacy": "Argument from Anecdote"
+          "fallacy": "Appeal to Authority"
+        },
+        {
+          "fallacy": "Post Hoc Ergo Propter Hoc"
         }
       ]
     },
@@ -165,10 +162,10 @@
       "id": "eval_020",
       "predictions": [
         {
-          "fallacy": "Argument from Anecdote"
+          "fallacy": "Appeal to Accomplishment"
         },
         {
-          "fallacy": "False Equivalence"
+          "fallacy": "Argument from Anecdote"
         }
       ]
     },
@@ -232,7 +229,7 @@
       "id": "eval_030",
       "predictions": [
         {
-          "fallacy": "False Dilemma"
+          "fallacy": "Affirming the Consequent"
         },
         {
           "fallacy": "Survivorship Bias"
@@ -294,7 +291,7 @@
       "id": "eval_039",
       "predictions": [
         {
-          "fallacy": "Fallacy of the Single Cause"
+          "fallacy": "False Dilemma"
         },
         {
           "fallacy": "Furtive Fallacy"
@@ -303,6 +300,301 @@
     },
     {
       "id": "eval_040",
+      "predictions": []
+    },
+    {
+      "id": "eval_041",
+      "predictions": [
+        {
+          "fallacy": "Appeal to Probability"
+        }
+      ]
+    },
+    {
+      "id": "eval_042",
+      "predictions": [
+        {
+          "fallacy": "Argument from Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_043",
+      "predictions": [
+        {
+          "fallacy": "Base Rate Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_044",
+      "predictions": [
+        {
+          "fallacy": "Conjunction Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_045",
+      "predictions": [
+        {
+          "fallacy": "Masked-Man Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_046",
+      "predictions": [
+        {
+          "fallacy": "Affirming a Disjunct"
+        }
+      ]
+    },
+    {
+      "id": "eval_047",
+      "predictions": [
+        {
+          "fallacy": "Affirming the Consequent"
+        }
+      ]
+    },
+    {
+      "id": "eval_048",
+      "predictions": [
+        {
+          "fallacy": "Denying the Antecedent"
+        }
+      ]
+    },
+    {
+      "id": "eval_049",
+      "predictions": [
+        {
+          "fallacy": "Existential Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_050",
+      "predictions": [
+        {
+          "fallacy": "Illicit Major"
+        }
+      ]
+    },
+    {
+      "id": "eval_051",
+      "predictions": [
+        {
+          "fallacy": "Fallacy of Composition"
+        }
+      ]
+    },
+    {
+      "id": "eval_052",
+      "predictions": [
+        {
+          "fallacy": "Fallacy of the Undistributed Middle"
+        }
+      ]
+    },
+    {
+      "id": "eval_053",
+      "predictions": [
+        {
+          "fallacy": "Fallacy of the Undistributed Middle"
+        }
+      ]
+    },
+    {
+      "id": "eval_054",
+      "predictions": [
+        {
+          "fallacy": "Fallacy of the Undistributed Middle"
+        }
+      ]
+    },
+    {
+      "id": "eval_055",
+      "predictions": [
+        {
+          "fallacy": "Illicit Major"
+        }
+      ]
+    },
+    {
+      "id": "eval_056",
+      "predictions": [
+        {
+          "fallacy": "Affirming the Consequent"
+        }
+      ]
+    },
+    {
+      "id": "eval_057",
+      "predictions": [
+        {
+          "fallacy": "Modal Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_058",
+      "predictions": [
+        {
+          "fallacy": "Appeal to Probability"
+        },
+        {
+          "fallacy": "Modal Scope Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_059",
+      "predictions": [
+        {
+          "fallacy": "False Dilemma"
+        }
+      ]
+    },
+    {
+      "id": "eval_060",
+      "predictions": [
+        {
+          "fallacy": "Equivocation"
+        }
+      ]
+    },
+    {
+      "id": "eval_061",
+      "predictions": [
+        {
+          "fallacy": "Moving the Goalposts"
+        }
+      ]
+    },
+    {
+      "id": "eval_062",
+      "predictions": [
+        {
+          "fallacy": "Fallacy of Composition"
+        }
+      ]
+    },
+    {
+      "id": "eval_063",
+      "predictions": [
+        {
+          "fallacy": "Cum Hoc Ergo Propter Hoc"
+        }
+      ]
+    },
+    {
+      "id": "eval_064",
+      "predictions": [
+        {
+          "fallacy": "Sunk Costs Fallacy"
+        }
+      ]
+    },
+    {
+      "id": "eval_065",
+      "predictions": [
+        {
+          "fallacy": "Red Herring"
+        }
+      ]
+    },
+    {
+      "id": "eval_066",
+      "predictions": [
+        {
+          "fallacy": "Circumstantial Ad Hominem"
+        }
+      ]
+    },
+    {
+      "id": "eval_067",
+      "predictions": [
+        {
+          "fallacy": "Appeal to Fear"
+        }
+      ]
+    },
+    {
+      "id": "eval_068",
+      "predictions": [
+        {
+          "fallacy": "Wishful Thinking"
+        }
+      ]
+    },
+    {
+      "id": "eval_069",
+      "predictions": [
+        {
+          "fallacy": "Appeal to Nature"
+        }
+      ]
+    },
+    {
+      "id": "eval_070",
+      "predictions": [
+        {
+          "fallacy": "Argument from Silence"
+        }
+      ]
+    },
+    {
+      "id": "eval_071",
+      "predictions": [
+        {
+          "fallacy": "Two Wrongs Make a Right"
+        }
+      ]
+    },
+    {
+      "id": "eval_072",
+      "predictions": [
+        {
+          "fallacy": "Cherry Picking"
+        }
+      ]
+    },
+    {
+      "id": "eval_073",
+      "predictions": []
+    },
+    {
+      "id": "eval_074",
+      "predictions": [
+        {
+          "fallacy": "Affirming the Consequent"
+        }
+      ]
+    },
+    {
+      "id": "eval_075",
+      "predictions": []
+    },
+    {
+      "id": "eval_076",
+      "predictions": []
+    },
+    {
+      "id": "eval_077",
+      "predictions": []
+    },
+    {
+      "id": "eval_078",
+      "predictions": []
+    },
+    {
+      "id": "eval_079",
+      "predictions": []
+    },
+    {
+      "id": "eval_080",
       "predictions": []
     }
   ]
