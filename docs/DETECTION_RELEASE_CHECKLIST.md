@@ -92,7 +92,8 @@ Each successful `/api/scan` emits one JSON log line:
   "latency_ms": 1240,
   "cache_hit": false,
   "raw_finding_count": 3,
-  "model_latency_ms": 1180
+  "model_latency_ms": 1180,
+  "request_id": "b7b6e2b0-..."
 }
 ```
 
@@ -104,8 +105,15 @@ Each successful `/api/scan` emits one JSON log line:
 | `latency_ms` | Total request time |
 | `model_latency_ms` | Anthropic call time (cache miss only) |
 | `cache_hit` | Response served from in-memory cache |
+| `request_id` | Correlates this line to the `x-request-id` response header and any error logs/Sentry events for the same request |
 
-Filter production logs: `event=scan_complete`. Alert on high `spans_dropped` or `parse_retries` rates.
+Filter production logs: `event=scan_complete`.
+
+**Alerting is wired, not just aspirational**: any scan with `spans_dropped > 0` or
+`parse_retries > 0` also fires a `scan_quality_degraded` Sentry message (warning level,
+telemetry attached) — see `scan_observability.log_scan_complete`. Requires `SENTRY_DSN` to
+be set (see `docs/DEPLOYMENT_GUIDE.md` § Error Tracking); configure a Sentry alert rule on
+that message to get paged on detection-quality regressions instead of manually grepping logs.
 
 ---
 

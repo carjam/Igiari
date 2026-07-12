@@ -5,6 +5,7 @@ Supports consumer and legal product surfaces (spec 10_monetization.md).
 import os
 from typing import Any, Dict, List, Optional
 
+import sentry_sdk
 import stripe
 from fastapi import HTTPException
 
@@ -15,6 +16,9 @@ from billing import (
     update_account_fields,
     webhook_event_processed,
 )
+from logging_config import get_logger
+
+logger = get_logger(__name__)
 
 CONSUMER_PRODUCTS: Dict[str, Dict[str, Any]] = {
     "starter_pack": {
@@ -90,7 +94,8 @@ def _stripe() -> None:
 
 def _stripe_http_error(exc: stripe.error.StripeError) -> HTTPException:
     user_message = getattr(exc, "user_message", None) or str(exc)
-    print(f"Stripe API error [{exc.__class__.__name__}]: {user_message}")
+    logger.error("Stripe API error [%s]: %s", exc.__class__.__name__, user_message)
+    sentry_sdk.capture_exception(exc)
     return HTTPException(
         status_code=502,
         detail={
@@ -200,9 +205,11 @@ def get_or_create_stripe_customer(account: Dict[str, Any]) -> str:
         except stripe.error.StripeError as exc:
             if not _stripe_customer_not_found(exc):
                 raise _stripe_http_error(exc) from exc
-            print(
-                f"Replacing missing Stripe customer {existing} "
-                f"for account {account_id}: {exc}"
+            logger.warning(
+                "Replacing missing Stripe customer %s for account %s: %s",
+                existing,
+                account_id,
+                exc,
             )
 
     try:
@@ -340,7 +347,9 @@ def _handle_checkout_completed(session: Dict[str, Any], event_id: str) -> None:
     metadata = session.get("metadata") or {}
     account_id = metadata.get("account_id")
     if not account_id:
-        print(f"checkout.session.completed missing account_id: {session.get('id')}")
+        logger.error(
+            "checkout.session.completed missing account_id: %s", session.get("id")
+        )
         return
 
     updates: Dict[str, Any] = {}
@@ -380,7 +389,7 @@ def _handle_invoice_paid(invoice: Dict[str, Any], event_id: str) -> None:
 
     account = get_account_by_stripe_customer(customer_id)
     if not account:
-        print(f"invoice.paid: no account for customer {customer_id}")
+        logger.error("invoice.paid: no account for customer %s", customer_id)
         return
 
     credits = 0
@@ -393,7 +402,7 @@ def _handle_invoice_paid(invoice: Dict[str, Any], event_id: str) -> None:
             subscription = stripe.Subscription.retrieve(subscription_id)
             sub_metadata = subscription.get("metadata") or {}
         except stripe.error.StripeError as exc:
-            print(f"Could not load subscription {subscription_id}: {exc}")
+            logger.warning("Could not load subscription %s: %s", subscription_id, exc)
 
     if sub_metadata.get("surface") == "legal":
         update_account_fields(account["id"], {"account_type": "legal"})
@@ -439,14 +448,14 @@ def handle_webhook_payload(payload: bytes, signature: Optional[str]) -> None:
     try:
         event = stripe.Webhook.construct_event(payload, signature, secret)
     except stripe.error.SignatureVerificationError as exc:
-        print(f"Stripe webhook signature failed: {exc}")
+        logger.warning("Stripe webhook signature failed: %s", exc)
         raise HTTPException(status_code=400, detail="Invalid signature") from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail="Invalid payload") from exc
 
     event_id = event["id"]
     if webhook_event_processed(event_id):
-        print(f"Stripe webhook duplicate ignored: {event_id}")
+        logger.info("Stripe webhook duplicate ignored: %s", event_id)
         return
 
     event_type = event["type"]
@@ -464,4 +473,4 @@ def handle_webhook_payload(payload: bytes, signature: Optional[str]) -> None:
         if account:
             update_account_fields(account["id"], {"subscription_status": "canceled"})
     else:
-        print(f"Stripe webhook unhandled type: {event_type}")
+        logger.info("Stripe webhook unhandled type: %s", event_type)

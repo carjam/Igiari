@@ -5,6 +5,10 @@ import json
 from dataclasses import asdict, dataclass
 from typing import Any
 
+import sentry_sdk
+
+from logging_config import request_id_var
+
 
 @dataclass
 class ApiCallStats:
@@ -30,9 +34,20 @@ class ScanTelemetry:
     def to_log_dict(self) -> dict[str, Any]:
         payload = asdict(self)
         payload["event"] = "scan_complete"
+        request_id = request_id_var.get()
+        if request_id:
+            payload["request_id"] = request_id
         return payload
 
 
 def log_scan_complete(telemetry: ScanTelemetry) -> None:
     """Emit one JSON log line per scan for aggregation and alerting."""
-    print(json.dumps(telemetry.to_log_dict(), ensure_ascii=False), flush=True)
+    payload = telemetry.to_log_dict()
+    print(json.dumps(payload, ensure_ascii=False), flush=True)
+
+    if telemetry.spans_dropped > 0 or telemetry.parse_retries > 0:
+        sentry_sdk.capture_message(
+            "scan_quality_degraded",
+            level="warning",
+            extras=payload,
+        )

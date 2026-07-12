@@ -6,10 +6,12 @@ import json
 import os
 import time
 import hashlib
+import uuid
 from pathlib import Path
 from typing import Dict, List, Optional
 from collections import defaultdict
 
+import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -24,6 +26,8 @@ from billing import (
     load_account_from_token,
     require_credits,
 )
+from error_tracking import init_error_tracking
+from logging_config import configure_logging, get_logger, request_id_var
 from scan_observability import ApiCallStats, ScanTelemetry, log_scan_complete
 from stripe_billing import (
     create_checkout_session,
@@ -37,8 +41,26 @@ from stripe_billing import (
 # Load environment variables
 load_dotenv()
 
+configure_logging()
+init_error_tracking()
+logger = get_logger(__name__)
+
 # Initialize FastAPI
 app = FastAPI(title="Fallacy Scanner API")
+
+
+@app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    """Assign a request ID for log/telemetry correlation; echo it back to the client."""
+    incoming_id = request.headers.get("x-request-id")
+    request_id = incoming_id.strip() if incoming_id and incoming_id.strip() else str(uuid.uuid4())
+    token = request_id_var.set(request_id)
+    try:
+        response = await call_next(request)
+    finally:
+        request_id_var.reset(token)
+    response.headers["x-request-id"] = request_id
+    return response
 
 # Configure CORS - allow all origins for now (tighten in production)
 app.add_middleware(
@@ -53,7 +75,8 @@ app.add_middleware(
 @app.exception_handler(stripe.error.StripeError)
 async def handle_stripe_error(request: Request, exc: stripe.error.StripeError):
     user_message = getattr(exc, "user_message", None) or str(exc)
-    print(f"Unhandled Stripe error on {request.url.path}: {user_message}")
+    logger.error("Unhandled Stripe error on %s: %s", request.url.path, user_message, exc_info=exc)
+    sentry_sdk.capture_exception(exc)
     return JSONResponse(
         status_code=502,
         content={
@@ -67,7 +90,8 @@ async def handle_stripe_error(request: Request, exc: stripe.error.StripeError):
 
 @app.exception_handler(Exception)
 async def handle_unhandled_exception(request: Request, exc: Exception):
-    print(f"Unhandled error on {request.url.path}: {exc}")
+    logger.error("Unhandled error on %s: %s", request.url.path, exc, exc_info=exc)
+    sentry_sdk.capture_exception(exc)
     return JSONResponse(
         status_code=500,
         content={
@@ -135,7 +159,7 @@ def load_taxonomy():
     taxonomy_path = Path(__file__).parent / "fallacy_reference" / "fallacies.json"
     with open(taxonomy_path, "r", encoding="utf-8") as f:
         fallacy_taxonomy = json.load(f)
-    print(f"Loaded {len(fallacy_taxonomy)} fallacies from taxonomy")
+    logger.info("Loaded %d fallacies from taxonomy", len(fallacy_taxonomy))
 
 
 def check_rate_limit(client_ip: str) -> bool:
@@ -288,8 +312,11 @@ async def call_anthropic_api(user_text: str, stats: Optional[ApiCallStats] = Non
             if stats is not None:
                 stats.parse_retries += 1
             # Retry once if JSON parsing fails
-            print(f"JSON parse error on first attempt: {e}")
-            print(f"Response text: {response_text[:500]}")
+            logger.warning(
+                "JSON parse error on first attempt: %s; response_text=%r",
+                e,
+                response_text[:500],
+            )
             
             # Second attempt with explicit instruction
             retry_prompt = system_prompt + "\n\nIMPORTANT: Return ONLY valid JSON, no markdown code fences or other text."
@@ -318,7 +345,8 @@ async def call_anthropic_api(user_text: str, stats: Optional[ApiCallStats] = Non
             return result
             
     except Exception as e:
-        print(f"Anthropic API error: {e}")
+        logger.error("Anthropic API error: %s", e, exc_info=e)
+        sentry_sdk.capture_exception(e)
         raise
 
 
@@ -332,6 +360,16 @@ async def startup_event():
 async def root():
     """Health check endpoint."""
     return {"status": "ok", "service": "fallacy-scanner-api"}
+
+
+@app.get("/healthz")
+async def healthz():
+    """Uptime-monitor health check. No auth, no dependencies on billing/Anthropic."""
+    return {
+        "status": "ok",
+        "service": "fallacy-scanner-api",
+        "taxonomy_loaded": len(fallacy_taxonomy) > 0,
+    }
 
 
 def extract_bearer_token(authorization: Optional[str]) -> Optional[str]:
@@ -537,7 +575,7 @@ async def scan_text(
     # Check cache first (Phase 3.5)
     cache_key = hash_text(text)
     if cache_key in response_cache:
-        print(f"Cache hit for hash: {cache_key[:16]}...")
+        logger.debug("Cache hit for hash: %s...", cache_key[:16])
         cached_response = response_cache[cache_key]
         credits_remaining = account["credit_balance"] if account else None
         findings = [Finding(**f) for f in cached_response["findings"]]
@@ -559,7 +597,7 @@ async def scan_text(
         )
     
     # Cache miss - proceed with API call
-    print(f"Cache miss for hash: {cache_key[:16]}...")
+    logger.debug("Cache miss for hash: %s...", cache_key[:16])
     api_stats = ApiCallStats()
     
     # Call Anthropic API
@@ -574,7 +612,8 @@ async def scan_text(
             }
         )
     except Exception as e:
-        print(f"Unexpected error: {e}")
+        # Already logged + reported to Sentry inside call_anthropic_api.
+        logger.error("Scan failed after Anthropic call: %s", e)
         raise HTTPException(
             status_code=500,
             detail={
@@ -597,7 +636,7 @@ async def scan_text(
     if len(response_cache) > CACHE_MAX_SIZE:
         oldest_key = next(iter(response_cache))
         del response_cache[oldest_key]
-        print(f"Cache evicted oldest entry (size was {CACHE_MAX_SIZE + 1})")
+        logger.debug("Cache evicted oldest entry (size was %d)", CACHE_MAX_SIZE + 1)
 
     credits_remaining = None
     if user_id:

@@ -102,6 +102,12 @@ Details per service: **[INTEGRATIONS.md](INTEGRATIONS.md)**
 
 Without the three Supabase vars, sign-in works but balance/scans fail. See [INTEGRATIONS.md](INTEGRATIONS.md#render-backend-api).
 
+**Optional (observability):**
+- `SENTRY_DSN` — enables error tracking; unset means Sentry is fully inert (see § Error Tracking below)
+- `SENTRY_ENVIRONMENT` — defaults to `ENVIRONMENT` or `"production"`
+- `SENTRY_TRACES_SAMPLE_RATE` — defaults to `0`
+- `LOG_LEVEL` — defaults to `INFO`
+
 **How to update:** Render → **igiari-backend** → Environment → Save Changes (auto-redeploy).
 
 ### Frontend (Cloudflare Pages)
@@ -121,11 +127,36 @@ Configured in Supabase dashboard (not Render). See [INTEGRATIONS.md](INTEGRATION
 3. View real-time logs (auto-refreshes)
 4. Look for errors, API calls, rate limiting messages
 
+Backend logs are structured JSON, one object per line (`logging_config.py`), so they're
+directly filterable/greppable in the Render log view. Every log line includes `level`,
+`logger`, `message`, and (when set) `request_id`. Set `LOG_LEVEL` (default `INFO`) to
+change verbosity; `x-request-id` is echoed on every response and threads through to the
+matching `scan_complete` telemetry line for correlation.
+
 **What to watch for:**
 - `HTTP 200` - Successful requests
 - `HTTP 429` - Rate limit exceeded
 - `HTTP 500` - Server errors
 - Build failures - Usually Python dependency issues
+- `"level":"ERROR"` - Application errors (Stripe, Anthropic, Supabase failures)
+
+### Error Tracking (Sentry)
+
+Set `SENTRY_DSN` on Render to enable Sentry error capture (unhandled exceptions, Stripe
+errors, Anthropic API errors are all reported explicitly; see `error_tracking.py`). Without
+`SENTRY_DSN` set, Sentry is fully inert — no calls are made. Optional: `SENTRY_ENVIRONMENT`
+(defaults to `ENVIRONMENT` or `"production"`) and `SENTRY_TRACES_SAMPLE_RATE` (default `0`).
+
+`/api/scan` requests with dropped spans or a JSON parse retry also emit a
+`scan_quality_degraded` Sentry message (warning level) with the scan telemetry attached —
+configure a Sentry alert rule on this message to catch prompt/model regressions in
+production, closing the loop described in `docs/DETECTION_RELEASE_CHECKLIST.md`.
+
+### Health Check
+
+`GET /healthz` returns `{"status": "ok", "service": "fallacy-scanner-api", "taxonomy_loaded": true}`
+with no auth and no external dependencies (billing/Anthropic). Point Render's health check
+and any uptime monitor (e.g. UptimeRobot, Better Uptime) at this path.
 
 ### Frontend (Cloudflare Pages)
 

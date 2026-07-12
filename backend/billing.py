@@ -8,6 +8,10 @@ from typing import Any, Dict, Optional
 import requests
 from fastapi import HTTPException
 
+from logging_config import get_logger
+
+logger = get_logger(__name__)
+
 TRIAL_CREDITS = 5
 REQUEST_TIMEOUT = 10
 INSUFFICIENT_CREDIT_MESSAGE = (
@@ -83,7 +87,7 @@ def verify_access_token(token: str) -> Dict[str, Any]:
             timeout=REQUEST_TIMEOUT,
         )
     except requests.RequestException as exc:
-        print(f"Auth verification request failed: {exc}")
+        logger.warning("Auth verification request failed: %s", exc)
         raise HTTPException(
             status_code=503,
             detail={
@@ -93,7 +97,7 @@ def verify_access_token(token: str) -> Dict[str, Any]:
         ) from exc
 
     if response.status_code != 200:
-        print(f"Auth verification failed: {response.status_code} {response.text}")
+        logger.warning("Auth verification failed: %s %s", response.status_code, response.text)
         raise HTTPException(
             status_code=401,
             detail={
@@ -124,7 +128,7 @@ def get_account(user_id: str) -> Optional[Dict[str, Any]]:
         timeout=REQUEST_TIMEOUT,
     )
     if response.status_code != 200:
-        print(f"get_account failed: {response.status_code} {response.text}")
+        logger.error("get_account failed: %s %s", response.status_code, response.text)
         message = "Could not load your account. Please try again."
         try:
             body = response.json()
@@ -158,7 +162,9 @@ def get_account_by_stripe_customer(stripe_customer_id: str) -> Optional[Dict[str
         timeout=REQUEST_TIMEOUT,
     )
     if response.status_code != 200:
-        print(f"get_account_by_stripe_customer failed: {response.status_code} {response.text}")
+        logger.error(
+            "get_account_by_stripe_customer failed: %s %s", response.status_code, response.text
+        )
         return None
     rows = response.json()
     return rows[0] if rows else None
@@ -173,7 +179,7 @@ def update_account_fields(user_id: str, fields: Dict[str, Any]) -> None:
         timeout=REQUEST_TIMEOUT,
     )
     if response.status_code != 200:
-        print(f"update_account failed: {response.status_code} {response.text}")
+        logger.error("update_account failed: %s %s", response.status_code, response.text)
 
 
 def webhook_event_processed(stripe_event_id: str) -> bool:
@@ -203,7 +209,7 @@ def grant_credits(
 
     account = get_account(user_id)
     if not account:
-        print(f"grant_credits: account not found {user_id}")
+        logger.error("grant_credits: account not found %s", user_id)
         return 0
 
     new_balance = account["credit_balance"] + delta
@@ -222,7 +228,7 @@ def grant_credits(
         timeout=REQUEST_TIMEOUT,
     )
     if txn.status_code not in (200, 201):
-        print(f"grant_credits txn failed: {txn.status_code} {txn.text}")
+        logger.error("grant_credits txn failed: %s %s", txn.status_code, txn.text)
         if stripe_event_id and txn.status_code == 409:
             account = get_account(user_id)
             return account["credit_balance"] if account else 0
@@ -256,7 +262,7 @@ def grant_trial_credits(user_id: str) -> None:
         timeout=REQUEST_TIMEOUT,
     )
     if txn.status_code not in (200, 201):
-        print(f"trial grant txn failed: {txn.status_code} {txn.text}")
+        logger.error("trial grant txn failed: %s %s", txn.status_code, txn.text)
         raise HTTPException(
             status_code=503,
             detail={
@@ -276,7 +282,7 @@ def grant_trial_credits(user_id: str) -> None:
         timeout=REQUEST_TIMEOUT,
     )
     if updated.status_code != 200:
-        print(f"trial grant update failed: {updated.status_code} {updated.text}")
+        logger.error("trial grant update failed: %s %s", updated.status_code, updated.text)
 
 
 def ensure_account(
@@ -303,7 +309,7 @@ def ensure_account(
             timeout=REQUEST_TIMEOUT,
         )
         if created.status_code not in (200, 201):
-            print(f"create account failed: {created.status_code} {created.text}")
+            logger.error("create account failed: %s %s", created.status_code, created.text)
             raise HTTPException(
                 status_code=503,
                 detail={
@@ -379,7 +385,7 @@ def debit_scan_credit(user_id: str) -> int:
         timeout=REQUEST_TIMEOUT,
     )
     if txn.status_code not in (200, 201):
-        print(f"debit txn failed: {txn.status_code} {txn.text}")
+        logger.error("debit txn failed: %s %s", txn.status_code, txn.text)
         raise HTTPException(
             status_code=503,
             detail={
@@ -396,6 +402,6 @@ def debit_scan_credit(user_id: str) -> int:
         timeout=REQUEST_TIMEOUT,
     )
     if updated.status_code != 200:
-        print(f"debit update failed: {updated.status_code} {updated.text}")
+        logger.error("debit update failed: %s %s", updated.status_code, updated.text)
 
     return new_balance
