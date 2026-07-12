@@ -8,7 +8,7 @@ If you are an agent picking this up cold: read 00–03 for context, then check *
 
 ## What this product is
 
-A web page where someone pastes in text (an email, an article, an ad, a transcript) and gets back the same text with logical fallacies highlighted inline, each with a short explanation and the fallacy's name. Think "Grammarly, but for bad reasoning instead of bad grammar."
+A web page where someone pastes in text (an email, an article, an ad, a transcript) and gets back a list of the logical fallacies found, each with the flagged quote, the fallacy's name, and a short explanation. Think "Grammarly, but for bad reasoning instead of bad grammar." (As of 2026-07, results are shown as a findings list only — the full pasted text is not echoed back inline, since the user already has it.)
 
 ## What this product explicitly is NOT (yet)
 

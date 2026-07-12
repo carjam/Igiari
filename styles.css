@@ -222,108 +222,6 @@ body {
     font-weight: 600;
 }
 
-/* Annotated text */
-.annotated-text {
-    font-family: var(--font-serif);
-    font-size: 16px;
-    line-height: 1.8;
-    margin-bottom: 32px;
-    padding: 24px;
-    background: white;
-    border: 1px solid var(--color-muted);
-    border-radius: 4px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
-
-.fallacy-highlight {
-    position: relative;
-    text-decoration: underline;
-    text-decoration-style: wavy;
-    text-decoration-color: var(--color-accent);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-    cursor: help;
-    transition: background-color 0.2s;
-}
-
-.fallacy-highlight:hover {
-    background-color: rgba(168, 51, 43, 0.08);
-}
-
-/* Tooltip */
-.tooltip {
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--color-text);
-    color: white;
-    padding: 12px 16px;
-    border-radius: 4px;
-    font-family: var(--font-sans);
-    font-size: 13px;
-    line-height: 1.4;
-    max-width: 320px;
-    width: max-content;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.fallacy-highlight:hover .tooltip {
-    opacity: 1;
-}
-
-.tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: var(--color-text);
-}
-
-.tooltip-fallacy {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-accent);
-    display: block;
-    margin-bottom: 4px;
-}
-
-.tooltip-explanation {
-    color: #E8E6E0;
-}
-
-.tooltip-strengthen {
-    display: block;
-    margin-top: 6px;
-    color: #D8D4C8;
-    font-style: italic;
-    line-height: 1.4;
-}
-
-.tooltip-strengthen::before {
-    content: 'Gap: ';
-    font-style: normal;
-    font-weight: 600;
-    color: #E8E6E0;
-}
-
-.tooltip-confidence {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: #9B9587;
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
 /* Findings list */
 .findings-list {
     margin-top: 32px;
@@ -643,20 +541,6 @@ main.legal-page {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
-    }
-    
-    .tooltip {
-        position: fixed;
-        bottom: 20px;
-        left: 16px;
-        right: 16px;
-        top: auto;
-        transform: none;
-        max-width: none;
-    }
-    
-    .tooltip::after {
-        display: none;
     }
 }
 

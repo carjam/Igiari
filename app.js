@@ -30,11 +30,9 @@ const loadingState = document.getElementById('loadingState');
 const errorState = document.getElementById('errorState');
 const errorMessage = document.getElementById('errorMessage');
 const noFallaciesState = document.getElementById('noFallaciesState');
-const annotatedText = document.getElementById('annotatedText');
 const findingsList = document.getElementById('findingsList');
 
 // State
-let currentText = '';
 let currentFindings = [];
 
 // Initialize
@@ -50,7 +48,6 @@ function init() {
 
 // Handle text input
 function handleTextInput() {
-    currentText = textInput.value;
     updateCharCount();
     updateScanButton();
 }
@@ -145,7 +142,6 @@ async function handleScan() {
         }
         
         // Success - show results
-        currentText = text;
         currentFindings = data.findings || [];
         showResults();
 
@@ -196,49 +192,17 @@ function showResults() {
     if (currentFindings.length === 0) {
         // No fallacies found
         noFallaciesState.classList.remove('hidden');
-        annotatedText.classList.add('hidden');
         findingsList.classList.add('hidden');
     } else {
         // Fallacies found
         noFallaciesState.classList.add('hidden');
-        annotatedText.classList.remove('hidden');
         findingsList.classList.remove('hidden');
-        
-        renderAnnotatedText();
+
         renderFindingsList();
     }
-    
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Render annotated text with highlights
-function renderAnnotatedText() {
-    // Sort findings by start_index (reverse order for correct insertion)
-    const sortedFindings = [...currentFindings].sort((a, b) => b.start_index - a.start_index);
-    
-    let annotatedHTML = escapeHtml(currentText);
-    
-    // Insert highlights from end to start (so indices remain valid)
-    sortedFindings.forEach((finding, index) => {
-        const before = annotatedHTML.substring(0, finding.start_index);
-        const span = annotatedHTML.substring(finding.start_index, finding.end_index);
-        const after = annotatedHTML.substring(finding.end_index);
-        
-        const highlightHTML = `<span class="fallacy-highlight" data-finding-index="${index}">
-            ${span}
-            <span class="tooltip">
-                <span class="tooltip-fallacy">${escapeHtml(finding.fallacy)}</span>
-                <span class="tooltip-explanation">${escapeHtml(finding.explanation)}</span>
-                ${renderStrengthenHtml(finding.what_would_strengthen_this, 'tooltip')}
-                <span class="tooltip-confidence">Confidence: ${escapeHtml(finding.confidence)}</span>
-            </span>
-        </span>`;
-        
-        annotatedHTML = before + highlightHTML + after;
-    });
-    
-    annotatedText.innerHTML = annotatedHTML;
 }
 
 // Render findings list
@@ -257,7 +221,7 @@ function renderFindingsList() {
             <div class="finding-category">${escapeHtml(finding.category)} › ${escapeHtml(finding.subcategory)}</div>
             <div class="finding-span">"${escapeHtml(finding.span)}"</div>
             <div class="finding-explanation">${escapeHtml(finding.explanation)}</div>
-            ${renderStrengthenHtml(finding.what_would_strengthen_this, 'card')}
+            ${renderStrengthenHtml(finding.what_would_strengthen_this)}
         `;
         
         findingsList.appendChild(card);
@@ -267,7 +231,6 @@ function renderFindingsList() {
 // Handle reset/scan another
 function handleReset() {
     // Reset state
-    currentText = '';
     currentFindings = [];
     textInput.value = '';
     
@@ -293,13 +256,10 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function renderStrengthenHtml(text, context) {
+function renderStrengthenHtml(text) {
     const value = (text || '').trim();
     if (!value) {
         return '';
-    }
-    if (context === 'tooltip') {
-        return `<span class="tooltip-strengthen">${escapeHtml(value)}</span>`;
     }
     return `
         <div class="finding-strengthen-label">What would strengthen this</div>

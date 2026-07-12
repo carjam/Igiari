@@ -10,8 +10,8 @@
 |---|---|---|
 | F1 | A text input area where the user pastes or types text | Plain `<textarea>`, no rich text needed |
 | F2 | A "Scan" button that submits the text for analysis | Disabled while a request is in flight |
-| F3 | The submitted text re-rendered with fallacious spans visually highlighted | Highlight = colored underline or background, not a destructive rewrite of the text |
-| F4 | Clicking/hovering a highlighted span shows: fallacy name, one-sentence explanation | Tooltip or side panel — see `02_design_direction.md` for which |
+| F3 | A findings list showing each flagged span (the exact quote), the fallacy name, category, and explanation | As of 2026-07, this is the only rendering of results — the full pasted text is not echoed back inline, since the user already has it |
+| F4 | Each finding also shows a confidence level and, when applicable, what would strengthen the reasoning | Part of the same findings-list card as F3, not a separate hover/click interaction |
 | F5 | A visible, enforced input length cap | See `03_architecture.md` for the exact number and why |
 | F6 | A loading state while the request is processing | Should not feel broken on a 5–10 second wait |
 | F7 | A clear empty/error state if the model finds nothing, or if the request fails | "No fallacies found" is a valid, expected result — must not look like an error |
