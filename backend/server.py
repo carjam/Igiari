@@ -288,7 +288,10 @@ async def call_anthropic_api(user_text: str, stats: Optional[ApiCallStats] = Non
                 {"role": "user", "content": "Analyze the text in <user_text> and return JSON only."}
             ]
         )
-        
+        if stats is not None:
+            stats.input_tokens += message.usage.input_tokens
+            stats.output_tokens += message.usage.output_tokens
+
         # Extract text content
         response_text = message.content[0].text
         
@@ -328,6 +331,9 @@ async def call_anthropic_api(user_text: str, stats: Optional[ApiCallStats] = Non
                     {"role": "user", "content": "Analyze the text in <user_text> and return JSON only."}
                 ]
             )
+            if stats is not None:
+                stats.input_tokens += message.usage.input_tokens
+                stats.output_tokens += message.usage.output_tokens
             response_text = message.content[0].text.strip()
             
             # Strip markdown again on retry
@@ -588,6 +594,7 @@ async def scan_text(
                 latency_ms=int((time.perf_counter() - scan_started) * 1000),
                 cache_hit=True,
                 raw_finding_count=len(findings),
+                model=MODEL_NAME,
             )
         )
         return ScanResponse(
@@ -652,6 +659,9 @@ async def scan_text(
             cache_hit=False,
             raw_finding_count=len(raw_findings),
             model_latency_ms=api_stats.latency_ms,
+            model=MODEL_NAME,
+            input_tokens=api_stats.input_tokens,
+            output_tokens=api_stats.output_tokens,
         )
     )
 

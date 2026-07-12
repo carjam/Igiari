@@ -249,6 +249,7 @@ After enabling the beacon, update `legal/privacy.html` § Cookies and Analytics.
 - Dashboard: https://console.anthropic.com/settings/usage
 - Set budget alerts in Anthropic dashboard
 - **Required for Step 0:** Set a monthly spend limit or alert at https://console.anthropic.com/settings/limits — backstop below app rate limiting (see `docs/STEP0_LAUNCH_READINESS.md`)
+- Per-scan cost visibility doesn't require the Anthropic dashboard: every `scan_complete` log line includes `input_tokens`/`output_tokens` (see `docs/DETECTION_RELEASE_CHECKLIST.md` § Observability). Multiply by current per-token pricing to compute cost-per-scan and spot spend spikes tied to specific traffic, not just an aggregate dashboard total.
 
 **Render:**
 - Dashboard shows usage hours

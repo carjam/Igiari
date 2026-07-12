@@ -15,9 +15,16 @@ class _FakeContent:
         self.text = text
 
 
+class _FakeUsage:
+    def __init__(self, input_tokens: int = 100, output_tokens: int = 50):
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+
+
 class _FakeMessage:
-    def __init__(self, text: str):
+    def __init__(self, text: str, input_tokens: int = 100, output_tokens: int = 50):
         self.content = [_FakeContent(text)]
+        self.usage = _FakeUsage(input_tokens, output_tokens)
 
 
 class _FakeMessages:
@@ -124,6 +131,26 @@ def test_call_anthropic_api_records_parse_retry_in_stats(anthropic_mock):
     assert result == {"findings": []}
     assert stats.parse_retries == 1
     assert stats.latency_ms >= 0
+
+
+def test_call_anthropic_api_records_token_usage_in_stats(anthropic_mock):
+    anthropic_mock.messages.responses.append('{"findings": []}')
+    stats = server.ApiCallStats()
+
+    _run(call_anthropic_api("sample", stats=stats))
+
+    assert stats.input_tokens == 100
+    assert stats.output_tokens == 50
+
+
+def test_call_anthropic_api_accumulates_token_usage_across_retry(anthropic_mock):
+    anthropic_mock.messages.responses.extend(["not json", '{"findings": []}'])
+    stats = server.ApiCallStats()
+
+    _run(call_anthropic_api("sample", stats=stats))
+
+    assert stats.input_tokens == 200
+    assert stats.output_tokens == 100
 
 
 def test_scan_returns_502_when_model_json_unrecoverable(client, anthropic_mock):

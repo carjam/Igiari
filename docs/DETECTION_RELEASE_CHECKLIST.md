@@ -93,6 +93,9 @@ Each successful `/api/scan` emits one JSON log line:
   "cache_hit": false,
   "raw_finding_count": 3,
   "model_latency_ms": 1180,
+  "model": "claude-haiku-4-5-20251001",
+  "input_tokens": 2103,
+  "output_tokens": 412,
   "request_id": "b7b6e2b0-..."
 }
 ```
@@ -105,6 +108,8 @@ Each successful `/api/scan` emits one JSON log line:
 | `latency_ms` | Total request time |
 | `model_latency_ms` | Anthropic call time (cache miss only) |
 | `cache_hit` | Response served from in-memory cache |
+| `model` | The `MODEL_NAME` currently configured in `server.py`. On a cache hit this reflects the *current* config, not necessarily the model that originally produced the cached result — useful for spotting model-version drift over time |
+| `input_tokens` / `output_tokens` | Anthropic token usage for this scan, summed across the JSON-parse retry if one occurred (0 on cache hit — no API call made). Multiply by current Anthropic per-token pricing to get cost-per-scan; do this downstream rather than hardcoding a price in code, since pricing changes over time. |
 | `request_id` | Correlates this line to the `x-request-id` response header and any error logs/Sentry events for the same request |
 
 Filter production logs: `event=scan_complete`.

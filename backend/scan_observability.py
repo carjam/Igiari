@@ -12,10 +12,12 @@ from logging_config import request_id_var
 
 @dataclass
 class ApiCallStats:
-    """Metrics collected during a single Anthropic API call."""
+    """Metrics collected during a single Anthropic API call (across retries)."""
 
     latency_ms: int = 0
     parse_retries: int = 0
+    input_tokens: int = 0
+    output_tokens: int = 0
 
 
 @dataclass
@@ -30,6 +32,9 @@ class ScanTelemetry:
     cache_hit: bool
     raw_finding_count: int = 0
     model_latency_ms: int | None = None
+    model: str | None = None
+    input_tokens: int = 0
+    output_tokens: int = 0
 
     def to_log_dict(self) -> dict[str, Any]:
         payload = asdict(self)
