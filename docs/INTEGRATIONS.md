@@ -1,5 +1,7 @@
 # Integrations — Supabase, Resend, Render, Cloudflare, Anthropic
 
+> ⚠️ **Archived Deployment:** Services listed below were active during production. See [../DEPLOYMENT_STATUS.md](../DEPLOYMENT_STATUS.md) for current status and restart instructions.
+
 Concise reference for every external service Igiari uses. **Secrets stay in dashboards** — never commit SMTP passwords, secret keys, or API keys (except Supabase publishable key in `site-config.js`).
 
 **Full disaster rebuild:** [AUTH_AND_EMAIL_RECOVERY.md](AUTH_AND_EMAIL_RECOVERY.md)

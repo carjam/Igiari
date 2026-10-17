@@ -1,5 +1,7 @@
 # Documentation Index
 
+> ⚠️ **Deployment Status:** This project is currently **archived** (services paused). See [../DEPLOYMENT_STATUS.md](../DEPLOYMENT_STATUS.md) for restart instructions. Documentation below reflects the production setup when services were live.
+
 Operations, deployment, and testing docs. **Build specs** live in [`specs/`](../specs/README.md).
 
 **Layout rules:** [CONVENTIONS.md](CONVENTIONS.md) — what belongs in `docs/` vs `specs/` vs service folders.

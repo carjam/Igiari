@@ -1,21 +1,67 @@
 # Igiari! (異議あり!)
 
+> 🎯 **Portfolio Project** - A production-ready SaaS application demonstrating full-stack development, LLM integration, and complete monetization architecture.
+>
+> **Skills showcased:** FastAPI · Anthropic Claude API · Stripe billing · Supabase auth · PostgreSQL RLS · Structured logging · Pytest · Vanilla JS
+
 **Objection!** — A logical fallacy scanner for text.
 
 Paste an argument, email, article, or transcript and see logical fallacies highlighted inline with explanations. Think "Grammarly, but for bad reasoning instead of bad grammar."
 
-## 🚀 Live Deployment
+---
 
-**Try it now:** https://igiari.us
+## 🏗️ Technical Highlights
 
-- **Frontend:** https://igiari.us (Cloudflare Pages; also https://igiari.pages.dev/)
+- **LLM Integration** - Anthropic Claude API with structured output parsing and cost tracking
+- **Complete Billing Stack** - Stripe checkout, subscriptions, idempotent webhooks, credit ledger
+- **Authentication** - Magic link + OTP email auth with JWT verification and RLS policies
+- **Production Observability** - Structured logging, Sentry error tracking, request correlation
+- **Comprehensive Testing** - Unit tests, integration tests, and LLM output quality evaluation
+
+👉 **[See ARCHITECTURE.md for technical deep-dive](ARCHITECTURE.md)**
+
+## 📦 Deployment Status
+
+**Currently archived (2026-10-16)** - Services paused to avoid ongoing costs. All code is production-ready and can be quickly reactivated. See deployment docs for setup instructions.
+
+<details>
+<summary>Previous live deployment details</summary>
+
+- **Frontend:** https://igiari.us (Cloudflare Pages)
 - **Backend API:** https://igiari-backend.onrender.com (Render)
+- **Status:** Consumer billing fully implemented (Stripe Starter pack + Casual subscription)
 
-✅ **Status:** Phases 0–4 deployed. **Consumer billing live** (Stripe Starter + Casual on Render). **Legal billing not configured** — see [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md). **Next:** [LEGAL_BILLING_SETUP.md](docs/LEGAL_BILLING_SETUP.md), then Step 2 outreach.
+</details>
 
-📖 **Docs:** [docs/README.md](docs/README.md) · [specs/README.md](specs/README.md) · [CONVENTIONS.md](docs/CONVENTIONS.md)
+📖 **Docs:** [ARCHITECTURE.md](ARCHITECTURE.md) · [docs/README.md](docs/README.md) · [specs/README.md](specs/README.md) · [CONVENTIONS.md](docs/CONVENTIONS.md)
 
-## Quick Start
+---
+
+## 📂 Repository Structure
+
+```
+igiari/
+├── index.html, app.js, auth.js, styles.css    # Frontend (vanilla JS)
+├── site-config.js                             # Frontend config
+├── backend/                                   # FastAPI server
+│   ├── server.py                              # API endpoints
+│   ├── billing.py, stripe_billing.py          # Monetization logic
+│   ├── tests/                                 # Comprehensive test suite
+│   └── requirements.txt
+├── supabase/                                  # Database migrations
+│   ├── migrations/                            # SQL schema + RLS
+│   └── email-templates/                       # Auth email templates
+├── specs/                                     # Original build specifications
+├── docs/                                      # Deployment runbooks
+├── legal/                                     # Terms, privacy policy
+├── ARCHITECTURE.md                            # 👈 Start here for technical overview
+├── DEPLOYMENT_STATUS.md                       # How to restart services
+└── LICENSE                                    # MIT
+```
+
+## 🚀 Quick Start
+
+> **Note:** Services are currently paused. See [DEPLOYMENT_STATUS.md](DEPLOYMENT_STATUS.md) for activation instructions. For local development:
 
 ### Backend
 
@@ -48,65 +94,38 @@ Click "Try an Example" to see it in action.
 
 ---
 
-## Build Specification
+## 📋 Build Specifications
 
-This project was built following a complete specification designed for AI agents to execute autonomously.
+This project was built following a complete specification designed for AI-assisted development.
 
-**Start here for current work:** [`specs/11_monetization_rollout_plan.md`](specs/11_monetization_rollout_plan.md)
+The [`specs/`](specs/) directory contains the original build plans, architecture decisions, and phased execution:
+- [`specs/00_master_spec.md`](specs/00_master_spec.md) - Overview and scope
+- [`specs/03_architecture.md`](specs/03_architecture.md) - Stack and design decisions
+- [`specs/04_build_phases.md`](specs/04_build_phases.md) - Phased build plan (completed)
+- [`specs/10_monetization.md`](specs/10_monetization.md) - Billing architecture
 
-For the original MVP build (complete), see [`specs/04_build_phases.md`](specs/04_build_phases.md).
+**Why specs matter:** Demonstrates ability to plan, document, and execute complex full-stack projects systematically.
 
-## Why this spec exists
+## 📊 Project Status
 
-Built as a demand-testing MVP first; now moving to a paid launch experiment. See [`docs/MONETIZATION_ROLLOUT.md`](docs/MONETIZATION_ROLLOUT.md) for the phased plan. Resist building beyond the current step's scope; park ideas in `specs/08_future_ideas.md`.
+| Component | Status | Notes |
+|-----------|--------|-------|
+| **MVP Build** | ✅ Complete | All phases (0-5) finished |
+| **Monetization** | ✅ Implemented | Stripe billing, subscriptions, webhooks |
+| **Testing** | ✅ Complete | Unit + integration tests + LLM eval |
+| **Deployment** | ⏸️ Archived | Ready to restart (see DEPLOYMENT_STATUS.md) |
+| **Documentation** | ✅ Complete | Full specs, runbooks, and architecture docs |
 
-## Build Progress
+See [docs/MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md) for detailed implementation status.
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| **Phase 0** | ✅ Complete | Setup: repo structure, taxonomy files, .env.example |
-| **Phase 1** | ✅ Complete | Backend: FastAPI + Anthropic API + rate limiting |
-| **Phase 2** | ✅ Complete | Quality validation script (`backend/run_eval.py`) |
-| **Phase 3** | ✅ Complete | Frontend: Vanilla HTML/CSS/JS, copyeditor aesthetic |
-| **Phase 4** | ✅ Complete | Deployment: Backend (Render) + Frontend (Cloudflare Pages) |
-| **Phase 5** | ✅ Complete | Soft launch — Step 0 checklist done |
-| **Monetization** | ✅ Consumer live | Stripe live on Render; legal billing ⬜ — [MONETIZATION_ROLLOUT.md](docs/MONETIZATION_ROLLOUT.md) |
+---
 
-## Project structure
+## 📞 Contact
 
-```
-igiari/
-├── index.html, app.js, auth.js, styles.css   # static site (repo root)
-├── site-config.js                            # Supabase + analytics config
-├── legal/                                    # privacy, terms
-├── backend/                                  # FastAPI + billing
-├── supabase/                                 # migrations, email templates
-├── specs/                                    # build specifications
-├── docs/                                     # deployment & runbooks
-└── source-materials/                         # original taxonomy + eval
-```
+**Developer:** [carjam](https://github.com/carjam)
 
-See [specs/README.md](specs/README.md) and [docs/README.md](docs/README.md) for full indexes.
+**Portfolio:** This project demonstrates production-ready full-stack SaaS development with modern tooling. See [ARCHITECTURE.md](ARCHITECTURE.md) for technical deep-dive.
 
-| File | Purpose |
-|---|---|
-| `specs/00_master_spec.md` | Entry point, scope summary, file structure |
-| `specs/01_product_requirements.md` | Functional requirements, explicit in/out of scope |
-| `specs/02_design_direction.md` | Visual identity guidance |
-| `specs/03_architecture.md` | Stack, hosting, model choice, cost controls — concrete decisions |
-| `specs/04_build_phases.md` | **The task list** — sequenced phases with acceptance criteria |
-| `specs/05_api_contract.md` | Exact frontend/backend request-response schema |
-| `specs/06_testing_and_launch_checklist.md` | Pre-launch verification |
-| `specs/07_monetization_notes.md` | MVP deferral rationale; ads rejected |
-| `specs/08_future_ideas.md` | Parking lot — explicitly not in scope yet |
-| `specs/09_legal_positioning_and_pricing..md` | Legal beachhead positioning and pricing |
-| `specs/10_monetization.md` | Full monetization architecture and Stripe/pricing design |
-| `specs/11_monetization_rollout_plan.md` | **Phased execution plan — current work** |
-| `docs/MONETIZATION_ROLLOUT.md` | Human-readable rollout tracker |
-| `docs/INTEGRATIONS.md` | Supabase, Resend, Render, Cloudflare dashboards |
-| `docs/STEP0_LAUNCH_READINESS.md` | Step 0 checklist (analytics, live tests, spend cap) |
-| `specs/README.md` | Spec folder index |
+## 📄 License
 
-## Prerequisite materials
-
-This spec assumes access to a prior project's outputs (a fallacy-detection taxonomy and eval set). If you don't have these files, ask before proceeding — see `specs/00_master_spec.md`'s "Source materials" section for the exact list of files needed.
+MIT License - see [LICENSE](LICENSE) for details.

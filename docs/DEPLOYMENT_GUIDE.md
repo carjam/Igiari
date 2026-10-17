@@ -1,5 +1,7 @@
 # Deployment Management Guide
 
+> ⚠️ **Archived:** This guide reflects the production deployment that ran until October 2026. Services are currently paused. See [../DEPLOYMENT_STATUS.md](../DEPLOYMENT_STATUS.md) for restart instructions.
+
 Quick reference for managing your live Igiari deployment.
 
 ## 🌐 Live URLs

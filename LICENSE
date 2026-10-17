@@ -1,64 +1,21 @@
-PROPRIETARY SOFTWARE — ALL RIGHTS RESERVED
+MIT License
 
-Copyright (c) 2026 James Carson. All Rights Reserved.
+Copyright (c) 2025-2026 carjam
 
-NOTICE: All information contained in this repository and in any related
-materials is, and remains, the proprietary and confidential property of
-James Carson (the "Owner"). Unauthorized access, use, copying,
-modification, distribution, publication, or disclosure of this software,
-source code, object code, documentation, prompts, models, designs, data
-compilations, or any related materials (collectively, the "Software") is
-strictly prohibited.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-NO LICENSE GRANTED
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-Nothing in this repository or associated materials grants any license or
-right to use, reproduce, modify, merge, publish, distribute, sublicense,
-rent, lease, lend, sell, or otherwise exploit the Software, in whole or in
-part, without prior written permission from the Owner.
-
-PERMITTED USE OF THE PUBLIC WEBSITE ONLY
-
-Use of the Igiari! website at its public URL for its intended purpose
-(scanning pasted text through the web interface) is permitted only as
-described in the Terms of Service. That limited permission does not extend
-to the underlying Software, source code, backend implementation, prompts,
-or any other proprietary materials.
-
-RESTRICTIONS
-
-Without the Owner's prior written consent, you may not:
-
-  - Access, copy, download, mirror, or distribute the Software or any
-    portion thereof
-  - Reverse engineer, decompile, disassemble, or attempt to derive source
-    code, algorithms, prompts, or trade secrets from the Software or Service
-  - Remove or alter copyright, trademark, or other proprietary notices
-  - Use the Software to develop, train, or operate a competing product or
-    service
-  - Publish, disclose, or make the Software available to any third party
-  - Scrape, crawl, or systematically extract code, assets, or data from the
-    Service except as strictly necessary for normal web browsing
-
-THIRD-PARTY COMPONENTS
-
-The Software may incorporate third-party open-source components subject to
-their respective licenses. Those components remain governed by their own
-license terms; this notice does not restrict use of those components as
-permitted by their licenses.
-
-NO WARRANTY
-
-THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
-
-ENFORCEMENT
-
-Unauthorized use may violate copyright, trade secret, contract, and other
-applicable laws and may result in civil and criminal penalties.
-
-CONTACT
-
-For licensing inquiries or written permission requests:
-jamescarson3rd@gmail.com
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

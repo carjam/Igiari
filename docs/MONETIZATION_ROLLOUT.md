@@ -1,5 +1,7 @@
 # Monetization Rollout — Summary & Tracker
 
+> ⚠️ **Archived:** Monetization was fully implemented and tested. Services are currently paused (October 2026). This document preserved for reference.
+
 This is the human-readable companion to [`specs/11_monetization_rollout_plan.md`](../specs/11_monetization_rollout_plan.md). Full architecture and pricing numbers live in [`specs/10_monetization.md`](../specs/10_monetization.md).
 
 ## Current state (June 2026)
